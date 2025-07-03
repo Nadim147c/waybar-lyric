@@ -47,6 +47,23 @@ desktop music experience.
 yay -S waybar-lyric-git
 ```
 
+- Or from [Nixpkgs](https://github.com/NixOS/nixpkgs)
+
+On NixOS:
+
+```nix
+  environment.systemPackages = [
+    pkgs.waybar-lyric
+  ];
+```
+
+On Non NixOS:
+
+```bash
+# without flakes:
+nix-env -iA nixpkgs.waybar-lyric
+```
+
 - With `go install`
   > Note: You have to make sure that `$GOPATH/bin/` in your system `PATH` before
   > running waybar.
