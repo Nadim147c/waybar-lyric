@@ -1,0 +1,80 @@
+* {
+  min-height: 0;
+  min-width: 0;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+window#waybar {
+  transition-duration: 0.5s;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  margin: 0 1rem;
+}
+
+.module {
+  padding: 0 0.3rem;
+  margin: 0;
+  border-radius: 10px;
+  background-color: #13131a;
+  color: #bec4ed;
+}
+
+.modules-right,
+#workspaces,
+#tray,
+#custom-lyrics {
+  margin: 0 0.5rem;
+  padding: 0 0.4rem;
+  background-color: #13131a;
+  color: #bec4ed;
+  border-radius: 10px;
+}
+
+#tray,
+#custom-lyrics {
+  padding: 0 0.7rem;
+}
+
+#workspaces button {
+  box-shadow: none;
+  text-shadow: none;
+  border: none;
+  border-radius: 15px;
+  padding: 0 0.4rem;
+  margin: 0.5rem 0;
+  color: #e4e1eb;
+}
+#workspaces button.active {
+  background: #bec4ed;
+  color: #272e4f;
+}
+#workspaces button.urgent {
+  background: #4b4547;
+  color: #e9e0e2;
+}
+#workspaces button:hover {
+  box-shadow: inherit;
+  text-shadow: inherit;
+  border: none;
+  background: #dde1ff;
+  color: #121939;
+}
+
+#custom-lyrics {
+  font-family: "Noto Font";
+}
+#custom-lyrics.paused {
+  font-style: italic;
+  color: #cdc4c7;
+}
+
+tooltip {
+  font-family: "Noto Font";
+  border-radius: 15px;
+  background-color: #13131a;
+  border: 2px solid #272e4f;
+}
