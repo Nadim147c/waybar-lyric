@@ -80,6 +80,11 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 	// Cover is optional
 	cover, _ := meta["mpris:artUrl"].Value().(string)
 
+	volume, err := player.GetVolume()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get player volume")
+	}
+
 	artistList, ok := meta["xesam:artist"].Value().([]string)
 	if !ok || len(artistList) == 0 {
 		return nil, fmt.Errorf("missing artist information")
@@ -109,6 +114,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		Title:    title,
 		Album:    album,
 		Status:   status,
+		Volume:   volume,
 		Position: position,
 		Length:   length,
 		Shuffle:  shuffle,

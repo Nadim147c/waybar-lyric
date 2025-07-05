@@ -168,6 +168,7 @@ type PlayerInfo struct {
 	Album  string `json:"album"`
 	Cover  string `json:"cover"`
 
+	Volume   float64       `json:"volume"`
 	Position time.Duration `json:"position"`
 	Length   time.Duration `json:"length"`
 	Shuffle  bool          `json:"shuffle"`
