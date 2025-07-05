@@ -20,6 +20,7 @@ func PrintSnippet() {
 		"paused": "",
 		"lyric": "",
 		"music": "󰝚",
+		"no_lyric": ""
 	},
 	"exec-if": "which waybar-lyric",
 	"exec": "waybar-lyric --quiet -m%d",
