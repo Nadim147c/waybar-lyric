@@ -4,7 +4,7 @@
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <player>"
-    echo "Example: $0 org.mpris.MediaPlayer2.spotify"
+    echo "Example: $0 spotify"
     exit 1
 fi
 
@@ -14,7 +14,7 @@ player="$1"
 pid=$(dbus-send --session --print-reply --dest=org.freedesktop.DBus \
     /org/freedesktop/DBus \
     org.freedesktop.DBus.GetConnectionUnixProcessID \
-    "string:$player" |
+    "string:org.mpris.MediaPlayer2.$player" |
     tail -1 |
     awk '{print $NF}')
 

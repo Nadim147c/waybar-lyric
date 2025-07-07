@@ -66,10 +66,10 @@
           :halign "center"
           (scale
             :min 0
-            :max {lyrics.info.length / 1000000000}
-            :value {lyrics.info.position / 1000000000}
+            :max {lyrics.info.length}
+            :value {lyrics.info.position}
             :width 300 :orientation "h"
-            :onchange `playerctl --player=${substring(lyrics.info.name, 23, 1000)} position {}`
+            :onchange `playerctl --player=${lyrics.info.player} position {}`
           )
         )
       )
@@ -81,7 +81,7 @@
       (for lyric in {lyrics.context}
         (button
           :class "line"
-          :onclick `playerctl --player=${substring(lyrics.info.name, 23, 1000)} position ${lyric.time / 1000000000}`
+          :onclick `playerctl --player=${lyrics.info.player} position ${lyric.time}`
           (label
             :class {lyric.active ? "active" : "passive"}
             :justify "center"
@@ -106,27 +106,27 @@
       :space-evenly false
       (button
         :class {lyrics.info.shuffle ? "shuffled" : "shuffle"}
-        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} shuffle Toggle"
+        :onclick "playerctl --player=${lyrics.info.player} shuffle Toggle"
         ""
       )
       (button
         :class "previous"
-        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} previous"
+        :onclick "playerctl --player=${lyrics.info.player} previous"
         ""
       )
       (button
         :class {lyrics?.info?.status == "Playing" ? "pause" : "play"}
-        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} play-pause"
+        :onclick "playerctl --player=${lyrics.info.player} play-pause"
         {lyrics?.info?.status == "Playing" ? "" : ""}
       )
       (button
         :class "next"
-        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} next"
+        :onclick "playerctl --player=${lyrics.info.player} next"
         ""
       )
       (button
         :class "open"
-        :onclick `open-player.sh ${lyrics.info.name} && ${EWW_CMD} close media`
+        :onclick `open-player.sh ${lyrics.info.player} && ${EWW_CMD} close media`
         "󰁌"
       )
     )
