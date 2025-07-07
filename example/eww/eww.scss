@@ -6,12 +6,13 @@
   $onPrimary: #113633;
   $surfaceContainerHighest: #2d3637;
 
-  $buttonBorderRadius: 0.4rem;
+  $buttonRoundess: 0.4rem;
+  $roundness: 1rem;
 
   background-color: $background;
   color: $onBackground;
   padding: 1rem;
-  border-radius: 1rem;
+  border-radius: $roundness;
 
   .title {
     font-size: 18px;
@@ -22,7 +23,7 @@
 
     button {
       padding: 0.2rem 0.6rem;
-      border-radius: $buttonBorderRadius;
+      border-radius: $buttonRoundess;
       &:hover {
         color: $onPrimary;
         background-color: $primary;
@@ -53,6 +54,21 @@
     }
     &:hover {
       font-weight: 800;
+    }
+  }
+
+  .close {
+    button {
+      background-color: $primary;
+      color: $onPrimary;
+      padding: 2.5px 5px;
+      padding-right: 10px;
+      margin-right: 0px;
+      border-radius: 15px;
+      &:hover {
+        background-color: $error;
+        color: $onError;
+      }
     }
   }
 
