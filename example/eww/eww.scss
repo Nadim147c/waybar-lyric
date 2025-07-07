@@ -1,0 +1,73 @@
+.eww-media {
+  /* These colors are material colors */
+  $background: #0c1516;
+  $onBackground: #dae4e5;
+  $primary: #a8cec9;
+  $onPrimary: #113633;
+  $surfaceContainerHighest: #2d3637;
+
+  $buttonBorderRadius: 0.4rem;
+
+  background-color: $background;
+  color: $onBackground;
+  padding: 1rem;
+  border-radius: 1rem;
+
+  .title {
+    font-size: 18px;
+  }
+
+  .control {
+    margin: 0 1rem;
+
+    button {
+      padding: 0.2rem 0.6rem;
+      border-radius: $buttonBorderRadius;
+      &:hover {
+        color: $onPrimary;
+        background-color: $primary;
+      }
+    }
+
+    /* Nerd font width adjustments */
+    .shuffle,
+    .shuffled {
+      padding-right: 1rem;
+    }
+    .open {
+      padding-right: 0.8rem;
+    }
+    /* Nerd font width adjustments */
+
+    .shuffled,
+    .play {
+      color: $onPrimary;
+      background-color: $primary;
+    }
+  }
+
+  .line {
+    .active {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    &:hover {
+      font-weight: 800;
+    }
+  }
+
+  scale trough highlight {
+    background-color: $primary;
+    padding: 0.4rem 0;
+    color: $onPrimary;
+    border-radius: 10px;
+  }
+
+  scale trough {
+    all: unset;
+    background-color: $surfaceContainerHighest;
+    border-radius: 3rem;
+    min-width: 3rem;
+    margin-right: 7px;
+  }
+}

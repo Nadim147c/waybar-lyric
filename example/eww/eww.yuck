@@ -1,0 +1,135 @@
+(deflisten cover_art :initial "" `mpris-cover.sh`)
+(deflisten lyrics :initial `{"text": ""}` `waybar-lyric -qdm150 -fpartial`)
+
+(defwindow media []
+  :monitor 0
+  :stacking "overlay"
+  :windowtype "dialog"
+	:geometry (geometry
+    :x "20px"
+    :y "0"
+    :anchor "top left"
+  )
+  (media)
+)
+
+(defwidget media []
+  (box
+    :class "eww-media"
+    :orientation "v"
+    :space-evenly false
+    :spacing {spacing}
+    (box
+      :class "info"
+      :orientation "h"
+      :space-evenly false
+      :spacing {spacing}
+      (image
+        :class "cover"
+        :path "${cover_art}"
+        :image-height 150
+        :image-width 150
+      )
+      (box
+        :orientation "v"
+        :class "metadata"
+        :width 300
+        :halign "center"
+        :space-evenly false
+        :spacing 5
+        (box
+          :orientation "h"
+          (eventbox
+            :class "close"
+            :cursor "pointer"
+            :halign "end"
+            (button :onclick "${EWW_CMD} close media" "")
+          )
+        )
+        (label
+          :text "   ${lyrics.info.title}"
+          :class "title"
+          :halign "start"
+        )
+        (label
+          :text "󰠃  ${lyrics.info.artist}"
+          :class "artist"
+          :halign "start"
+        )
+        (label
+          :text "󰀥  ${lyrics.info.album}"
+          :class "album"
+          :halign "start"
+        )
+        (media_control)
+        (box
+          :class "progressbar"
+          :halign "center"
+          (scale
+            :min 0
+            :max {lyrics.info.length / 1000000000}
+            :value {lyrics.info.position / 1000000000}
+            :width 300 :orientation "h"
+            :onchange `playerctl --player=${substring(lyrics.info.name, 23, 1000)} position {}`
+          )
+        )
+      )
+    )
+    (box
+      :orientation "v"
+      :spacing 5
+      :space-evenly false
+      (for lyric in {lyrics.context}
+        (button
+          :class "line"
+          :onclick `playerctl --player=${substring(lyrics.info.name, 23, 1000)} position ${lyric.time / 1000000000}`
+          (label
+            :class {lyric.active ? "active" : "passive"}
+            :justify "center"
+            :text {lyric.line != "" ? lyric.line : "󰝚"}
+            :show-truncated false
+            :wrap true
+            :wrap-mode "word"
+          )
+        )
+      )
+    )
+  )
+)
+
+(defwidget media_control []
+  (eventbox
+    :cursor "pointer"
+    :class "control"
+    :halign "center"
+    (box
+      :orientation "h"
+      :space-evenly false
+      (button
+        :class {lyrics.info.shuffle ? "shuffled" : "shuffle"}
+        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} shuffle Toggle"
+        ""
+      )
+      (button
+        :class "previous"
+        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} previous"
+        ""
+      )
+      (button
+        :class {lyrics?.info?.status == "Playing" ? "pause" : "play"}
+        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} play-pause"
+        {lyrics?.info?.status == "Playing" ? "" : ""}
+      )
+      (button
+        :class "next"
+        :onclick "playerctl --player=${substring(lyrics.info.name, 23, 1000)} next"
+        ""
+      )
+      (button
+        :class "open"
+        :onclick `open-player.sh ${lyrics.info.name} && ${EWW_CMD} close media`
+        "󰁌"
+      )
+    )
+  )
+)
