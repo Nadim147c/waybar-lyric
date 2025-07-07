@@ -1,4 +1,3 @@
-(deflisten cover_art :initial "" `mpris-cover.sh`)
 (deflisten lyrics :initial `{"text": ""}` `waybar-lyric -qdm150 -fpartial`)
 
 (defwindow media []
@@ -24,11 +23,11 @@
       :orientation "h"
       :space-evenly false
       :spacing {spacing}
-      (image
+      (box
         :class "cover"
-        :path "${cover_art}"
-        :image-height 150
-        :image-width 150
+        :vexpand false
+        :hexpand false
+        :style "background-image: url('${lyrics.info.cover}');"
       )
       (box
         :orientation "v"

@@ -14,6 +14,14 @@
   padding: 1rem;
   border-radius: $roundness;
 
+  .cover {
+    $size: 150px;
+    background-size: $size;
+    min-height: $size;
+    min-width: $size;
+    border-radius: $roundness;
+  }
+
   .title {
     font-size: 18px;
   }
