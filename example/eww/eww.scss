@@ -19,7 +19,8 @@
     background-size: $size;
     min-height: $size;
     min-width: $size;
-    border-radius: $roundness;
+    /* Make the cover image less rounded than window border */
+    border-radius: calc($roundness - 4px);
   }
 
   .title {
