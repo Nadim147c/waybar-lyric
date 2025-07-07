@@ -35,6 +35,17 @@ type LyricLine struct {
 	Active bool `json:"active"`
 }
 
+func (l LyricLine) MarshalJSON() ([]byte, error) {
+	type Alias LyricLine
+	return json.Marshal(&struct {
+		Alias
+		Timestamp float64 `json:"time"`
+	}{
+		Alias:     (Alias)(l),
+		Timestamp: l.Timestamp.Seconds(),
+	})
+}
+
 // Lyrics is a slice of LyricLine
 type Lyrics []LyricLine
 
@@ -161,7 +172,7 @@ func (w *Waybar) Paused(info *PlayerInfo) {
 
 // PlayerInfo holds all information of currently playing track metadata
 type PlayerInfo struct {
-	Name   string `json:"name"`
+	Player string `json:"player"`
 	ID     string `json:"id"`
 	Artist string `json:"artist"`
 	Title  string `json:"title"`
@@ -174,6 +185,21 @@ type PlayerInfo struct {
 	Shuffle  bool          `json:"shuffle"`
 
 	Status mpris.PlaybackStatus `json:"status"`
+}
+
+// MarshalJSON encodes PlayerInfo with durations in seconds (float)
+func (p PlayerInfo) MarshalJSON() ([]byte, error) {
+	p.Player = p.Player[23:]
+	type Alias PlayerInfo // create alias to avoid recursion
+	return json.Marshal(&struct {
+		Alias
+		Position float64 `json:"position"`
+		Length   float64 `json:"length"`
+	}{
+		Alias:    (Alias)(p),
+		Position: p.Position.Seconds(),
+		Length:   p.Length.Seconds(),
+	})
 }
 
 func (p *PlayerInfo) Percentage() int {

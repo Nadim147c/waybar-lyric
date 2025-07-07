@@ -108,7 +108,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 	}
 
 	return &PlayerInfo{
-		Name:     player.GetName(),
+		Player:   player.GetName(),
 		ID:       id,
 		Artist:   artist,
 		Title:    title,
