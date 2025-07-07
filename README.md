@@ -8,6 +8,15 @@ A CLI tool that displays lyrics on your
 
 ![Example](./example/waybar/screenshot.png)
 
+<details>
+  <summary>You can create an interective eww widget with this tool, too!</summary>
+
+Checkout the [example](./example/eww/) configuration.
+
+![Example](./example/eww/screenshot.png)
+
+</details>
+
 ## Description
 
 `waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
