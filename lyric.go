@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var LyricStore = make(Store)
+var LyricStore = NewStore()
 
 const LrclibEndpoint = "https://lrclib.net/api/get"
 

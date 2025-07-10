@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,8 +10,76 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
+
+type StoreValue struct {
+	LastAccess time.Time
+	Lyrics     Lyrics
+}
+
+// Store is used to cache lyrics in memory
+type Store struct {
+	mu   sync.RWMutex // Using RWMutex for better read performance
+	data map[string]*StoreValue
+}
+
+// NewStore creates a new initialized Store
+func NewStore() *Store {
+	return &Store{
+		data: make(map[string]*StoreValue),
+	}
+}
+
+// Save saves lyrics to Store
+func (s *Store) Save(id string, lyrics Lyrics) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.data[id] = &StoreValue{
+		LastAccess: time.Now(),
+		Lyrics:     lyrics,
+	}
+}
+
+// Load loads lyrics from Store
+func (s *Store) Load(key string) (Lyrics, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	v, exists := s.data[key]
+	if !exists {
+		return nil, false
+	}
+	v.LastAccess = time.Now() // Update last access time
+	return v.Lyrics, true
+}
+
+// Cleanup runs a blocking loop that periodically removes unused entries
+// until the context is canceled.
+func (s *Store) Cleanup(ctx context.Context, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return // Exit when context is canceled
+		case <-ticker.C:
+			s.cleanupExpired(interval)
+		}
+	}
+}
+
+// cleanupExpired removes entries not accessed within the interval
+func (s *Store) cleanupExpired(threshold time.Duration) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for key, value := range s.data {
+		if time.Since(value.LastAccess) > threshold {
+			delete(s.data, key)
+		}
+	}
+}
 
 var CacheDir string
 

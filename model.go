@@ -248,30 +248,6 @@ func (p *PlayerInfo) UpdatePosition(player *mpris.Player) error {
 	return nil
 }
 
-type StoreValue struct {
-	LastAccess time.Time
-	Lyrics     Lyrics
-}
-
-type Store map[string]*StoreValue
-
-// Save saves lyrics to Store
-func (s Store) Save(id string, lyrics Lyrics) {
-	s[id] = &StoreValue{
-		LastAccess: time.Now(),
-		Lyrics:     lyrics,
-	}
-}
-
-// Load loads lyrics from Store
-func (s Store) Load(key string) (Lyrics, bool) {
-	v, e := s[key]
-	if e {
-		v.LastAccess = time.Now()
-	}
-	return v.Lyrics, e
-}
-
 // noopHandler is a empty handler that ignore all logs
 type noopHandler struct{}
 

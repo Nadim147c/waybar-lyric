@@ -17,7 +17,7 @@ build:
 # Build the Go binary
 .PHONY: test
 test:
-	$(GO) test -v -cover .
+	$(GO) test -v -cover ./...
 
 # Clean up build artifacts
 .PHONY: clean
