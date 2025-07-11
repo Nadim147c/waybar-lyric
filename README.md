@@ -8,8 +8,10 @@ A CLI tool that displays lyrics on your
 
 ![Example](./example/waybar/screenshot.png)
 
+> You can also use this tool to create interactive `eww` widget.
+
 <details>
-  <summary>You can create an interective eww widget with this tool, too!</summary>
+  <summary>Eww configuration!</summary>
 
 Checkout the [example](./example/eww/) configuration.
 
