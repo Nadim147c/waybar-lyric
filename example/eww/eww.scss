@@ -1,4 +1,7 @@
 .eww-media {
+  $nerd: "JetBrainsMono Nerd Font Propo";
+  $sans: "Noto Sans";
+
   /* These colors are material colors */
   $background: #0c1516;
   $onBackground: #dae4e5;
@@ -8,6 +11,8 @@
 
   $buttonRoundess: 0.4rem;
   $roundness: 1rem;
+
+  font-family: $sans, $nerd;
 
   background-color: $background;
   color: $onBackground;
@@ -29,6 +34,7 @@
 
   .control {
     margin: 0 1rem;
+    font-family: $sans, $nerd;
 
     button {
       padding: 0.2rem 0.6rem;
@@ -38,16 +44,6 @@
         background-color: $primary;
       }
     }
-
-    /* Nerd font width adjustments */
-    .shuffle,
-    .shuffled {
-      padding-right: 1rem;
-    }
-    .open {
-      padding-right: 0.8rem;
-    }
-    /* Nerd font width adjustments */
 
     .shuffled,
     .play {
