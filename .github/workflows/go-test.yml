@@ -3,6 +3,11 @@ name: Go Tests
 on:
   push:
     branches: [main]
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "revive.toml"
   pull_request:
     branches: [main]
 
@@ -30,3 +35,8 @@ jobs:
 
       - name: Run tests
         run: go test -v ./...
+
+      - name: Run Revive Action
+        uses: docker://morphy/revive-action:v2
+        with:
+          config: revive.toml
