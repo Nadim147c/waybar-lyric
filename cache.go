@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -28,7 +29,7 @@ type Store struct {
 // NewStore creates a new initialized Store
 func NewStore() *Store {
 	return &Store{
-		data: make(map[string]*StoreValue),
+		data: map[string]*StoreValue{},
 	}
 }
 
@@ -147,7 +148,7 @@ func LoadCache(filePath string) ([]LyricLine, error) {
 	}
 
 	if len(lyrics) == 0 {
-		return nil, fmt.Errorf("Number of line found is zero.")
+		return nil, errors.New("Number of line found is zero")
 	}
 
 	return lyrics, nil

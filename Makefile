@@ -1,4 +1,5 @@
 GO         ?= go
+REVIVE     ?= revive
 SRCBIN     ?= ./bin/waybar-lyric
 PREFIX     ?= /usr/local
 BINDIR     ?= $(PREFIX)/bin
@@ -18,6 +19,7 @@ build:
 .PHONY: test
 test:
 	$(GO) test -v -cover ./...
+	$(REVIVE) -config revive.toml
 
 # Clean up build artifacts
 .PHONY: clean

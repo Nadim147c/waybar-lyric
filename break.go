@@ -14,7 +14,7 @@ func BreakLine(line string, limit int) string {
 	words := strings.Fields(line)
 	var out strings.Builder
 
-	var lineLen int = 0
+	var lineLen int
 	for word := range slices.Values(words) {
 		wordlen := len(word)
 		if lineLen == 0 {

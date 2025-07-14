@@ -77,20 +77,20 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	start := max(idx-2, 0)
 	end := min(idx+TooltipLines-2, len(lyrics))
 
-	context := slices.Clone(lyrics[start:end])
+	lyricsContext := slices.Clone(lyrics[start:end])
 
 	var tooltip strings.Builder
 
 	tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
 
-	for i, ttl := range context {
+	for i, ttl := range lyricsContext {
 		line := BreakLine(ttl.Text, BreakTooltip)
 		if ttl.Text == "" {
 			line = "󰝚 "
 		}
 
 		if start+i == idx {
-			context[i].Active = true
+			lyricsContext[i].Active = true
 			newLine := fmt.Sprintf("</span><b><big>%s</big></b>\n<span foreground=\"%s\">", line, TooltipColor)
 			tooltip.WriteString(newLine)
 			continue
@@ -106,16 +106,16 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	waybar := &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
 
 	if Detailed {
-		waybar.Context = &context
+		waybar.Context = &lyricsContext
 	}
 
 	return waybar
 }
 
-var Json = json.NewEncoder(os.Stdout)
+var JSON = json.NewEncoder(os.Stdout)
 
 func init() {
-	Json.SetEscapeHTML(false)
+	JSON.SetEscapeHTML(false)
 }
 
 func (w *Waybar) Encode() {
@@ -133,7 +133,7 @@ func (w *Waybar) Encode() {
 		fmt.Println("{}")
 	}
 
-	Json.Encode(w)
+	JSON.Encode(w)
 }
 
 func (w *Waybar) Is(other *Waybar) bool {
@@ -207,7 +207,7 @@ func (p *PlayerInfo) Percentage() int {
 }
 
 func (p *PlayerInfo) Waybar() *Waybar {
-	var alt Status = Playing
+	alt := Status(Playing)
 	if p.Status == "Paused" {
 		alt = Paused
 	}

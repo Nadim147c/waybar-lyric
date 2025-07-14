@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,6 +11,12 @@ import (
 	"slices"
 	"strings"
 	"time"
+)
+
+var (
+	ErrLyricsNotFound  = errors.New("lyrics not found")
+	ErrLyricsNotExists = errors.New("lyrics does not exists")
+	ErrLyricsNotSynced = errors.New("lyrics is not synced")
 )
 
 var LyricStore = NewStore()
@@ -46,7 +53,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 
 	if val, exists := LyricStore.Load(uri); exists {
 		if len(val) == 0 {
-			return val, fmt.Errorf("Lyrics doesn't exists")
+			return val, ErrLyricsNotExists
 		}
 		slog.Debug("Lyrics found in memory cache", "lines", len(val))
 		return val, nil
@@ -54,13 +61,13 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 
 	cacheFile := filepath.Join(CacheDir, uri+".csv")
 
-	if cachedLyrics, err := LoadCache(cacheFile); err == nil {
+	cachedLyrics, err := LoadCache(cacheFile)
+	if err == nil {
 		CensorLyrics(cachedLyrics)
 		LyricStore.Save(uri, cachedLyrics)
 		return cachedLyrics, nil
-	} else {
-		slog.Warn("Can't find the lyrics in the cache", "error", err)
 	}
+	slog.Warn("Can't find the lyrics in the cache", "error", err)
 
 	queryParams := url.Values{}
 	queryParams.Set("track_name", info.Title)
@@ -83,7 +90,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 
 	if resp.StatusCode == http.StatusNotFound {
 		LyricStore.Save(uri, []LyricLine{})
-		return nil, fmt.Errorf("Lyrics not found")
+		return nil, ErrLyricsNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -91,14 +98,14 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 		return nil, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
-	var resJson LrcLibResponse
-	err = json.NewDecoder(resp.Body).Decode(&resJson)
+	var resJSON LrcLibResponse
+	err = json.NewDecoder(resp.Body).Decode(&resJSON)
 	if err != nil {
 		LyricStore.Save(uri, []LyricLine{})
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	lyrics, err := ParseLyrics(resJson.SyncedLyrics)
+	lyrics, err := ParseLyrics(resJSON.SyncedLyrics)
 	if err != nil {
 		LyricStore.Save(uri, []LyricLine{})
 		return nil, fmt.Errorf("failed to parse lyrics: %w", err)
@@ -106,7 +113,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 
 	if len(lyrics) == 0 {
 		LyricStore.Save(uri, []LyricLine{})
-		return nil, fmt.Errorf("failed to find sync lyrics lines")
+		return nil, ErrLyricsNotSynced
 	}
 
 	slices.SortFunc(lyrics, func(a, b LyricLine) int {

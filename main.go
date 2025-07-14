@@ -90,7 +90,7 @@ func main() {
 	fixedTicker := time.NewTicker(SleepTime)
 	defer fixedTicker.Stop()
 
-	var lastWaybar *Waybar = nil
+	var lastWaybar *Waybar
 
 	for {
 		select {
@@ -227,6 +227,5 @@ func main() {
 			)
 			lyricTicker.Reset(d)
 		}
-
 	}
 }

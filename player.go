@@ -4,13 +4,18 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log/slog"
 	"slices"
 	"time"
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
+)
+
+var (
+	ErrNoPlayerVolume = errors.New("failed to get player volume")
+	ErrNoArtists      = errors.New("failed to get artists")
+	ErrNoTitle        = errors.New("failed to get title")
 )
 
 // PlayerParser parses player information from mpris metadata
@@ -82,18 +87,18 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 
 	volume, err := player.GetVolume()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get player volume")
+		return nil, ErrNoPlayerVolume
 	}
 
 	artistList, ok := meta["xesam:artist"].Value().([]string)
 	if !ok || len(artistList) == 0 {
-		return nil, fmt.Errorf("missing artist information")
+		return nil, ErrNoArtists
 	}
 	artist := artistList[0]
 
 	title, ok := meta["xesam:title"].Value().(string)
 	if !ok || title == "" {
-		return nil, fmt.Errorf("missing title information")
+		return nil, ErrNoArtists
 	}
 
 	id, ok := meta["mpris:trackid"].Value().(string)
