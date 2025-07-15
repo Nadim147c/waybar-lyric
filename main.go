@@ -92,12 +92,16 @@ func main() {
 
 	var lastWaybar *Waybar
 
+	instant := make(chan bool)
+	go func() { instant <- true }()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return // Clean exit on cancel
 		case <-playerSignal:
 			slog.Debug("Received player update signal")
+		case <-instant:
 		case <-lyricTicker.C:
 		case <-fixedTicker.C:
 		}
