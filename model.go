@@ -159,6 +159,24 @@ func (w *Waybar) Is(other *Waybar) bool {
 		}
 	}
 
+	if Detailed {
+		if w.Info == nil && other.Info == nil {
+			return true
+		}
+		if w.Info == nil || other.Info == nil {
+			return false
+		}
+		if w.Info.Shuffle != other.Info.Shuffle {
+			return false
+		}
+		if w.Info.Status != other.Info.Status {
+			return false
+		}
+		if w.Info.Volume != other.Info.Volume {
+			return false
+		}
+	}
+
 	return true
 }
 
