@@ -133,10 +133,12 @@ func TestParseLyrics(t *testing.T) {
 		name string
 		file string
 		want shared.Lyrics
+		err  bool
 	}{
 		{
 			name: "Empty file",
 			file: "",
+			err:  true,
 			want: shared.Lyrics{},
 		},
 		{
@@ -191,13 +193,14 @@ func TestParseLyrics(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, gotErr := ParseLyrics(tt.file)
+
+			if tt.err && gotErr == nil {
+				t.Fatalf("ParseLyrics(), wants errors. but err is nil.")
+			}
+
 			if len(got) >= 1 {
 				// Drop the first empty line
 				got = got[1:]
-			}
-
-			if gotErr != nil {
-				return
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {

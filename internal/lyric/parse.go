@@ -1,6 +1,7 @@
 package lyric
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -36,6 +37,10 @@ func ParseLyrics(file string) (shared.Lyrics, error) {
 
 		lyric := shared.LyricLine{Timestamp: timestamp, Text: lyricLine}
 		lyrics = append(lyrics, lyric)
+	}
+
+	if len(lyrics) == 1 {
+		return lyrics, errors.New("no lyric found")
 	}
 
 	return lyrics, nil
