@@ -41,10 +41,11 @@ func Execute(_ *cobra.Command, _ []string) {
 	var mprisPlayer *mpris.Player
 	for mprisPlayer == nil {
 		p, _, err := player.Select(conn)
-		if err == nil {
+		if err != nil {
 			slog.Debug("Failed to select player", "error", err)
-			mprisPlayer = p
+			time.Sleep(SleepTime)
 		}
+		mprisPlayer = p
 	}
 	slog.Debug("Player selected", "player", mprisPlayer)
 
