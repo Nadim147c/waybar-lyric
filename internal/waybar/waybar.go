@@ -59,7 +59,11 @@ func ForLyrics(lyrics shared.Lyrics, idx int) *Waybar {
 
 		if start+i == idx {
 			lyricsContext[i].Active = true
-			newLine := fmt.Sprintf("</span><b><big>%s</big></b>\n<span foreground=\"%s\">", line, config.TooltipColor)
+			newLine := fmt.Sprintf(
+				"</span><b><big>%s</big></b>\n<span foreground=\"%s\">",
+				line,
+				config.TooltipColor,
+			)
 			tooltip.WriteString(newLine)
 			continue
 		}
@@ -116,6 +120,11 @@ var JSON = json.NewEncoder(os.Stdout)
 
 func init() {
 	JSON.SetEscapeHTML(false)
+}
+
+// SetText sets truncates the given txt and sets to text value
+func (w *Waybar) SetText(txt string) {
+	w.Text = str.Truncate(txt, config.MaxTextLength)
 }
 
 var lastLine string

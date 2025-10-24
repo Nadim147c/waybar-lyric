@@ -71,6 +71,13 @@ func CensorLyrics(lyrics shared.Lyrics) {
 	}
 }
 
+// TruncateLyrics truncates all lines using utf8 character length from user input
+func TruncateLyrics(lyrics shared.Lyrics) {
+	for i, l := range lyrics {
+		lyrics[i].Text = str.Truncate(l.Text, config.MaxTextLength)
+	}
+}
+
 // GetLyrics returns lyrics for given *player.Info
 func GetLyrics(info *player.Info) (shared.Lyrics, error) {
 	uri := filepath.Base(info.ID)
@@ -89,6 +96,7 @@ func GetLyrics(info *player.Info) (shared.Lyrics, error) {
 	cachedLyrics, err := LoadCache(cacheFile)
 	if err == nil {
 		CensorLyrics(cachedLyrics)
+		TruncateLyrics(cachedLyrics)
 		Store.Save(uri, cachedLyrics)
 		return cachedLyrics, nil
 	}
@@ -155,6 +163,7 @@ func GetLyrics(info *player.Info) (shared.Lyrics, error) {
 	}
 
 	CensorLyrics(lyrics)
+	TruncateLyrics(lyrics)
 	Store.Save(uri, lyrics)
 	return lyrics, nil
 }
