@@ -181,7 +181,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		}
 
 		if currentLyric.Text == "" {
-			w.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
+			w.SetText(fmt.Sprintf("%s - %s", info.Artist, info.Title))
 			w.Alt = waybar.Music
 		}
 
