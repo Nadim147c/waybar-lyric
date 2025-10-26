@@ -4,6 +4,7 @@ GO      ?= go
 REVIVE  ?= revive
 SRC_BIN ?= bin/$(NAME)
 PREFIX  ?= /usr/local
+VERSION ?= $(shell git describe --tags)
 
 BIN_DIR         = $(shell realpath -m "$(PREFIX)/bin")
 BIN_FILE        = $(shell realpath -m "$(BIN_DIR)/$(NAME)")
@@ -24,7 +25,7 @@ all: build
 # Build the Go binary
 .PHONY: build
 build:
-	$(GO) build -trimpath -o $(SRC_BIN)
+	$(GO) build -trimpath -ldflags '-X main.Version=$(VERSION)' -o $(SRC_BIN)
 
 # Build the Go binary
 .PHONY: test

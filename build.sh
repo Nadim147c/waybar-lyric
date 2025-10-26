@@ -57,7 +57,7 @@ for platform in "${platforms[@]}"; do
     # Cross-compile
     CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
         gum spin --spinner dot --title "Building for $os/$arch..." -- \
-        go build -o "$bin_dir/$binary_name" .
+        make build SRC_BIN="$bin_dir/$binary_name" VERSION="$VERSION"
 
     # Copy completion files
     install -Dm644 "$COMPLETION_DIR/$APP_NAME.bash" "$share_base_dir/bash-completion/completions/$APP_NAME"
