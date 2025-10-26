@@ -17,17 +17,6 @@ A CLI tool that displays lyrics on your
 
 ![Example](./example/waybar/screenshot.png)
 
-> You can also use this tool to create interactive `eww` widget.
-
-<details>
-  <summary>Eww configuration!</summary>
-
-Checkout the [example](./example/eww/) configuration.
-
-![Example](./example/eww/screenshot.png)
-
-</details>
-
 ## Description
 
 `waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
@@ -62,33 +51,30 @@ desktop music experience.
 
 ### Prerequisites
 
-- [Waybar](https://github.com/Alexays/Waybar)
-- A working Spotify installation
+- Any of the supported browser
 - DBus connectivity
+- [waybar](https://github.com/Alexays/Waybar)
+- [go](https://go.dev/)
 
 ### Install
 
-#### Prerequisites
+#### AUR
 
-- [go](https://go.dev/)
-
-#### Installation
-
-- From [AUR](https://aur.archlinux.org/packages); Recommended for Arch `btw` users.
+- Latest stable version
 
 ```bash
 yay -S waybar-lyric
 ```
 
-or the latest git commit:
+- The latest git commit:
 
 ```bash
 yay -S waybar-lyric-git
 ```
 
-- Or from [Nixpkgs](https://github.com/NixOS/nixpkgs)
+#### Nixpkgs
 
-On NixOS:
+- NixOS:
 
 ```nix
 environment.systemPackages = [
@@ -96,27 +82,52 @@ environment.systemPackages = [
 ];
 ```
 
-On Non NixOS:
+- Home-Manager:
+
+```nix
+home.packages = [
+  pkgs.waybar-lyric
+];
+```
+
+- On Non NixOS:
 
 ```bash
 # without flakes:
 nix-env -iA nixpkgs.waybar-lyric
 ```
 
-- With `go install`
-  > Note: You have to make sure that `$GOPATH/bin/` in your system `PATH` before
-  > running waybar.
+#### Manual
 
-```bash
-go install github.com/Nadim147c/waybar-lyric@latest
-```
+> You need GNU `make` and `install`
 
-- Or install from source
+1. Build the waybar-lyric
 
 ```bash
 git clone https://github.com/Nadim147c/waybar-lyric.git
 cd waybar-lyric
-go install
+make
+```
+
+2. Local install
+
+```bash
+make install PREFIX=$HOME/.local
+```
+
+3. Global install
+
+```bash
+sudo make install PREFIX=/usr
+```
+
+#### go install (Not recommended)
+
+> Note: You have to make sure that `$GOPATH/bin/` in your system `PATH` before
+> running waybar.
+
+```bash
+go install github.com/Nadim147c/waybar-lyric@latest
 ```
 
 ## Configuration
@@ -127,7 +138,7 @@ The recommended way to configure waybar-lyric is to generate the configuration
 snippet using the built-in command:
 
 ```bash
-waybar-lyric --init
+waybar-lyric init
 ```
 
 This will output the proper JSON configuration snippet that you can copy directly
@@ -153,15 +164,28 @@ Add to your `style.css`:
 
 If you encounter issues:
 
-1. Check that Spotify is running and connected
-2. Run with verbose logging: `waybar-lyric -v --log-file=/tmp/waybar-lyric.log`
-3. Verify DBus connectivity with: `dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:org.mpris.MediaPlayer2.Player string:PlaybackStatus`
+1. Check that any of the supported browser is running is running and connected
+2. Run with verbose logging
+
+```bash
+waybar-lyric -v --log-file=/tmp/waybar-lyric.log
+```
+
+3. Verify DBus connectivity with:
+
+```bash
+dbus-send --print-reply \
+    --dest=org.mpris.MediaPlayer2.spotify \
+    /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get \
+    string:org.mpris.MediaPlayer2.Player \
+    string:PlaybackStatus
+```
+
+## Hacking
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
 This repository is licensed under [AGPL-3.0](./LICENSE). Thanks to
 [LrcLib](https://lrclib.net/) for providing lyrics.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
