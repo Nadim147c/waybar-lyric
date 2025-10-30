@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"math"
 	"os"
 	"path/filepath"
 
@@ -101,16 +102,20 @@ var Command = &cobra.Command{
 			return errors.New("Tooltip lines limit must be at least 4")
 		}
 
+		var level log.Level
+
 		if config.Quiet {
-			slog.SetDefault(slog.New(&noopHandler{}))
+			level = math.MaxInt // ignore all logs
 			return nil
 		}
 
 		if config.Verbose {
-			slog.SetLogLoggerLevel(slog.LevelDebug)
+			level = log.DebugLevel
 		}
 
-		handler := slog.New(log.New(os.Stderr))
+		handler := slog.New(log.NewWithOptions(os.Stderr, log.Options{
+			Level: log.Level(level),
+		}))
 
 		if config.LogFilePath == "" {
 			slog.SetDefault(handler)
@@ -126,7 +131,10 @@ var Command = &cobra.Command{
 			return err
 		}
 
-		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{AddSource: true})))
+		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+			Level:     slog.LevelDebug, // file logging always verbose
+			AddSource: true,
+		})))
 		logFile = file
 
 		return nil
