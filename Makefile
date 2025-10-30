@@ -4,7 +4,7 @@ GO      ?= go
 REVIVE  ?= revive
 SRC_BIN ?= bin/$(NAME)
 PREFIX  ?= /usr/local
-VERSION ?= $(shell git describe --tags)
+VERSION ?= $(shell git describe --long --tags --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')
 
 BIN_DIR         = $(shell realpath -m "$(PREFIX)/bin")
 BIN_FILE        = $(shell realpath -m "$(BIN_DIR)/$(NAME)")
@@ -50,9 +50,7 @@ install: check-path
 
 .PHONY: check-path
 check-path:
-	@if ! paths="$$(echo $$PATH | xargs -d: -n1 realpath -m 2>/dev/null)"; then \
-		echo "❌ Failed to resolve PATH entries."; \
-	elif ! echo "$$paths" | grep -qxF "$(BIN_DIR)"; then \
+	@if ! grep -qxF "$(BIN_DIR)" <(echo $$PATH | xargs -d: -n1 realpath -m 2>/dev/null); then \
 		echo "⚠️  Warning: $(BIN_DIR) is not in your PATH."; \
 		echo "   Add it with:"; \
 		echo "     export PATH=\"$(BIN_DIR):\$$PATH\""; \
