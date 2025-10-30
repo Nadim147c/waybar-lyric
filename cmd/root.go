@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"math"
 	"os"
 	"path/filepath"
 
@@ -19,17 +20,28 @@ import (
 )
 
 func init() {
-	Command.Flags().BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
-	Command.Flags().BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output (Experimental)")
-	Command.Flags().BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
-	Command.Flags().BoolVarP(&config.PrintInit, "init", "i", config.PrintInit, "Display JSON snippet for waybar/config.jsonc")
-	Command.Flags().BoolVarP(&config.PrintVersion, "version", "V", config.PrintVersion, "Display waybar-lyric version information")
-	Command.Flags().BoolVarP(&config.ToggleState, "toggle", "t", config.ToggleState, "Toggle player state between pause and resume")
-	Command.Flags().IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
-	Command.Flags().IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")
-	Command.Flags().IntVarP(&config.TooltipLines, "tooltip-lines", "L", config.TooltipLines, "Set maximum number of lines in waybar tooltip")
-	Command.Flags().StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
-	Command.Flags().StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
+	Command.Flags().
+		BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
+	Command.Flags().
+		BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output (Experimental)")
+	Command.Flags().
+		BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
+	Command.Flags().
+		BoolVarP(&config.PrintInit, "init", "i", config.PrintInit, "Display JSON snippet for waybar/config.jsonc")
+	Command.Flags().
+		BoolVarP(&config.PrintVersion, "version", "V", config.PrintVersion, "Display waybar-lyric version information")
+	Command.Flags().
+		BoolVarP(&config.ToggleState, "toggle", "t", config.ToggleState, "Toggle player state between pause and resume")
+	Command.Flags().
+		IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
+	Command.Flags().
+		IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")
+	Command.Flags().
+		IntVarP(&config.TooltipLines, "tooltip-lines", "L", config.TooltipLines, "Set maximum number of lines in waybar tooltip")
+	Command.Flags().
+		StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
+	Command.Flags().
+		StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
 
 	Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'.")
 	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")
@@ -37,9 +49,12 @@ func init() {
 	Command.MarkFlagsMutuallyExclusive("toggle", "init")
 
 	Command.PersistentFlags().BoolP("help", "h", false, "Display help for waybar-lyric")
-	Command.PersistentFlags().BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
-	Command.PersistentFlags().BoolVarP(&config.Verbose, "verbose", "v", config.Verbose, "Enable verbose logging")
-	Command.PersistentFlags().StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
+	Command.PersistentFlags().
+		BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
+	Command.PersistentFlags().
+		BoolVarP(&config.Verbose, "verbose", "v", config.Verbose, "Enable verbose logging")
+	Command.PersistentFlags().
+		StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
 
 	Command.MarkFlagsMutuallyExclusive("quiet", "verbose")
 	Command.MarkFlagsMutuallyExclusive("quiet", "log-file")
@@ -101,16 +116,20 @@ var Command = &cobra.Command{
 			return errors.New("Tooltip lines limit must be at least 4")
 		}
 
+		var level log.Level
+
 		if config.Quiet {
-			slog.SetDefault(slog.New(&noopHandler{}))
+			level = math.MaxInt // ignore all logs
 			return nil
 		}
 
 		if config.Verbose {
-			slog.SetLogLoggerLevel(slog.LevelDebug)
+			level = log.DebugLevel
 		}
 
-		handler := slog.New(log.New(os.Stderr))
+		handler := slog.New(log.NewWithOptions(os.Stderr, log.Options{
+			Level: log.Level(level),
+		}))
 
 		if config.LogFilePath == "" {
 			slog.SetDefault(handler)
@@ -126,7 +145,10 @@ var Command = &cobra.Command{
 			return err
 		}
 
-		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{AddSource: true})))
+		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+			Level:     slog.LevelDebug, // file logging always verbose
+			AddSource: true,
+		})))
 		logFile = file
 
 		return nil
