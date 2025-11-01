@@ -122,6 +122,7 @@ func GetLyrics(info *player.Info) (shared.Lyrics, error) {
 
 	resp, err := request(queryParams, header)
 	if err != nil {
+		Store.Save(uri, shared.Lyrics{})
 		return nil, fmt.Errorf("failed to fetch lyrics: %w", err)
 	}
 	defer resp.Body.Close()
