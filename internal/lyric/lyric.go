@@ -1,6 +1,7 @@
 package lyric
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,7 +48,10 @@ var Store = newStore()
 const LrclibEndpoint = "https://lrclib.net/api/get"
 
 func request(params url.Values, header http.Header) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, LrclibEndpoint, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, LrclibEndpoint, nil)
 	if err != nil {
 		return nil, err
 	}
