@@ -18,7 +18,7 @@ var Version = "dev-build"
 var version = fmt.Sprintf("waybar-lyric %s (https://github.com/Nadim147c/waybar-lyric)", Version)
 
 func main() {
-	config.Version = Version
+	config.Version = version
 
 	err := fang.Execute(
 		context.Background(),
