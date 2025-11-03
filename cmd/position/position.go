@@ -14,7 +14,8 @@ import (
 var lyricsLine bool
 
 func init() {
-	Command.Flags().BoolVarP(&lyricsLine, "lyric", "l", lyricsLine, "Set player position to lyrics line number")
+	Command.Flags().
+		BoolVarP(&lyricsLine, "lyric", "l", lyricsLine, "Set player position to lyrics line number")
 }
 
 // Command is the position changer command
@@ -27,7 +28,7 @@ var Command = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 
 	DisableFlagsInUseLine: true,
-	RunE: func(_ *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		pos, err := cast.ToDurationE(args[0])
 		if err != nil {
 			return fmt.Errorf("failed to convert duration: %w", err)
@@ -48,35 +49,67 @@ var Command = &cobra.Command{
 		if lyricsLine {
 			info, err := parser(mp)
 			if err != nil {
-				return fmt.Errorf("failed to parse player informations: %w", err)
+				return fmt.Errorf(
+					"failed to parse player informations: %w",
+					err,
+				)
 			}
-			slog.Debug("Parsed player information", "title", info.Title, "artist", info.Artist)
+			slog.Debug(
+				"Parsed player information",
+				"title",
+				info.Title,
+				"artist",
+				info.Artist,
+			)
 
-			lyrics, err := lyric.GetLyrics(info)
+			lyrics, err := lyric.GetLyrics(cmd.Context(), info)
 			if err != nil {
 				return fmt.Errorf("failed to fetch lyrics: %w", err)
 			}
-			slog.Debug("Fetched lyrics", "line-count", len(lyrics))
+			lines := lyrics.Lines
+			slog.Debug("Fetched lyrics", "line-count", len(lines))
 
 			lineNumber := int(pos)
 
 			if lineNumber < 0 {
-				idx := len(lyrics) + lineNumber
+				idx := len(lines) + lineNumber
 				if idx < 0 {
-					return fmt.Errorf("line number out of range (line-count=%d, requested=%d)", len(lyrics), lineNumber)
+					return fmt.Errorf(
+						"line number out of range (line-count=%d, requested=%d)",
+						len(lines),
+						lineNumber,
+					)
 				}
-				slog.Debug("Setting position from negative index", "line-number", lineNumber, "resolved-index", idx)
-				pos = lyrics[idx].Timestamp
+				slog.Debug(
+					"Setting position from negative index",
+					"line-number",
+					lineNumber,
+					"resolved-index",
+					idx,
+				)
+				pos = lines[idx].Timestamp
 			} else {
-				if lineNumber > len(lyrics) {
-					return fmt.Errorf("line number out of range (line-count=%d, requested=%d)", len(lyrics), lineNumber)
+				if lineNumber > len(lines) {
+					return fmt.Errorf(
+						"line number out of range (line-count=%d, requested=%d)",
+						len(lines),
+						lineNumber,
+					)
 				}
-				slog.Debug("Setting position from positive line number", "line-number", lineNumber)
-				pos = lyrics[lineNumber].Timestamp
+				slog.Debug(
+					"Setting position from positive line number",
+					"line-number",
+					lineNumber,
+				)
+				pos = lines[lineNumber].Timestamp
 			}
 		} else {
 			if pos < 0 {
-				slog.Debug("Negative duration detected. Trying to substract from song length", "position", pos)
+				slog.Debug(
+					"Negative duration detected. Trying to substract from song length",
+					"position",
+					pos,
+				)
 				length, err := mp.GetLength()
 				if err != nil {
 					return fmt.Errorf("failed to song duration: %v", err)
@@ -85,7 +118,13 @@ var Command = &cobra.Command{
 			}
 		}
 
-		slog.Info("Setting player position", "player", mp.GetName(), "position", pos)
+		slog.Info(
+			"Setting player position",
+			"player",
+			mp.GetName(),
+			"position",
+			pos,
+		)
 		if err := mp.SetPosition(pos); err != nil {
 			return fmt.Errorf("failed to set player position: %w", err)
 		}

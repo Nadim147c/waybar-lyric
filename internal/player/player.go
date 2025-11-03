@@ -28,7 +28,7 @@ var (
 )
 
 // Parser parses player information from mpris metadata
-type Parser func(*mpris.Player) (*Info, error)
+type Parser func(*mpris.Player) (*Metadata, error)
 
 // IDFunc extracts a stable ID for a player.
 type IDFunc func(p *mpris.Player) (string, error)
@@ -133,7 +133,13 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 		playerName := mpris.BaseInterface + "." + p.name
 		if slices.Contains(players, playerName) {
 			slog.Debug("Player selected", "name", playerName)
-			return mpris.New(conn, playerName), parserWithIDFunc(DefaultParser, p.idFunc), nil
+			return mpris.New(
+					conn,
+					playerName,
+				), parserWithIDFunc(
+					DefaultParser,
+					p.idFunc,
+				), nil
 		}
 	}
 
@@ -154,7 +160,8 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 			continue
 		}
 		host := strings.ToLower(pu.Host)
-		if strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com") {
+		if strings.Contains(host, "music.youtube.com") ||
+			strings.Contains(host, "open.spotify.com") {
 			slog.Debug("Player selected", "name", "firefox")
 			return fp, parserWithIDFunc(DefaultParser, urlIDFunc), nil
 		}
@@ -164,7 +171,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 }
 
 func parserWithIDFunc(f Parser, i IDFunc) Parser {
-	return func(p *mpris.Player) (*Info, error) {
+	return func(p *mpris.Player) (*Metadata, error) {
 		info, err := f(p)
 		if err != nil {
 			return info, err
@@ -184,7 +191,7 @@ func should[T any](v T, _ error) T {
 }
 
 // DefaultParser takes *mpris.Player of spotify and return *PlayerInfo
-func DefaultParser(player *mpris.Player) (*Info, error) {
+func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	meta, err := player.GetMetadata()
 	if err != nil {
 		return nil, err
@@ -234,7 +241,7 @@ func DefaultParser(player *mpris.Player) (*Info, error) {
 	idValue, _ := meta["mpris:trackid"]
 	trackid := cast.ToString(idValue.Value())
 
-	info := &Info{
+	info := &Metadata{
 		Player:   player.GetName(),
 		Album:    album,
 		Artist:   artist,

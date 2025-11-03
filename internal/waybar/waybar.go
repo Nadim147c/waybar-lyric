@@ -8,13 +8,13 @@ import (
 	"strings"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
-	"github.com/Nadim147c/waybar-lyric/internal/shared"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 )
 
 // ForPlayer returns printable Waybar
-func ForPlayer(p *player.Info) *Waybar {
+func ForPlayer(p *player.Metadata) *Waybar {
 	alt := Status(Playing)
 	if p.Status == "Paused" {
 		alt = Paused
@@ -40,16 +40,19 @@ func ForPlayer(p *player.Info) *Waybar {
 }
 
 // ForLyrics returns Waybar for lyrics
-func ForLyrics(lyrics shared.Lyrics, idx int) *Waybar {
-	currentLine := lyrics[idx]
+func ForLyrics(lyrics lyric.Lyrics, idx int) *Waybar {
+	lines := lyrics.Lines
+	currentLine := lines[idx]
 	start := max(idx-2, 0)
-	end := min(idx+config.TooltipLines-2, len(lyrics))
+	end := min(idx+config.TooltipLines-2, len(lines))
 
-	lyricsContext := slices.Clone(lyrics[start:end])
+	lyricsContext := slices.Clone(lines[start:end])
 
 	var tooltip strings.Builder
 
-	tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", config.TooltipColor))
+	tooltip.WriteString(
+		fmt.Sprintf("<span foreground=\"%s\">", config.TooltipColor),
+	)
 
 	for i, ttl := range lyricsContext {
 		line := str.BreakLine(ttl.Text, config.BreakTooltip)
@@ -71,14 +74,18 @@ func ForLyrics(lyrics shared.Lyrics, idx int) *Waybar {
 		tooltip.WriteString(line + "\n")
 	}
 
-	line := str.Truncate(currentLine.Text, config.MaxTextLength)
+	line := str.Truncate(currentLine.Text)
 	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
 	class := Class{Lyric, Playing}
 	waybar := &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
 
 	if config.Detailed {
-		waybar.Context = &lyricsContext
+		waybar.Info = lyrics.Metadata
+		waybar.Context = lyrics.Lines
+	} else {
+		waybar.Info = nil
+		waybar.Context = nil
 	}
 
 	return waybar
@@ -106,13 +113,13 @@ type Class []Status
 
 // Waybar is structure data which can be printed to for waybar output
 type Waybar struct {
-	Text       string         `json:"text"`
-	Class      Class          `json:"class"`
-	Alt        Status         `json:"alt"`
-	Tooltip    string         `json:"tooltip"`
-	Percentage int            `json:"percentage"`
-	Info       *player.Info   `json:"info,omitempty"`
-	Context    *shared.Lyrics `json:"context,omitempty"`
+	Text       string           `json:"text"`
+	Class      Class            `json:"class"`
+	Alt        Status           `json:"alt"`
+	Tooltip    string           `json:"tooltip"`
+	Percentage int              `json:"percentage"`
+	Info       *player.Metadata `json:"info,omitempty"`
+	Context    lyric.Lines      `json:"context,omitempty"`
 }
 
 // JSON is the json encoder for waybar
@@ -124,7 +131,7 @@ func init() {
 
 // SetText sets truncates the given txt and sets to text value
 func (w *Waybar) SetText(txt string) {
-	w.Text = str.Truncate(txt, config.MaxTextLength)
+	w.Text = str.Truncate(txt)
 }
 
 var lastLine string
@@ -198,7 +205,7 @@ func (w *Waybar) Is(other *Waybar) bool {
 }
 
 // Paused set Text to artist and title on default mode
-func (w *Waybar) Paused(info *player.Info) {
+func (w *Waybar) Paused(info *player.Metadata) {
 	if !config.LyricOnly {
 		w.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
 	}
