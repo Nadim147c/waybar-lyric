@@ -70,6 +70,8 @@ func (p *Metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	p.Player = mpris.BaseInterface + "." + p.Player
+
 	// Restore durations from seconds
 	p.Position = time.Duration(aux.Position * float64(time.Second))
 	p.Length = time.Duration(aux.Length * float64(time.Second))
