@@ -90,7 +90,7 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 		return lyrics, ErrLyricsNotFound
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 300 {
 		Store.NotFound(uri)
 		return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
