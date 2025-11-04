@@ -62,8 +62,12 @@ type Lyrics struct {
 
 // GetLyrics returns lyrics for given *player.Info
 func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
-	lyrics := Lyrics{Metadata: info}
 	uri := info.ID
+	if l, err := Store.Load(uri); err == nil {
+		return l, nil
+	}
+
+	lyrics := Lyrics{Metadata: info}
 
 	queryParams := url.Values{}
 	queryParams.Set("track_name", info.Title)
