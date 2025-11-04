@@ -34,17 +34,23 @@ type Metadata struct {
 // MarshalJSON encodes PlayerInfo with durations in seconds (float)
 func (p Metadata) MarshalJSON() ([]byte, error) {
 	p.Player = strings.TrimPrefix(p.Player, mpris.BaseInterface+".")
+
+	var u string
+	if p.URL != nil {
+		u = p.URL.String()
+	}
+
 	type Alias Metadata // create alias to avoid recursion
 	return json.Marshal(&struct {
 		Alias
 		Position float64 `json:"position"`
 		Length   float64 `json:"length"`
-		URL      string  `json:"url"`
+		URL      string  `json:"url,omitempty"`
 	}{
 		Alias:    (Alias)(p),
 		Position: p.Position.Seconds(),
 		Length:   p.Length.Seconds(),
-		URL:      p.URL.String(),
+		URL:      u,
 	})
 }
 
