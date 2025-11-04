@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
 // CacheSize is the max amount lyrics to save into the cache
@@ -31,8 +29,14 @@ func NewCache() *Cache {
 
 // NotFound saves a empty lyrics to Cache
 func (s *Cache) NotFound(id string) {
-	l := Lyrics{Metadata: &player.Metadata{ID: id}}
-	s.Save(l)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if len(s.store) == CacheSize {
+		clear(s.store) // clear in memory cache
+	}
+
+	s.store[id] = Lyrics{}
 }
 
 // Save saves lyrics to Cache
