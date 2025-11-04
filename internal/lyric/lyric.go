@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"slices"
 	"time"
 
@@ -65,18 +63,7 @@ type Lyrics struct {
 // GetLyrics returns lyrics for given *player.Info
 func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 	lyrics := Lyrics{Metadata: info}
-
 	uri := info.ID
-
-	cacheFile := filepath.Join(CacheDir, uri+".json")
-	cachedLyrics, err := LoadCache(cacheFile)
-	if err == nil {
-		CensorLyrics(cachedLyrics)
-		TruncateLyrics(cachedLyrics)
-		Store.Save(uri, cachedLyrics)
-		return cachedLyrics, nil
-	}
-	slog.Warn("Can't find the lyrics in the cache", "error", err)
 
 	queryParams := url.Values{}
 	queryParams.Set("track_name", info.Title)
@@ -132,13 +119,12 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 
 	lyrics.Lines = lines
 
-	if err = SaveCache(lyrics, cacheFile); err != nil {
+	if Store.Save(lyrics); err != nil {
 		return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
 	}
 
 	CensorLyrics(lyrics)
 	TruncateLyrics(lyrics)
-	Store.Save(uri, lyrics)
 	return lyrics, nil
 }
 

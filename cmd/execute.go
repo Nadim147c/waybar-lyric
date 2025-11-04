@@ -52,9 +52,6 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	ctx, cancel := context.WithCancel(cmd.Context())
 	defer cancel()
 
-	// Clean In memery lyrics cache every 10 minute
-	go lyric.Store.Cleanup(ctx, 10*time.Minute)
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
@@ -131,8 +128,8 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			continue
 		}
 
-		lyrics, exists := lyric.Store.Load(info.ID)
-		if !exists {
+		lyrics, err := lyric.Store.Load(info.ID)
+		if err != nil {
 			w := waybar.ForPlayer(info)
 			w.Alt = waybar.Getting
 			w.Class = append(w.Class, waybar.Getting)

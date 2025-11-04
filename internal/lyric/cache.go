@@ -1,76 +1,84 @@
 package lyric
 
 import (
-	"context"
 	"encoding/json"
-	"log/slog"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
+// CacheSize is the max amount lyrics to save into the cache
+const CacheSize = 20
+
 // Store is in-memorey lyrics cache
-var Store = store{}
+var Store = NewCache()
 
-// store is used to cache lyrics in memory
-type store struct{ m sync.Map }
-
-// Save saves lyrics to Store
-func (s *store) NotFound(id string) {
-	s.m.Store(id, Lyrics{})
+// Cache is used to cache lyrics in memory
+type Cache struct {
+	mu    sync.Mutex
+	store map[string]Lyrics
 }
 
-// Save saves lyrics to Store
-func (s *store) Save(id string, lyrics Lyrics) {
-	s.m.Store(id, lyrics)
+// NewCache creates a new instance of Cachhe
+func NewCache() *Cache {
+	c := new(Cache)
+	c.store = make(map[string]Lyrics, CacheSize)
+	return c
 }
 
-// Load loads lyrics from Store
-func (s *store) Load(key string) (Lyrics, bool) {
-	v, ok := s.m.Load(key)
+// NotFound saves a empty lyrics to Cache
+func (s *Cache) NotFound(id string) {
+	l := Lyrics{Metadata: &player.Metadata{ID: id}}
+	s.Save(l)
+}
+
+// Save saves lyrics to Cache
+func (s *Cache) Save(lyrics Lyrics) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if len(s.store) == CacheSize {
+		clear(s.store) // clear in memory cache
+	}
+
+	s.store[lyrics.Metadata.ID] = lyrics
+	return s.saveCache(lyrics)
+}
+
+// Load loads lyrics from Cache
+func (s *Cache) Load(id string) (Lyrics, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	v, ok := s.store[id]
 	if !ok {
-		return Lyrics{}, false
+		return s.loadCache(id)
 	}
-	return v.(Lyrics), true
+	return v, nil
 }
 
-// Cleanup runs a blocking loop that periodically removes unused entries
-// until the context is canceled.
-func (s *store) Cleanup(ctx context.Context, interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return // Exit when context is canceled
-		case <-ticker.C:
-			s.m.Clear()
-		}
-	}
-}
-
-// CacheDir is waybar-lyric lyrics cache dir
-var CacheDir string
-
-func init() {
+func (s *Cache) getCacheDir() (string, error) {
 	userCacheDir, err := os.UserCacheDir()
 	if err != nil {
-		slog.Error("Failed to find cache directory", "error", err)
-		return
+		return "", fmt.Errorf("failed to find cache directory: %v", err)
 	}
 
-	CacheDir = filepath.Join(userCacheDir, "waybar-lyric")
-
-	if err := os.MkdirAll(CacheDir, 0755); err != nil {
-		slog.Error("Failed to create cache directory")
-	}
+	return filepath.Join(userCacheDir, "waybar-lyric"), nil
 }
 
 // SaveCache saves the lyrics to cache
-func SaveCache(lyrics Lyrics, filePath string) error {
-	file, err := os.Create(filePath)
+func (s *Cache) saveCache(lyrics Lyrics) error {
+	cacheDir, err := s.getCacheDir()
+
+	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
+		return err
+	}
+
+	cachePath := filepath.Join(cacheDir, lyrics.Metadata.ID+".json")
+
+	file, err := os.Create(cachePath)
 	if err != nil {
 		return err
 	}
@@ -79,10 +87,17 @@ func SaveCache(lyrics Lyrics, filePath string) error {
 }
 
 // LoadCache loads the lyrics from cache
-func LoadCache(filePath string) (Lyrics, error) {
+func (s *Cache) loadCache(id string) (Lyrics, error) {
 	var lyrics Lyrics
 
-	file, err := os.Open(filePath)
+	cacheDir, err := s.getCacheDir()
+	if err != nil {
+		return lyrics, err
+	}
+
+	cachePath := filepath.Join(cacheDir, id+".json")
+
+	file, err := os.Open(cachePath)
 	if err != nil {
 		return lyrics, err
 	}
