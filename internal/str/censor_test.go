@@ -1,6 +1,10 @@
 package str
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/Nadim147c/waybar-lyric/internal/config"
+)
 
 func TestCensorText(t *testing.T) {
 	profanity = `
@@ -11,7 +15,7 @@ badword|worseword
 
 	tests := []struct {
 		input    string
-		partial  string
+		kind     string
 		expected string
 	}{
 		{"this is a badword", "full", "this is a *******"},
@@ -21,10 +25,19 @@ badword|worseword
 		{"no bad content", "full", "no bad content"},
 	}
 
-	for _, test := range tests {
-		output := CensorText(test.input, test.partial)
-		if output != test.expected {
-			t.Errorf("CensorText(%q, %v) = %q; want %q", test.input, test.partial, output, test.expected)
-		}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			config.FilterProfanityType = tt.kind
+			output := CensorText(tt.input)
+			if output != tt.expected {
+				t.Errorf(
+					"CensorText(%q, %v) = %q; want %q",
+					tt.input,
+					tt.kind,
+					output,
+					tt.expected,
+				)
+			}
+		})
 	}
 }
