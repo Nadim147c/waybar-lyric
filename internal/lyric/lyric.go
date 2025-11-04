@@ -119,7 +119,7 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 
 	lyrics.Lines = lines
 
-	if Store.Save(lyrics); err != nil {
+	if err := Store.Save(lyrics); err != nil {
 		return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
 	}
 
