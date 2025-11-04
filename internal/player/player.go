@@ -1,10 +1,10 @@
 package player
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"log/slog"
 	"net/url"
 	"path"
@@ -35,24 +35,10 @@ type IDFunc func(p *mpris.Player) (string, error)
 
 // Hash return sha256 hash for given string
 func Hash(v ...any) string {
-	h := sha256.New()
-	fmt.Fprint(h, v...)
+	h := fnv.New128a()
+	fmt.Fprintf(h, "%s:", v...)
 	hash := h.Sum(nil)
-	return base64.RawURLEncoding.EncodeToString(hash)
-}
-
-// trackIDFunc: uses mpris:trackid as ID source
-func trackIDFunc(p *mpris.Player) (string, error) {
-	meta, err := p.GetMetadata()
-	if err != nil {
-		return "", err
-	}
-	val, ok := meta["mpris:trackid"]
-	if !ok {
-		return "", ErrNoID
-	}
-
-	return Hash(val), nil
+	return hex.EncodeToString(hash)
 }
 
 // artistTitleFunc: uses artist+title combo as ID source
