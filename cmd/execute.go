@@ -24,7 +24,7 @@ const SleepTime = 500 * time.Millisecond
 // Execute is the main function for lyrics
 func Execute(cmd *cobra.Command, _ []string) error {
 	if !config.Quiet {
-		PrintASCII()
+		fmt.Fprintln(os.Stderr, cmd.Version)
 	}
 
 	if config.PrintVersion {
