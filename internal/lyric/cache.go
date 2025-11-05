@@ -1,6 +1,7 @@
 package lyric
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -72,6 +73,9 @@ func (s *Cache) getCacheDir() (string, error) {
 	return filepath.Join(userCacheDir, "waybar-lyric"), nil
 }
 
+// CacheExtension is the extension use for cache files
+const CacheExtension = ".json.gz"
+
 // SaveCache saves the lyrics to cache
 func (s *Cache) saveCache(lyrics Lyrics) error {
 	cacheDir, err := s.getCacheDir()
@@ -80,14 +84,22 @@ func (s *Cache) saveCache(lyrics Lyrics) error {
 		return err
 	}
 
-	cachePath := filepath.Join(cacheDir, lyrics.Metadata.ID+".json")
+	cachePath := filepath.Join(cacheDir, lyrics.Metadata.ID+CacheExtension)
 
 	file, err := os.Create(cachePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	return json.NewEncoder(file).Encode(lyrics)
+
+	gz := gzip.NewWriter(file)
+	defer gz.Close()
+
+	if err := json.NewEncoder(gz).Encode(&lyrics); err != nil {
+		return err
+	}
+
+	return gz.Flush()
 }
 
 // LoadCache loads the lyrics from cache
@@ -99,7 +111,7 @@ func (s *Cache) loadCache(id string) (Lyrics, error) {
 		return lyrics, err
 	}
 
-	cachePath := filepath.Join(cacheDir, id+".json")
+	cachePath := filepath.Join(cacheDir, id+CacheExtension)
 
 	file, err := os.Open(cachePath)
 	if err != nil {
@@ -107,6 +119,12 @@ func (s *Cache) loadCache(id string) (Lyrics, error) {
 	}
 	defer file.Close()
 
-	err = json.NewDecoder(file).Decode(&lyrics)
+	gz, err := gzip.NewReader(file)
+	if err != nil {
+		return lyrics, err
+	}
+	defer gz.Close()
+
+	err = json.NewDecoder(gz).Decode(&lyrics)
 	return lyrics, err
 }

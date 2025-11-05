@@ -34,9 +34,21 @@ type Parser func(*mpris.Player) (*Metadata, error)
 type IDFunc func(p *mpris.Player) (string, error)
 
 // Hash return sha256 hash for given string
-func Hash(v ...any) string {
+func Hash(v ...string) string {
 	h := fnv.New128a()
-	fmt.Fprintf(h, "%s:", v...)
+
+	switch len(v) {
+	case 0:
+		panic("nothing to hash")
+	case 1:
+		fmt.Fprintf(h, "%s", v[0])
+	default:
+		fmt.Fprint(h, v[0])
+		for _, e := range v {
+			fmt.Fprintf(h, ":%s", e)
+		}
+	}
+
 	hash := h.Sum(nil)
 	return hex.EncodeToString(hash)
 }
