@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/Nadim147c/waybar-lyric/internal/config"
 )
 
 //go:embed profanity.txt
@@ -23,10 +25,10 @@ func profanityRegex() *regexp.Regexp {
 	return profanityRe
 }
 
-func CensorText(input string, filterType string) string {
+func CensorText(input string) string {
 	re := profanityRegex()
 	input = re.ReplaceAllStringFunc(input, func(match string) string {
-		switch filterType {
+		switch config.FilterProfanityType {
 		case "full":
 			return strings.Repeat("*", len(match))
 		case "partial":
@@ -43,5 +45,12 @@ func partialCensor(word string) string {
 	if len(chars) <= 3 {
 		return strings.Repeat("*", len(word))
 	}
-	return string(chars[0]) + strings.Repeat("*", len(word)-2) + string(chars[len(word)-1])
+	return string(
+		chars[0],
+	) + strings.Repeat(
+		"*",
+		len(word)-2,
+	) + string(
+		chars[len(word)-1],
+	)
 }

@@ -1,8 +1,6 @@
 module github.com/Nadim147c/waybar-lyric
 
-go 1.24.2
-
-toolchain go1.24.5
+go 1.25
 
 require (
 	github.com/Nadim147c/fang v0.4.4-0.20251004092645-61f7565b973f

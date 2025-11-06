@@ -3,6 +3,8 @@ package str
 import (
 	"slices"
 	"strings"
+
+	"github.com/Nadim147c/waybar-lyric/internal/config"
 )
 
 // BreakLine breaks a line at word boundaries if it exceeds the limit.
@@ -35,7 +37,8 @@ func BreakLine(line string, limit int) string {
 }
 
 // Truncate truncates using rune length from user input
-func Truncate(input string, limit int) string {
+func Truncate(input string) string {
+	limit := config.MaxTextLength
 	r := []rune(input)
 	if len(r) <= limit {
 		return input

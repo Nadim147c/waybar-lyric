@@ -24,7 +24,7 @@ const SleepTime = 500 * time.Millisecond
 // Execute is the main function for lyrics
 func Execute(cmd *cobra.Command, _ []string) error {
 	if !config.Quiet {
-		PrintASCII()
+		fmt.Fprintln(os.Stderr, cmd.Version)
 	}
 
 	if config.PrintVersion {
@@ -52,9 +52,6 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	ctx, cancel := context.WithCancel(cmd.Context())
 	defer cancel()
 
-	// Clean In memery lyrics cache every 10 minute
-	go lyric.Store.Cleanup(ctx, 10*time.Minute)
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
@@ -75,7 +72,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	var lastWaybar *waybar.Waybar
 
 	instant := make(chan bool)
-	go func() { instant <- true }()
+	go func() { instant <- false }()
 
 	for {
 		select {
@@ -131,16 +128,28 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			continue
 		}
 
-		lyrics, err := lyric.GetLyrics(info)
+		lyrics, err := lyric.Store.Load(info.ID)
 		if err != nil {
-			slog.Error("Failed to get lyrics", "error", err)
+			w := waybar.ForPlayer(info)
+			w.Alt = waybar.Getting
+			w.Class = append(w.Class, waybar.Getting)
+			w.Encode()
+			lyrics, err = lyric.GetLyrics(ctx, info)
+		}
+
+		if err != nil || len(lyrics.Lines) == 0 {
+			slog.Error(
+				"Failed to get lyrics",
+				"error", err,
+				"lines", lyrics.Lines,
+			)
+
 			w := waybar.ForPlayer(info)
 			w.Alt = waybar.NoLyric
 			if !w.Is(lastWaybar) {
 				w.Encode()
 				lastWaybar = w
 			}
-
 			continue
 		}
 
@@ -151,19 +160,16 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		}
 
 		var idx int
-		for i, line := range lyrics {
+		for i, line := range lyrics.Lines {
 			if info.Position <= line.Timestamp {
 				break
 			}
 			idx = i
 		}
 
-		currentLyric := lyrics[idx]
+		currentLyric := lyrics.Lines[idx]
 
 		w := waybar.ForLyrics(lyrics, idx)
-		if config.Detailed {
-			w.Info = info
-		}
 		w.Percentage = info.Percentage()
 
 		if info.Status == mpris.PlaybackPaused {
@@ -195,8 +201,8 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			lastWaybar = w
 		}
 
-		if len(lyrics) > idx+1 {
-			n := lyrics[idx+1]
+		if len(lyrics.Lines) > idx+1 {
+			n := lyrics.Lines[idx+1]
 			d := n.Timestamp - info.Position
 			if d <= 0 {
 				slog.Warn("Negative sleep time",

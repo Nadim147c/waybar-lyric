@@ -1,196 +1,130 @@
 package lyric
 
 import (
-	"bufio"
-	"context"
-	"errors"
+	"compress/gzip"
+	"encoding/json"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
-	"slices"
-	"strconv"
-	"strings"
 	"sync"
-	"time"
-	"unicode"
-
-	"github.com/Nadim147c/waybar-lyric/internal/player"
-	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
-// storeValue is Lyrics with LastAccess time
-type storeValue struct {
-	LastAccess time.Time
-	Lyrics     shared.Lyrics
+// CacheSize is the max amount lyrics to save into the cache
+const CacheSize = 20
+
+// Store is in-memorey lyrics cache
+var Store = NewCache()
+
+// Cache is used to cache lyrics in memory
+type Cache struct {
+	mu    sync.Mutex
+	store map[string]Lyrics
 }
 
-// store is used to cache lyrics in memory
-type store struct {
-	mu   sync.RWMutex // Using RWMutex for better read performance
-	data map[string]*storeValue
+// NewCache creates a new instance of Cachhe
+func NewCache() *Cache {
+	c := new(Cache)
+	c.store = make(map[string]Lyrics, CacheSize)
+	return c
 }
 
-// newStore creates a new initialized Store
-func newStore() *store {
-	return &store{
-		data: map[string]*storeValue{},
-	}
-}
-
-// Save saves lyrics to Store
-func (s *store) Save(id string, lyrics shared.Lyrics) {
+// NotFound saves a empty lyrics to Cache
+func (s *Cache) NotFound(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.data[id] = &storeValue{
-		LastAccess: time.Now(),
-		Lyrics:     lyrics,
+
+	if len(s.store) == CacheSize {
+		clear(s.store) // clear in memory cache
 	}
+
+	s.store[id] = Lyrics{}
 }
 
-// Load loads lyrics from Store
-func (s *store) Load(key string) (shared.Lyrics, bool) {
+// Save saves lyrics to Cache
+func (s *Cache) Save(lyrics Lyrics) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	v, exists := s.data[key]
-	if !exists {
-		return nil, false
+
+	if len(s.store) == CacheSize {
+		clear(s.store) // clear in memory cache
 	}
-	v.LastAccess = time.Now() // Update last access time
-	return v.Lyrics, true
+
+	s.store[lyrics.Metadata.ID] = lyrics
+	return s.saveCache(lyrics)
 }
 
-// Cleanup runs a blocking loop that periodically removes unused entries
-// until the context is canceled.
-func (s *store) Cleanup(ctx context.Context, interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return // Exit when context is canceled
-		case <-ticker.C:
-			s.cleanupExpired(interval)
-		}
-	}
-}
-
-// cleanupExpired removes entries not accessed within the interval
-func (s *store) cleanupExpired(threshold time.Duration) {
+// Load loads lyrics from Cache
+func (s *Cache) Load(id string) (Lyrics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	for key, value := range s.data {
-		if time.Since(value.LastAccess) > threshold {
-			delete(s.data, key)
-		}
+	v, ok := s.store[id]
+	if !ok {
+		return s.loadCache(id)
 	}
+	return v, nil
 }
 
-// CacheDir is waybar-lyric lyrics cache dir
-var CacheDir string
-
-func init() {
+func (s *Cache) getCacheDir() (string, error) {
 	userCacheDir, err := os.UserCacheDir()
 	if err != nil {
-		slog.Error("Failed to find cache directory", "error", err)
-		return
+		return "", fmt.Errorf("failed to find cache directory: %v", err)
 	}
 
-	CacheDir = filepath.Join(userCacheDir, "waybar-lyric")
-
-	if err := os.MkdirAll(CacheDir, 0755); err != nil {
-		slog.Error("Failed to create cache directory")
-	}
+	return filepath.Join(userCacheDir, "waybar-lyric"), nil
 }
 
+// CacheExtension is the extension use for cache files
+const CacheExtension = ".json.gz"
+
 // SaveCache saves the lyrics to cache
-func SaveCache(info *player.Info, lines shared.Lyrics, filePath string) error {
-	file, err := os.Create(filePath)
+func (s *Cache) saveCache(lyrics Lyrics) error {
+	cacheDir, err := s.getCacheDir()
+
+	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
+		return err
+	}
+
+	cachePath := filepath.Join(cacheDir, lyrics.Metadata.ID+CacheExtension)
+
+	file, err := os.Create(cachePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	// Write player info as comments before lyrics
-	fmt.Fprintf(file, "# PLAYER: %s\n", info.Player)
-	fmt.Fprintf(file, "# ID: %s\n", info.ID)
-	metaLines := make([]string, 0, len(info.Metadata))
-	for k, v := range info.Metadata {
-		// Convert metadata key to SNAKE_CASE
-		keysplit := strings.SplitN(k, ":", 2)
-		if len(keysplit) != 2 {
-			continue
-		}
-		var key strings.Builder
-		for _, r := range keysplit[1] {
-			if unicode.IsUpper(r) {
-				key.WriteByte('_')
-			}
-			key.WriteRune(unicode.ToUpper(r))
-		}
-		metaLines = append(metaLines, fmt.Sprintf("# %s: %s", key.String(), v))
+	gz := gzip.NewWriter(file)
+	defer gz.Close()
+
+	if err := json.NewEncoder(gz).Encode(&lyrics); err != nil {
+		return err
 	}
 
-	slices.SortFunc(metaLines, func(a, b string) int {
-		return strings.Compare(a, b)
-	})
-
-	for line := range slices.Values(metaLines) {
-		fmt.Fprintln(file, line)
-	}
-
-	// Write lyrics
-	for line := range slices.Values(lines) {
-		_, err := fmt.Fprintf(file, "%d,%s\n", line.Timestamp, line.Text)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return gz.Flush()
 }
 
 // LoadCache loads the lyrics from cache
-func LoadCache(filePath string) (shared.Lyrics, error) {
-	file, err := os.Open(filePath)
+func (s *Cache) loadCache(id string) (Lyrics, error) {
+	var lyrics Lyrics
+
+	cacheDir, err := s.getCacheDir()
 	if err != nil {
-		return nil, err
+		return lyrics, err
+	}
+
+	cachePath := filepath.Join(cacheDir, id+CacheExtension)
+
+	file, err := os.Open(cachePath)
+	if err != nil {
+		return lyrics, err
 	}
 	defer file.Close()
 
-	var lyrics shared.Lyrics
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		parts := strings.SplitN(line, ",", 2)
-		if len(parts) != 2 {
-			continue // Skip invalid lines
-		}
-
-		ts, err := strconv.Atoi(parts[0])
-		if err != nil {
-			return nil, err
-		}
-
-		timestamp := time.Duration(ts)
-		text := strings.TrimSpace(parts[1])
-
-		lyric := shared.LyricLine{Timestamp: timestamp, Text: text}
-		lyrics = append(lyrics, lyric)
+	gz, err := gzip.NewReader(file)
+	if err != nil {
+		return lyrics, err
 	}
+	defer gz.Close()
 
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	if len(lyrics) == 0 {
-		return nil, errors.New("Number of line found is zero")
-	}
-
-	return lyrics, nil
+	err = json.NewDecoder(gz).Decode(&lyrics)
+	return lyrics, err
 }

@@ -7,16 +7,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
-// ParseLyrics parses a string containing time-synchronized lyrics in the format [MM:SS.ss]Lyric text
-// and returns a slice of LyricLine structs. Each line in the input should follow the format
-// "[timestamp]lyric text", where timestamp is in a format parseable by ParseTimestamp.
-// Empty lines and malformed lines are skipped.
-func ParseLyrics(file string) (shared.Lyrics, error) {
-	lyrics := shared.Lyrics{{}} // add empty line a start of the lyrics
+// ParseLyrics parses a string containing time-synchronized lyrics in the format
+// [MM:SS.ss]Lyric text and returns a slice of LyricLine structs. Each line in
+// the input should follow the format "[timestamp]lyric text", where timestamp
+// is in a format parseable by ParseTimestamp. Empty lines and malformed lines
+// are skipped.
+func ParseLyrics(file string) (Lines, error) {
+	lyrics := Lines{{}} // add empty line a start of the lyrics
 	for line := range strings.SplitSeq(file, "\n") {
 		if line == "" {
 			continue
@@ -32,11 +31,17 @@ func ParseLyrics(file string) (shared.Lyrics, error) {
 
 		timestamp, err := ParseTimestamp(timestampStr)
 		if err != nil {
-			slog.Debug("Failed to parse timestamp", "timestamp", timestampStr, "error", err)
+			slog.Debug(
+				"Failed to parse timestamp",
+				"timestamp",
+				timestampStr,
+				"error",
+				err,
+			)
 			continue
 		}
 
-		lyric := shared.LyricLine{Timestamp: timestamp, Text: lyricLine}
+		lyric := Line{timestamp, lyricLine, false}
 		lyrics = append(lyrics, lyric)
 	}
 
@@ -47,9 +52,10 @@ func ParseLyrics(file string) (shared.Lyrics, error) {
 	return lyrics, nil
 }
 
-// ParseTimestamp converts a timestamp string (in "HH:MM:SS", "MM:SS" or "SS" format)
-// into a time.Duration value representing the total number of nanoseconds.
-// Example inputs: "1:30:45" (1h 30m 45s), "5:20" (5m 20s), "42" (42s)
+// ParseTimestamp converts a timestamp string (in "HH:MM:SS", "MM:SS" or "SS"
+// format) into a time.Duration value representing the total number of
+// nanoseconds. Example inputs: "1:30:45" (1h 30m 45s), "5:20" (5m 20s), "42"
+// (42s)
 func ParseTimestamp(ts string) (time.Duration, error) {
 	durationConst := []time.Duration{time.Second, time.Minute, time.Hour}
 

@@ -1,10 +1,10 @@
 package player
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"log/slog"
 	"net/url"
 	"path"
@@ -28,31 +28,29 @@ var (
 )
 
 // Parser parses player information from mpris metadata
-type Parser func(*mpris.Player) (*Info, error)
+type Parser func(*mpris.Player) (*Metadata, error)
 
 // IDFunc extracts a stable ID for a player.
 type IDFunc func(p *mpris.Player) (string, error)
 
 // Hash return sha256 hash for given string
-func Hash(v ...any) string {
-	h := sha256.New()
-	fmt.Fprint(h, v...)
+func Hash(v ...string) string {
+	h := fnv.New128a()
+
+	switch len(v) {
+	case 0:
+		panic("nothing to hash")
+	case 1:
+		fmt.Fprintf(h, "%s", v[0])
+	default:
+		fmt.Fprint(h, v[0])
+		for _, e := range v {
+			fmt.Fprintf(h, ":%s", e)
+		}
+	}
+
 	hash := h.Sum(nil)
-	return base64.RawURLEncoding.EncodeToString(hash)
-}
-
-// trackIDFunc: uses mpris:trackid as ID source
-func trackIDFunc(p *mpris.Player) (string, error) {
-	meta, err := p.GetMetadata()
-	if err != nil {
-		return "", err
-	}
-	val, ok := meta["mpris:trackid"]
-	if !ok {
-		return "", ErrNoID
-	}
-
-	return Hash(val), nil
+	return hex.EncodeToString(hash)
 }
 
 // artistTitleFunc: uses artist+title combo as ID source
@@ -133,7 +131,13 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 		playerName := mpris.BaseInterface + "." + p.name
 		if slices.Contains(players, playerName) {
 			slog.Debug("Player selected", "name", playerName)
-			return mpris.New(conn, playerName), parserWithIDFunc(DefaultParser, p.idFunc), nil
+			return mpris.New(
+					conn,
+					playerName,
+				), parserWithIDFunc(
+					DefaultParser,
+					p.idFunc,
+				), nil
 		}
 	}
 
@@ -154,7 +158,8 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 			continue
 		}
 		host := strings.ToLower(pu.Host)
-		if strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com") {
+		if strings.Contains(host, "music.youtube.com") ||
+			strings.Contains(host, "open.spotify.com") {
 			slog.Debug("Player selected", "name", "firefox")
 			return fp, parserWithIDFunc(DefaultParser, urlIDFunc), nil
 		}
@@ -164,7 +169,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 }
 
 func parserWithIDFunc(f Parser, i IDFunc) Parser {
-	return func(p *mpris.Player) (*Info, error) {
+	return func(p *mpris.Player) (*Metadata, error) {
 		info, err := f(p)
 		if err != nil {
 			return info, err
@@ -184,7 +189,7 @@ func should[T any](v T, _ error) T {
 }
 
 // DefaultParser takes *mpris.Player of spotify and return *PlayerInfo
-func DefaultParser(player *mpris.Player) (*Info, error) {
+func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	meta, err := player.GetMetadata()
 	if err != nil {
 		return nil, err
@@ -234,7 +239,7 @@ func DefaultParser(player *mpris.Player) (*Info, error) {
 	idValue, _ := meta["mpris:trackid"]
 	trackid := cast.ToString(idValue.Value())
 
-	info := &Info{
+	info := &Metadata{
 		Player:   player.GetName(),
 		Album:    album,
 		Artist:   artist,
