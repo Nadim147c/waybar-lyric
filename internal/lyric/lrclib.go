@@ -7,7 +7,14 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/match"
+	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
+
+// MinimumScore is the minimum score required to consider the downloaded lyrics
+// as the lyrics of the current song!
+const MinimumScore float64 = 3.5
 
 // LrcLibResponse is the response sent from LrcLib api
 type LrcLibResponse struct {
@@ -61,4 +68,38 @@ func request(
 	client := http.Client{}
 
 	return client.Do(req)
+}
+
+// score calculates a similarity score between a MPRIS track and LrcLib result
+// to find if the lyrics is suitable for current track by scoring duration,
+// title, album and artist.
+//
+// Scoring breakdown:
+//   - Duration: Up to 1.5 points for an exact match, decreasing linearly to 0.0
+//     when the difference reaches or exceeds 8 seconds.
+//   - Title: Up to 2.0 points for an exact match, with lower scores for greater
+//     string differences.
+//   - Album: Up to 1.0 point for an exact match, with lower scores for greater
+//     string differences.
+//   - Artists: Up to 1.0 point for an exact match, with lower scores for greater
+//     string differences.
+func score(track *player.Metadata, lyrics LrcLibResponse) float64 {
+	lyricsDur := time.Duration(lyrics.Duration * float64(time.Second))
+
+	durationScore := match.Durations(track.Length, lyricsDur) * 1.5
+	titleScore := match.Strings(track.Title, lyrics.TrackName) * 2
+	albumScore := match.Strings(track.Album, lyrics.AlbumName)
+	artistsScore := match.Strings(track.Artist, lyrics.ArtistName)
+
+	score := durationScore + titleScore + albumScore + artistsScore
+
+	slog.Debug("SmartMatch",
+		"score", score,
+		"duration_score", durationScore,
+		"title_score", titleScore,
+		"album_score", albumScore,
+		"artists_score", artistsScore,
+	)
+
+	return score
 }

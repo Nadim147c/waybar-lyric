@@ -106,6 +106,11 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 		return lyrics, fmt.Errorf("failed to read response body: %w", err)
 	}
 
+	if score(info, resJSON) < MinimumScore {
+		Store.NotFound(uri)
+		return lyrics, fmt.Errorf("failed to read response body: %w", err)
+	}
+
 	lines, err := ParseLyrics(resJSON.SyncedLyrics)
 	if err != nil {
 		Store.NotFound(uri)
