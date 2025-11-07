@@ -29,12 +29,7 @@ func main() {
 		context.Background(),
 		cmd.Command,
 		fang.WithFlagTypes(),
-		fang.WithNotifySignal(
-			os.Interrupt,
-			os.Kill,
-			syscall.SIGKILL,
-			syscall.SIGTERM,
-		),
+		fang.WithNotifySignal(syscall.SIGINT, syscall.SIGTERM),
 		fang.WithVersion(GetASCII()),
 		fang.WithoutCompletions(),
 		fang.WithoutManpage(),
