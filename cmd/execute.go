@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -136,11 +137,15 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			w.Encode()
 			lyrics, err = lyric.GetLyrics(ctx, info)
 			if err != nil {
-				slog.Error(
-					"Failed to get lyrics",
-					"error", err,
-					"lines", lyrics.Lines,
-				)
+				if errors.Is(err, lyric.ErrLyricsNotFound) {
+					slog.Info("Lyrics not found")
+				} else {
+					slog.Error(
+						"Failed to get lyrics",
+						"error", err,
+						"lines", lyrics.Lines,
+					)
+				}
 			}
 		}
 
