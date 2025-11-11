@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -135,15 +136,20 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			w.Class = append(w.Class, waybar.Getting)
 			w.Encode()
 			lyrics, err = lyric.GetLyrics(ctx, info)
+			if err != nil {
+				if errors.Is(err, lyric.ErrLyricsNotFound) {
+					slog.Info("Lyrics not found")
+				} else {
+					slog.Error(
+						"Failed to get lyrics",
+						"error", err,
+						"lines", lyrics.Lines,
+					)
+				}
+			}
 		}
 
 		if err != nil || len(lyrics.Lines) == 0 {
-			slog.Error(
-				"Failed to get lyrics",
-				"error", err,
-				"lines", lyrics.Lines,
-			)
-
 			w := waybar.ForPlayer(info)
 			w.Alt = waybar.NoLyric
 			if !w.Is(lastWaybar) {
