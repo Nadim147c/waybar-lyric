@@ -149,6 +149,9 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			}
 		}
 
+		// replace load metadata with current
+		lyrics.Metadata = info
+
 		if err != nil || len(lyrics.Lines) == 0 {
 			w := waybar.ForPlayer(info)
 			w.Alt = waybar.NoLyric
