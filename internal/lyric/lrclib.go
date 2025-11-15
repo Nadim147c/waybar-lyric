@@ -3,6 +3,7 @@ package lyric
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -41,6 +42,15 @@ var (
 	// time-synchronized.
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")
 )
+
+type ErrLyricsMatchScore struct {
+	Score     float64
+	Threshold float64
+}
+
+func (e *ErrLyricsMatchScore) Error() string {
+	return fmt.Sprintf("insufficient lyrics match score: %.2f < %.2f", e.Score, e.Threshold)
+}
 
 func request(
 	ctx context.Context,

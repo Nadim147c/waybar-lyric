@@ -137,8 +137,9 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			w.Encode()
 			lyrics, err = lyric.GetLyrics(ctx, info)
 			if err != nil {
-				if errors.Is(err, lyric.ErrLyricsNotFound) {
-					slog.Info("Lyrics not found")
+				var scoreErr *lyric.ErrLyricsMatchScore
+				if errors.Is(err, lyric.ErrLyricsNotFound) || errors.As(err, &scoreErr) {
+					slog.Info("Lyrics not available", "reason", err)
 				} else {
 					slog.Error(
 						"Failed to get lyrics",
