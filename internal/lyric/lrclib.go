@@ -36,8 +36,6 @@ const LrclibEndpoint = "https://lrclib.net/api/get"
 var (
 	// ErrLyricsNotFound indicates that the requested lyrics could not be found.
 	ErrLyricsNotFound = errors.New("lyrics not found")
-	// ErrLyricsNotExists indicates that the lyrics resource does not exist.
-	ErrLyricsNotExists = errors.New("lyrics does not exist")
 	// ErrLyricsNotSynced indicates that the lyrics are available but not
 	// time-synchronized.
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")
