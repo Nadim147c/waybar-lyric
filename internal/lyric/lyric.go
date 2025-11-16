@@ -121,11 +121,6 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 		return lyrics, fmt.Errorf("failed to parse lyrics: %w", err)
 	}
 
-	if len(lines) == 0 {
-		Store.NotFound(uri)
-		return lyrics, ErrLyricsNotSynced
-	}
-
 	slices.SortFunc(lines, func(a, b Line) int {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
 	})
