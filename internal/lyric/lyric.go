@@ -3,6 +3,7 @@ package lyric
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -106,20 +107,18 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 		return lyrics, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	if score(info, resJSON) < MinimumScore {
+	if s := score(info, resJSON); s < MinimumScore {
 		Store.NotFound(uri)
-		return lyrics, fmt.Errorf("failed to read response body: %w", err)
+		return lyrics, &ErrLyricsMatchScore{Score: s, Threshold: MinimumScore}
 	}
 
 	lines, err := ParseLyrics(resJSON.SyncedLyrics)
 	if err != nil {
 		Store.NotFound(uri)
+		if errors.Is(err, ErrLyricsNotSynced) {
+			return lyrics, err
+		}
 		return lyrics, fmt.Errorf("failed to parse lyrics: %w", err)
-	}
-
-	if len(lines) == 0 {
-		Store.NotFound(uri)
-		return lyrics, ErrLyricsNotSynced
 	}
 
 	slices.SortFunc(lines, func(a, b Line) int {
