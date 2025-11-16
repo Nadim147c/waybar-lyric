@@ -3,6 +3,7 @@ package lyric
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -114,6 +115,9 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 	lines, err := ParseLyrics(resJSON.SyncedLyrics)
 	if err != nil {
 		Store.NotFound(uri)
+		if errors.Is(err, ErrLyricsNotSynced) {
+			return lyrics, err
+		}
 		return lyrics, fmt.Errorf("failed to parse lyrics: %w", err)
 	}
 
