@@ -49,7 +49,11 @@ type ErrLyricsMatchScore struct {
 }
 
 func (e *ErrLyricsMatchScore) Error() string {
-	return fmt.Sprintf("insufficient lyrics match score: %.2f < %.2f", e.Score, e.Threshold)
+	return fmt.Sprintf(
+		"insufficient lyrics match score: %.2f < %.2f",
+		e.Score,
+		e.Threshold,
+	)
 }
 
 func request(
@@ -57,7 +61,7 @@ func request(
 	params url.Values,
 	header http.Header,
 ) (*http.Response, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, LyricTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(
