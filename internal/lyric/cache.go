@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -57,11 +58,24 @@ func (s *Cache) Save(lyrics Lyrics) error {
 func (s *Cache) Load(id string) (Lyrics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	v, ok := s.store[id]
-	if !ok {
-		return s.loadCache(id)
+
+	if v, ok := s.store[id]; ok {
+		return v, nil
 	}
-	return v, nil
+
+	lyrics, err := s.loadCache(id)
+	if err != nil {
+		return lyrics, err
+	}
+
+	if len(s.store) == CacheSize {
+		slog.Debug("Flushing memory cache")
+		clear(s.store) // clear in memory cache
+	}
+
+	s.store[id] = lyrics
+
+	return lyrics, nil
 }
 
 func (s *Cache) getCacheDir() (string, error) {
