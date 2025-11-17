@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"slices"
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
+	"github.com/gofrs/flock"
 )
 
 // Line is a line of synchronized lyrics
@@ -61,14 +63,47 @@ type Lyrics struct {
 	Lines    Lines            `json:"lyrics"`
 }
 
+const flockPathPrefix = "/tmp/waybar-lyric"
+
+// LyricTimeout is the timeout duration for lyrics download.
+//
+// NOTE: LyricTimeout doesn't ensure that GetLyrics will only run for given
+// duration
+//
+// TODO: add cli flag for user defined duration
+const LyricTimeout = 10 * time.Second
+
 // GetLyrics returns lyrics for given *player.Info
 func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
+	lyrics := Lyrics{Metadata: info}
+
+	lockCtx, cancel := context.WithTimeout(ctx, LyricTimeout)
+	defer cancel()
+
+	lockFile := fmt.Sprintf("%s-%s.lock", flockPathPrefix, info.ID)
+	flocker := flock.New(lockFile)
+	locked, err := flocker.TryLockContext(lockCtx, 200*time.Millisecond)
+	if err != nil {
+		Store.NotFound(info.ID)
+		return lyrics, fmt.Errorf(
+			"failed to take flock for id(%s): %v",
+			info.ID, err,
+		)
+	}
+	defer os.Remove(lockFile)
+	defer flocker.Close()
+
+	if !locked {
+		return lyrics, fmt.Errorf(
+			"another instance is trying to download: id(%s)",
+			info.ID,
+		)
+	}
+
 	uri := info.ID
 	if l, err := Store.Load(uri); err == nil {
 		return l, nil
 	}
-
-	lyrics := Lyrics{Metadata: info}
 
 	queryParams := url.Values{}
 	queryParams.Set("track_name", info.Title)

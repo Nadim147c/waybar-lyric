@@ -36,8 +36,6 @@ const LrclibEndpoint = "https://lrclib.net/api/get"
 var (
 	// ErrLyricsNotFound indicates that the requested lyrics could not be found.
 	ErrLyricsNotFound = errors.New("lyrics not found")
-	// ErrLyricsNotExists indicates that the lyrics resource does not exist.
-	ErrLyricsNotExists = errors.New("lyrics does not exist")
 	// ErrLyricsNotSynced indicates that the lyrics are available but not
 	// time-synchronized.
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")
@@ -49,7 +47,11 @@ type ErrLyricsMatchScore struct {
 }
 
 func (e *ErrLyricsMatchScore) Error() string {
-	return fmt.Sprintf("insufficient lyrics match score: %.2f < %.2f", e.Score, e.Threshold)
+	return fmt.Sprintf(
+		"insufficient lyrics match score: %.2f < %.2f",
+		e.Score,
+		e.Threshold,
+	)
 }
 
 func request(
@@ -57,7 +59,7 @@ func request(
 	params url.Values,
 	header http.Header,
 ) (*http.Response, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, LyricTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(
