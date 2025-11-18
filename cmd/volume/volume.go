@@ -13,7 +13,7 @@ import (
 
 // Command is the volume changer command
 var Command = &cobra.Command{
-	Use: "volume [+/-]<volume>[%]",
+	Use: "volume",
 	Example: `  waybar-lyric volume 20% # Set player volume to 20%
   waybar-lyric volume 0.5 # Set player volume to 50%
   waybar-lyric volume +10% # Increase player volume by 10%
@@ -56,7 +56,11 @@ var Command = &cobra.Command{
 
 		// Validate absolute volume range
 		if !relative && (volume < 0 || volume > 1) {
-			slog.Error("Volume is out of range. Volume value must be between 0-1 or 0-100%", "got", volStr)
+			slog.Error(
+				"Volume is out of range. Volume value must be between 0-1 or 0-100%",
+				"got",
+				volStr,
+			)
 			return fmt.Errorf("volume is out of range. volume=%.2f", volume)
 		}
 
