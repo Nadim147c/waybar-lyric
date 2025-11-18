@@ -12,6 +12,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/cmd/next"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
 	"github.com/Nadim147c/waybar-lyric/cmd/position"
+	"github.com/Nadim147c/waybar-lyric/cmd/previous"
 	"github.com/Nadim147c/waybar-lyric/cmd/seek"
 	"github.com/Nadim147c/waybar-lyric/cmd/volume"
 	"github.com/Nadim147c/waybar-lyric/internal/config"
@@ -64,6 +65,7 @@ func init() {
 	Command.AddCommand(next.Command)
 	Command.AddCommand(playpause.Command)
 	Command.AddCommand(position.Command)
+	Command.AddCommand(previous.Command)
 	Command.AddCommand(seek.Command)
 	Command.AddCommand(volume.Command)
 
