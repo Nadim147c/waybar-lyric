@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	initcmd "github.com/Nadim147c/waybar-lyric/cmd/init"
+	"github.com/Nadim147c/waybar-lyric/cmd/next"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
 	"github.com/Nadim147c/waybar-lyric/cmd/position"
 	"github.com/Nadim147c/waybar-lyric/cmd/seek"
@@ -60,6 +61,7 @@ func init() {
 	Command.MarkFlagsMutuallyExclusive("quiet", "log-file")
 
 	Command.AddCommand(initcmd.Command)
+	Command.AddCommand(next.Command)
 	Command.AddCommand(playpause.Command)
 	Command.AddCommand(position.Command)
 	Command.AddCommand(seek.Command)
