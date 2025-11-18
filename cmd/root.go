@@ -24,7 +24,7 @@ func init() {
 	Command.Flags().
 		BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
 	Command.Flags().
-		BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output (Experimental)")
+		BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output")
 	Command.Flags().
 		BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
 	Command.Flags().
