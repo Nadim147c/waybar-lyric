@@ -21,37 +21,6 @@ import (
 type Line struct {
 	Timestamp time.Duration `json:"time"`
 	Text      string        `json:"line"`
-	Active    bool          `json:"active"`
-}
-
-// MarshalJSON implemetions json.Marshaller interface
-func (l Line) MarshalJSON() ([]byte, error) {
-	type Alias Line
-	return json.Marshal(&struct {
-		Alias
-		Timestamp float64 `json:"time"`
-	}{
-		Alias:     (Alias)(l),
-		Timestamp: l.Timestamp.Seconds(),
-	})
-}
-
-// UnmarshalJSON implements json.Unmarshaler interface
-func (l *Line) UnmarshalJSON(data []byte) error {
-	type Alias Line
-	aux := &struct {
-		Timestamp float64 `json:"time"`
-		*Alias
-	}{
-		Alias: (*Alias)(l),
-	}
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-
-	l.Timestamp = time.Duration(aux.Timestamp * float64(time.Second))
-	return nil
 }
 
 // Lines is a slice of Line

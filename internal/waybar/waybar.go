@@ -61,7 +61,6 @@ func ForLyrics(lyrics lyric.Lyrics, idx int) *Waybar {
 		}
 
 		if start+i == idx {
-			lyricsContext[i].Active = true
 			newLine := fmt.Sprintf(
 				"</span><b><big>%s</big></b>\n<span foreground=\"%s\">",
 				line,
