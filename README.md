@@ -12,7 +12,7 @@
 A CLI tool that displays lyrics on your
 [Waybar](https://github.com/Alexays/Waybar) for Linux systems.
 
-> [!NOTE]  
+> [!NOTE]
 > If you're using waybar for the first time checkout the [example](./example/waybar/) configuration.
 
 ![Example](./example/waybar/screenshot.png)
@@ -183,7 +183,7 @@ dbus-send --print-reply \
 
 ## Hacking
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Feel free to submit a Pull Request.
 
 ## License
 
