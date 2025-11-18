@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"math"
@@ -50,7 +49,8 @@ func init() {
 
 	Command.MarkFlagsMutuallyExclusive("toggle", "init")
 
-	Command.PersistentFlags().BoolP("help", "h", false, "Display help for waybar-lyric")
+	Command.PersistentFlags().
+		BoolP("help", "h", false, "Display help for waybar-lyric")
 	Command.PersistentFlags().
 		BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
 	Command.PersistentFlags().
@@ -113,7 +113,9 @@ var Command = &cobra.Command{
 		case "full", "partial":
 			config.FilterProfanity = true
 		default:
-			return errors.New("Profanity filter must one of 'full' or 'partial'")
+			return errors.New(
+				"Profanity filter must one of 'full' or 'partial'",
+			)
 		}
 
 		if config.TooltipLines < 4 {
@@ -140,9 +142,13 @@ var Command = &cobra.Command{
 			return nil
 		}
 
-		os.MkdirAll(filepath.Dir(config.LogFilePath), 0755)
+		os.MkdirAll(filepath.Dir(config.LogFilePath), 0o755)
 
-		file, err := os.OpenFile(config.LogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+		file, err := os.OpenFile(
+			config.LogFilePath,
+			os.O_CREATE|os.O_APPEND|os.O_WRONLY,
+			0o666,
+		)
 		if err != nil {
 			slog.SetDefault(handler)
 			slog.Error("Failed to open log-file", "error", err)
@@ -158,13 +164,3 @@ var Command = &cobra.Command{
 		return nil
 	},
 }
-
-// noopHandler is a empty handler that ignore all logs
-type noopHandler struct{}
-
-var _ slog.Handler = (*noopHandler)(nil)
-
-func (h *noopHandler) Enabled(_ context.Context, _ slog.Level) bool  { return false }
-func (h *noopHandler) Handle(_ context.Context, _ slog.Record) error { return nil }
-func (h *noopHandler) WithAttrs(_ []slog.Attr) slog.Handler          { return h }
-func (h *noopHandler) WithGroup(_ string) slog.Handler               { return h }
