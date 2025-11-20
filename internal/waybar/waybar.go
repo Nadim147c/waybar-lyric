@@ -50,34 +50,43 @@ func ForLyrics(lyrics lyric.Lyrics, idx int) *Waybar {
 
 	var tooltip strings.Builder
 
-	tooltip.WriteString(
-		fmt.Sprintf("<span foreground=\"%s\">", config.TooltipColor),
-	)
+	if !config.NoTooltip {
+		fmt.Fprintf(&tooltip, "<span foreground=\"%s\">", config.TooltipColor)
 
-	for i, ttl := range lyricsContext {
-		line := str.BreakLine(ttl.Text, config.BreakTooltip)
-		if ttl.Text == "" {
-			line = "󰝚 "
+		lastIndex := len(lyricsContext) - 1
+		for i, ttl := range lyricsContext {
+			line := str.BreakLine(ttl.Text, config.BreakTooltip)
+			if ttl.Text == "" {
+				line = "󰝚 "
+			}
+
+			if start+i == idx {
+				newLine := fmt.Sprintf(
+					"</span><b><big>%s</big></b>\n<span foreground=\"%s\">",
+					line,
+					config.TooltipColor,
+				)
+				tooltip.WriteString(newLine)
+				continue
+			}
+
+			if i != lastIndex {
+				tooltip.WriteString(line + "\n")
+			}
 		}
 
-		if start+i == idx {
-			newLine := fmt.Sprintf(
-				"</span><b><big>%s</big></b>\n<span foreground=\"%s\">",
-				line,
-				config.TooltipColor,
-			)
-			tooltip.WriteString(newLine)
-			continue
-		}
-
-		tooltip.WriteString(line + "\n")
+		tooltip.WriteString("</span>")
 	}
 
 	line := str.Truncate(currentLine.Text)
-	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
 	class := Class{Lyric, Playing}
-	waybar := &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
+	waybar := &Waybar{
+		Alt:     Lyric,
+		Class:   class,
+		Text:    line,
+		Tooltip: tooltip.String(),
+	}
 
 	if config.Detailed {
 		waybar.Info = lyrics.Metadata
@@ -113,9 +122,9 @@ type Class []Status
 // Waybar is structure data which can be printed to for waybar output
 type Waybar struct {
 	Text       string           `json:"text"`
-	Class      Class            `json:"class"`
-	Alt        Status           `json:"alt"`
-	Tooltip    string           `json:"tooltip"`
+	Class      Class            `json:"class,omitempty"`
+	Alt        Status           `json:"alt,omitempty"`
+	Tooltip    string           `json:"tooltip,omitempty"`
 	Percentage int              `json:"percentage"`
 	Info       *player.Metadata `json:"info,omitempty"`
 	Lines      lyric.Lines      `json:"lines,omitempty"`
