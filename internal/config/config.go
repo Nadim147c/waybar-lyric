@@ -2,6 +2,7 @@ package config
 
 var (
 	PrintInit       = false
+	NoTooltip       = false
 	PrintVersion    = false
 	ToggleState     = false
 	Verbose         = false

@@ -28,6 +28,8 @@ func init() {
 	Command.Flags().
 		BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
 	Command.Flags().
+		BoolVarP(&config.NoTooltip, "no-tooltip", "T", config.NoTooltip, "Disable tooltip from output")
+	Command.Flags().
 		BoolVarP(&config.PrintInit, "init", "i", config.PrintInit, "Display JSON snippet for waybar/config.jsonc")
 	Command.Flags().
 		BoolVarP(&config.PrintVersion, "version", "V", config.PrintVersion, "Display waybar-lyric version information")
