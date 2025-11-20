@@ -81,10 +81,10 @@ func ForLyrics(lyrics lyric.Lyrics, idx int) *Waybar {
 
 	if config.Detailed {
 		waybar.Info = lyrics.Metadata
-		waybar.Context = lyrics.Lines
+		waybar.Lines = lyrics.Lines
 	} else {
 		waybar.Info = nil
-		waybar.Context = nil
+		waybar.Lines = nil
 	}
 
 	return waybar
@@ -118,7 +118,7 @@ type Waybar struct {
 	Tooltip    string           `json:"tooltip"`
 	Percentage int              `json:"percentage"`
 	Info       *player.Metadata `json:"info,omitempty"`
-	Context    lyric.Lines      `json:"context,omitempty"`
+	Lines      lyric.Lines      `json:"lines,omitempty"`
 }
 
 // JSON is the json encoder for waybar
