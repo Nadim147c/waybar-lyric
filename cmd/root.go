@@ -128,7 +128,6 @@ var Command = &cobra.Command{
 
 		if config.Quiet {
 			level = math.MaxInt // ignore all logs
-			return nil
 		}
 
 		if config.Verbose {
