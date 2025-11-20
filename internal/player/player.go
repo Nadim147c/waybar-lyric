@@ -204,7 +204,7 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	album := should(player.GetAlbum())
 
 	urlStr := should(player.GetURL())
-	pu := should(url.Parse(urlStr))
+	trackURL := should(NewURL(urlStr))
 
 	status, err := player.GetPlaybackStatus()
 	if err != nil {
@@ -250,7 +250,7 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 		Shuffle:  shuffle,
 		Status:   status,
 		Title:    title,
-		URL:      pu,
+		URL:      trackURL,
 		Volume:   volume,
 	}
 

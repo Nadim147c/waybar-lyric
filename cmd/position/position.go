@@ -113,7 +113,7 @@ func setLyricPosition(p *mpris.Player, lines lyric.Lines, s string) error {
 
 // Command is the position changer command
 var Command = &cobra.Command{
-	Use: "position [+]<position>[m/s/ms/ns/%]",
+	Use: "position",
 	Example: `
   waybar-lyric position 20s # Set the player position to 20 seconds
   waybar-lyric position --lyric 1 # Set the player position to first lyrics line

@@ -41,7 +41,7 @@ func ParseLyrics(file string) (Lines, error) {
 			continue
 		}
 
-		lyric := Line{timestamp, lyricLine, false}
+		lyric := Line{timestamp, lyricLine}
 		lyrics = append(lyrics, lyric)
 	}
 
