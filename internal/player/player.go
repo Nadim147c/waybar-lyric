@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/url"
 	"path"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -188,6 +189,41 @@ func should[T any](v T, _ error) T {
 	return v
 }
 
+// Precompiled regex patterns
+var (
+	reParen1 = regexp.MustCompile(`\(.*\)`)
+	reParen2 = regexp.MustCompile(`（.*）`)
+	reQuote1 = regexp.MustCompile(`「.*」`)
+	reQuote2 = regexp.MustCompile(`『.*』`)
+	reAngle1 = regexp.MustCompile(`<.*>`)
+	reAngle2 = regexp.MustCompile(`《.*》`)
+	reAngle3 = regexp.MustCompile(`〈.*〉`)
+	reAngle4 = regexp.MustCompile(`＜.*＞`)
+)
+
+func normalizeTitle(title string) string {
+	s := title
+	s = reParen1.ReplaceAllString(s, "")
+	s = reParen2.ReplaceAllString(s, "")
+	s = reQuote1.ReplaceAllString(s, "")
+	s = reQuote2.ReplaceAllString(s, "")
+	s = reAngle1.ReplaceAllString(s, "")
+	s = reAngle2.ReplaceAllString(s, "")
+	s = reAngle3.ReplaceAllString(s, "")
+	s = reAngle4.ReplaceAllString(s, "")
+	return strings.TrimSpace(s)
+}
+
+func normalizeArtist(artist string) string {
+	s := strings.ReplaceAll(artist, ", ", "、")
+	s = strings.ReplaceAll(s, " & ", "、")
+	s = strings.ReplaceAll(s, ".", "")
+	s = strings.ReplaceAll(s, "和", "、")
+	s = reParen1.ReplaceAllString(s, "")
+	s = reParen2.ReplaceAllString(s, "")
+	return strings.TrimSpace(s)
+}
+
 // DefaultParser takes *mpris.Player of spotify and return *PlayerInfo
 func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	meta, err := player.GetMetadata()
@@ -225,12 +261,14 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 		return nil, ErrNoArtists
 	}
 
-	artist := artistList[0]
+	artist := normalizeArtist(artistList[0])
 
 	title, err := player.GetTitle()
 	if err != nil {
 		return nil, err
 	}
+
+	title = normalizeTitle(title)
 
 	if title == "" {
 		return nil, ErrNoArtists
