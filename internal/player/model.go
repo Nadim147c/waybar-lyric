@@ -71,13 +71,15 @@ func (u *URL) IsNil() bool {
 
 // Metadata holds all information of currently playing track metadata
 type Metadata struct {
-	Player string `json:"player"`
-	ID     string `json:"id"`
-	Artist string `json:"artist"`
-	Title  string `json:"title"`
-	Album  string `json:"album"`
-	Cover  string `json:"cover"`
-	URL    *URL   `json:"url"`
+	Player    string `json:"player"`
+	ID        string `json:"id"`
+	Artist    string `json:"artist"`
+	Title     string `json:"title"`
+	RawArtist string `json:"raw_artist"`
+	RawTitle  string `json:"raw_title"`
+	Album     string `json:"album"`
+	Cover     string `json:"cover"`
+	URL       *URL   `json:"url"`
 
 	Metadata map[string]dbus.Variant `json:"-"`
 

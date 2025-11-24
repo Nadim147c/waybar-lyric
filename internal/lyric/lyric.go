@@ -75,8 +75,8 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 	}
 
 	queryParams := url.Values{}
-	queryParams.Set("track_name", info.Title)
-	queryParams.Set("artist_name", info.Artist)
+	queryParams.Set("track_name", info.RawTitle)
+	queryParams.Set("artist_name", info.RawArtist)
 	if info.Album != "" {
 		queryParams.Set("album_name", info.Album)
 	}

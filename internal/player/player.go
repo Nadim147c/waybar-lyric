@@ -261,14 +261,12 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 		return nil, ErrNoArtists
 	}
 
-	artist := normalizeArtist(artistList[0])
+	artist := artistList[0]
 
 	title, err := player.GetTitle()
 	if err != nil {
 		return nil, err
 	}
-
-	title = normalizeTitle(title)
 
 	if title == "" {
 		return nil, ErrNoArtists
@@ -278,16 +276,19 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	trackid := cast.ToString(idValue.Value())
 
 	info := &Metadata{
+		Artist:    normalizeArtist(artist),
+		Title:     normalizeArtist(title),
+		RawArtist: artist,
+		RawTitle:  title,
+
 		Player:   player.GetName(),
 		Album:    album,
-		Artist:   artist,
 		Cover:    cover,
 		ID:       trackid,
 		Length:   length,
 		Metadata: meta,
 		Shuffle:  shuffle,
 		Status:   status,
-		Title:    title,
 		URL:      trackURL,
 		Volume:   volume,
 	}
