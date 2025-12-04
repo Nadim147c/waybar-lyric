@@ -75,6 +75,9 @@ func (s *Cache) Load(id string) (Lyrics, error) {
 
 	s.store[id] = lyrics
 
+	CensorLyrics(lyrics)
+	TruncateLyrics(lyrics)
+
 	return lyrics, nil
 }
 
