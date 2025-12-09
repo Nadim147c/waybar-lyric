@@ -31,11 +31,8 @@ var (
 // Parser parses player information from mpris metadata
 type Parser func(*mpris.Player) (*Metadata, error)
 
-// IDFunc extracts a stable ID for a player.
-type IDFunc func(p *mpris.Player) (string, error)
-
-// Hash return sha256 hash for given string
-func Hash(v ...string) string {
+// hash return sha256 hash for given string
+func hash(v ...any) string {
 	h := fnv.New128a()
 
 	switch len(v) {
@@ -44,49 +41,35 @@ func Hash(v ...string) string {
 	case 1:
 		fmt.Fprintf(h, "%s", v[0])
 	default:
-		fmt.Fprint(h, v[0])
-		for _, e := range v {
-			fmt.Fprintf(h, ":%s", e)
+		lastIndex := len(v) - 1
+		for i := range lastIndex {
+			fmt.Fprint(h, v[i])
+			fmt.Fprint(h, ":")
 		}
+		fmt.Fprint(h, v[lastIndex])
 	}
 
 	hash := h.Sum(nil)
 	return hex.EncodeToString(hash)
 }
 
-// artistTitleFunc: uses artist+title combo as ID source
-func artistTitleFunc(p *mpris.Player) (string, error) {
-	artists, err := p.GetArtist()
-	if err != nil || len(artists) == 0 {
-		return "", ErrNoArtists
-	}
-	artist := artists[0]
-
-	title, err := p.GetTitle()
-	if err != nil || title == "" {
-		return "", ErrNoTitle
-	}
-
-	return Hash(artist, ":", title), nil
-}
-
-// urlIDFunc: derive ID from URL for fallback players like Firefox
-func urlIDFunc(p *mpris.Player) (string, error) {
+// getID: derive ID from URL for fallback players like Firefox
+func getID(p *mpris.Player, m *Metadata) string {
 	u, err := p.GetURL()
 	if err != nil || u == "" {
-		return "", ErrNoID
+		return hash(m.Player, m.RawArtist, m.RawTitle)
 	}
 
 	parsed, err := url.Parse(u)
 	if err != nil {
-		return "", err
+		return hash(m.Player, m.RawArtist, m.RawTitle)
 	}
 
 	host := strings.ToLower(parsed.Host)
 
 	// Only allow music.youtube.com and open.spotify.com
 	if !(strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com")) {
-		return "", ErrNoID
+		return hash(m.Player, m.RawArtist, m.RawTitle)
 	}
 
 	id := ""
@@ -97,22 +80,17 @@ func urlIDFunc(p *mpris.Player) (string, error) {
 	}
 
 	if id == "" {
-		return "", ErrNoID
+		return hash(m.Player, m.RawArtist, m.RawTitle)
 	}
 
-	return Hash(host, ":", id), nil
+	return hash(host, id, m.RawArtist, m.RawTitle)
 }
 
-type players struct {
-	name   string
-	idFunc IDFunc
-}
-
-var supportedPlayers = []players{
-	{"spotify", urlIDFunc},
-	{"YoutubeMusic", urlIDFunc},
-	{"amarok", artistTitleFunc},
-	{"io.bassi.Amberol", artistTitleFunc},
+var supportedPlayers = []string{
+	"spotify",
+	"YoutubeMusic",
+	"amarok",
+	"io.bassi.Amberol",
 }
 
 // Select selects correct parses for player
@@ -129,16 +107,10 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 
 	// First: explicitly supported players
 	for p := range slices.Values(supportedPlayers) {
-		playerName := mpris.BaseInterface + "." + p.name
+		playerName := mpris.BaseInterface + "." + p
 		if slices.Contains(players, playerName) {
 			slog.Debug("Player selected", "name", playerName)
-			return mpris.New(
-					conn,
-					playerName,
-				), parserWithIDFunc(
-					DefaultParser,
-					p.idFunc,
-				), nil
+			return mpris.New(conn, playerName), DefaultParser, nil
 		}
 	}
 
@@ -162,27 +134,11 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 		if strings.Contains(host, "music.youtube.com") ||
 			strings.Contains(host, "open.spotify.com") {
 			slog.Debug("Player selected", "name", "firefox")
-			return fp, parserWithIDFunc(DefaultParser, urlIDFunc), nil
+			return fp, DefaultParser, nil
 		}
 	}
 
 	return nil, nil, errors.New("No player exists")
-}
-
-func parserWithIDFunc(f Parser, i IDFunc) Parser {
-	return func(p *mpris.Player) (*Metadata, error) {
-		info, err := f(p)
-		if err != nil {
-			return info, err
-		}
-		id, err := i(p)
-		if err != nil {
-			return info, err
-		}
-
-		info.ID = id
-		return info, nil
-	}
 }
 
 func should[T any](v T, _ error) T {
@@ -275,7 +231,7 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	idValue, _ := meta["mpris:trackid"]
 	trackid := cast.ToString(idValue.Value())
 
-	info := &Metadata{
+	metadata := &Metadata{
 		Artist:    normalizeArtist(artist),
 		Title:     normalizeTitle(title),
 		RawArtist: artist,
@@ -293,6 +249,8 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 		Volume:   volume,
 	}
 
-	err = info.UpdatePosition(player)
-	return info, err
+	metadata.ID = getID(player, metadata)
+
+	err = metadata.UpdatePosition(player)
+	return metadata, err
 }
