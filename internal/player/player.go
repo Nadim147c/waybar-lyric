@@ -277,7 +277,7 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 
 	info := &Metadata{
 		Artist:    normalizeArtist(artist),
-		Title:     normalizeArtist(title),
+		Title:     normalizeTitle(title),
 		RawArtist: artist,
 		RawTitle:  title,
 
