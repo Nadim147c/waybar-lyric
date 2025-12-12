@@ -26,6 +26,8 @@ var (
 	ErrNoTitle = errors.New("failed to get title")
 	// ErrNoID when failed to get id
 	ErrNoID = errors.New("failed to get track id")
+	// ErrNoLength when mpris track length is 0
+	ErrNoLength = errors.New("track length is empty")
 )
 
 // Parser parses player information from mpris metadata
@@ -206,6 +208,9 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	length, err := player.GetLength()
 	if err != nil {
 		return nil, err
+	}
+	if length == 0 {
+		return nil, ErrNoLength
 	}
 
 	artistList, err := player.GetArtist()

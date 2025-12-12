@@ -93,6 +93,9 @@ type Metadata struct {
 
 // Percentage is player position in percentage rounded to int
 func (p *Metadata) Percentage() int {
+	if p.Length == 0 {
+		return 0
+	}
 	return int(((p.Position * 100) / p.Length))
 }
 
