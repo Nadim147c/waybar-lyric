@@ -41,6 +41,8 @@ var (
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")
 )
 
+// ErrLyricsMatchScore is error when lyrics response does not satisfies the
+// minimum matching score required.
 type ErrLyricsMatchScore struct {
 	Score     float64
 	Threshold float64
