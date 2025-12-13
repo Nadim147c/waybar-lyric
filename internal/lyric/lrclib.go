@@ -20,7 +20,6 @@ const MinimumScore float64 = 3.5
 // LrcLibResponse is the response sent from LrcLib api
 type LrcLibResponse struct {
 	ID           int     `json:"id"`
-	Name         string  `json:"name"`
 	TrackName    string  `json:"trackName"`
 	ArtistName   string  `json:"artistName"`
 	AlbumName    string  `json:"albumName"`
@@ -31,7 +30,7 @@ type LrcLibResponse struct {
 }
 
 // LrclibEndpoint is api endpoint for lrclib
-const LrclibEndpoint = "https://lrclib.net/api/get"
+const LrclibEndpoint = "https://lrclib.net/api/search"
 
 var (
 	// ErrLyricsNotFound indicates that the requested lyrics could not be found.
@@ -41,6 +40,8 @@ var (
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")
 )
 
+// ErrLyricsMatchScore is error when lyrics response does not satisfies the
+// minimum matching score required.
 type ErrLyricsMatchScore struct {
 	Score     float64
 	Threshold float64
@@ -107,10 +108,13 @@ func score(track *player.Metadata, lyrics LrcLibResponse) float64 {
 
 	slog.Debug("SmartMatch",
 		"score", score,
-		"duration_score", durationScore,
-		"title_score", titleScore,
+		"album", lyrics.AlbumName,
 		"album_score", albumScore,
+		"artist", lyrics.ArtistName,
 		"artists_score", artistsScore,
+		"duration_score", durationScore,
+		"title", lyrics.TrackName,
+		"title_score", titleScore,
 	)
 
 	return score
