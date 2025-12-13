@@ -80,9 +80,6 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 	if info.Album != "" {
 		queryParams.Set("album_name", info.Album)
 	}
-	if info.Length != 0 {
-		queryParams.Set("duration", fmt.Sprintf("%.2f", info.Length.Seconds()))
-	}
 
 	header := http.Header{}
 	header.Set("User-Agent", config.Version)
@@ -104,19 +101,36 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 		return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
-	var resJSON LrcLibResponse
-	err = json.NewDecoder(resp.Body).Decode(&resJSON)
+	var items []LrcLibResponse
+	err = json.NewDecoder(resp.Body).Decode(&items)
 	if err != nil {
 		Store.NotFound(uri)
-		return lyrics, fmt.Errorf("failed to read response body: %w", err)
+		return lyrics, fmt.Errorf("failed to parse body: %w", err)
 	}
 
-	if s := score(info, resJSON); s < MinimumScore {
+	var best *LrcLibResponse
+	var bestScore float64
+
+	for item := range slices.Values(items) {
+		if item.SyncedLyrics == "" {
+			continue
+		}
+		itemScore := score(info, item)
+		if itemScore > bestScore {
+			best = &item
+			bestScore = itemScore
+		}
+	}
+
+	if bestScore < MinimumScore {
 		Store.NotFound(uri)
-		return lyrics, &ErrLyricsMatchScore{Score: s, Threshold: MinimumScore}
+		return lyrics, &ErrLyricsMatchScore{
+			Score:     bestScore,
+			Threshold: MinimumScore,
+		}
 	}
 
-	lines, err := ParseLyrics(resJSON.SyncedLyrics)
+	lines, err := ParseLyrics(best.SyncedLyrics)
 	if err != nil {
 		Store.NotFound(uri)
 		if errors.Is(err, ErrLyricsNotSynced) {
