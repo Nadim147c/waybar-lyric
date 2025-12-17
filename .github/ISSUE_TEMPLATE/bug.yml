@@ -1,0 +1,111 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in waybar-lyric
+title: "[Bug]: "
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+        Please fill out the sections below to help us diagnose the issue faster.
+
+  - type: input
+    id: version
+    attributes:
+      label: waybar-lyric version
+      description: Output of `waybar-lyric --version` or git commit hash
+      placeholder: "v0.x.x / commit abc123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install_method
+    attributes:
+      label: Installation method
+      options:
+        - NixOS / Nixpkgs
+        - Home Manager
+        - AUR (stable)
+        - AUR (-git)
+        - Manual (make)
+        - go install
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: player
+    attributes:
+      label: Media player
+      options:
+        - Spotify
+        - YouTube Music
+        - Amarok
+        - Amberol
+        - Firefox (open.spotify.com)
+        - Firefox (music.youtube.com)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / Distribution
+      placeholder: "NixOS 24.05, Arch Linux, Fedora 40"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: What happened? What did you expect to happen instead?
+      placeholder: |
+        Describe the issue clearly and concisely.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start Spotify
+        2. Play a song
+        3. Launch waybar
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Run with verbose logging and paste relevant output
+      placeholder: |
+        waybar-lyric -v --log-file=/tmp/waybar-lyric.log
+    validations:
+      required: false
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Waybar configuration (if relevant)
+      description: Paste your custom module config or tooltip settings
+      render: json
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I am using a supported player
+          required: true
+        - label: I verified DBus connectivity
+          required: false
+        - label: I checked existing issues
+          required: true
