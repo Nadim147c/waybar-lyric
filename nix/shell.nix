@@ -1,9 +1,7 @@
-{pkgs ? import <nixpkgs> {}}:
+{ pkgs, ... }:
 pkgs.mkShell {
   name = "waybar-lyric";
-  # Get dependencies from the main package
-  inputsFrom = [(pkgs.callPackage ./package.nix {})];
-  # Additional tooling
+  inputsFrom = [ (pkgs.callPackage ./package.nix { }) ];
   buildInputs = with pkgs; [
     gnumake
     go
