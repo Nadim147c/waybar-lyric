@@ -1,11 +1,11 @@
 {
-  stdenv,
-  installShellFiles,
-  lib,
   buildGoModule,
   fetchFromGitHub,
-  versionCheckHook,
+  installShellFiles,
+  lib,
   nix-update-script,
+  stdenv,
+  versionCheckHook,
 }:
 buildGoModule rec {
   pname = "waybar-lyric";
@@ -20,28 +20,30 @@ buildGoModule rec {
 
   vendorHash = "sha256-TeAZDSiww9/v3uQl8THJZdN/Ffp+FsZ3TsRStE3ndKA=";
 
-  ldflags = ["-s" "-w" "-X main.Version=${version}"];
-  nativeBuildInputs = [installShellFiles];
-  postInstall =
-    lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) # bash
+  ldflags = [
+    "-s"
+    "-w"
+    "-X main.Version=${version}"
+  ];
 
-    ''
-      installShellCompletion --cmd waybar-lyric \
+  nativeBuildInputs = [ installShellFiles ];
+  postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) /* bash */ ''
+    installShellCompletion --cmd waybar-lyric \
       --bash <($out/bin/waybar-lyric _carapace bash) \
       --fish <($out/bin/waybar-lyric _carapace fish) \
       --zsh <($out/bin/waybar-lyric _carapace zsh)
-    '';
+  '';
 
   doInstallCheck = true;
-  nativeInstallCheckInputs = [versionCheckHook];
+  nativeInstallCheckInputs = [ versionCheckHook ];
   versionCheckProgramArg = "--version";
-  versionCheckKeepEnvironment = ["XDG_CACHE_HOME"];
+  versionCheckKeepEnvironment = [ "XDG_CACHE_HOME" ];
   preInstallCheck = ''
     # ERROR Failed to find cache directory
     export XDG_CACHE_HOME=$(mktemp -d)
   '';
 
-  passthru.updateScript = nix-update-script {};
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Waybar module for displaying song lyrics";
