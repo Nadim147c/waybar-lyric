@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/Nadim147c/go-mpris"
@@ -20,7 +18,7 @@ import (
 )
 
 // SleepTime is the time for main fixed loop
-const SleepTime = 500 * time.Millisecond
+const SleepTime = time.Second / 4
 
 // Execute is the main function for lyrics
 func Execute(cmd *cobra.Command, _ []string) error {
@@ -39,41 +37,33 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		return nil
 	}
 
+	ctx, cancel := context.WithCancel(cmd.Context())
+	defer cancel()
+
+	// Main loop
+	ticker := time.NewTicker(SleepTime)
+	defer ticker.Stop()
+
 	var mprisPlayer *mpris.Player
 	for mprisPlayer == nil {
 		p, _, err := player.Select(conn)
 		if err != nil {
 			slog.Debug("Failed to select player", "error", err)
 			time.Sleep(SleepTime)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-ticker.C:
+			}
 		}
 		mprisPlayer = p
 	}
 	slog.Debug("Player selected", "player", mprisPlayer)
 
-	ctx, cancel := context.WithCancel(cmd.Context())
-	defer cancel()
-
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		cancel()
-	}()
-
 	playerSignal := make(chan *dbus.Signal)
 	mprisPlayer.OnSignal(playerSignal)
 
-	lyricTicker := time.NewTicker(SleepTime)
-	defer lyricTicker.Stop()
-
-	// Main loop
-	fixedTicker := time.NewTicker(SleepTime)
-	defer fixedTicker.Stop()
-
 	var lastWaybar *waybar.Waybar
-
-	instant := make(chan bool)
-	go func() { instant <- false }()
 
 	for {
 		select {
@@ -81,9 +71,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			return ctx.Err()
 		case <-playerSignal:
 			slog.Debug("Received player update signal")
-		case <-instant:
-		case <-lyricTicker.C:
-		case <-fixedTicker.C:
+		case <-ticker.C:
 		}
 
 		mprisPlayer, parser, err := player.Select(conn)
@@ -211,25 +199,6 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			)
 			w.Encode()
 			lastWaybar = w
-		}
-
-		if len(lyrics.Lines) > idx+1 {
-			n := lyrics.Lines[idx+1]
-			d := n.Timestamp - info.Position
-			if d <= 0 {
-				slog.Warn("Negative sleep time",
-					"duration", d.String(),
-					"position", info.Position.String(),
-					"next", n.Timestamp.String(),
-				)
-				continue
-			}
-			slog.Debug("Sleep",
-				"duration", d.String(),
-				"position", info.Position.String(),
-				"next", n.Timestamp.String(),
-			)
-			lyricTicker.Reset(d)
 		}
 	}
 }
