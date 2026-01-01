@@ -161,7 +161,7 @@ var Command = &cobra.Command{
 		}
 		slog.Debug("Created dbus session bus")
 
-		mp, parser, err := player.Select(conn)
+		mp, err := player.Select(conn)
 		if err != nil {
 			return fmt.Errorf("failed to select player: %w", err)
 		}
@@ -183,7 +183,7 @@ var Command = &cobra.Command{
 		}
 
 		// Fetch lyrics for line-based seeking
-		info, err := parser(mp)
+		info, err := player.Parse(mp)
 		if err != nil {
 			return fmt.Errorf("failed to parse player informations: %w", err)
 		}

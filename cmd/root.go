@@ -36,6 +36,8 @@ func init() {
 	Command.Flags().
 		BoolVarP(&config.ToggleState, "toggle", "t", config.ToggleState, "Toggle player state between pause and resume")
 	Command.Flags().
+		BoolVarP(&config.ExperimentalChromiumSupport, "experimental-chromium-support", "x", config.ToggleState, "Enable experimental chromium support.")
+	Command.Flags().
 		IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
 	Command.Flags().
 		IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")
