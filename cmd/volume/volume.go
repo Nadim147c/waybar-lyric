@@ -70,7 +70,7 @@ var Command = &cobra.Command{
 		}
 		slog.Debug("Created dbus session bus")
 
-		mp, _, err := player.Select(conn)
+		mp, err := player.Select(conn)
 		if err != nil {
 			return fmt.Errorf("failed to select player: %w", err)
 		}

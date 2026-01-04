@@ -46,7 +46,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 
 	var mprisPlayer *mpris.Player
 	for mprisPlayer == nil {
-		p, _, err := player.Select(conn)
+		p, err := player.Select(conn)
 		if err != nil {
 			slog.Debug("Failed to select player", "error", err)
 			time.Sleep(SleepTime)
@@ -74,7 +74,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		case <-ticker.C:
 		}
 
-		mprisPlayer, parser, err := player.Select(conn)
+		mprisPlayer, err := player.Select(conn)
 		if err != nil {
 			slog.Error("Player not found!", "error", err)
 
@@ -87,7 +87,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			continue
 		}
 
-		info, err := parser(mprisPlayer)
+		info, err := player.Parse(mprisPlayer)
 		if err != nil {
 			slog.Error("Failed to parse dbus mpris metadata", "error", err)
 			w := waybar.Zero

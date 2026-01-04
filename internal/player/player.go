@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cast"
 )
@@ -29,9 +30,6 @@ var (
 	// ErrNoLength when mpris track length is 0
 	ErrNoLength = errors.New("track length is empty")
 )
-
-// Parser parses player information from mpris metadata
-type Parser func(*mpris.Player) (*Metadata, error)
 
 // hash return sha256 hash for given string
 func hash(v ...any) string {
@@ -96,15 +94,15 @@ var supportedPlayers = []string{
 }
 
 // Select selects correct parses for player
-func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
+func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	players, err := mpris.List(conn)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	slog.Debug("Player names", "players", players)
 
 	if len(players) == 0 {
-		return nil, nil, errors.New("No player exists")
+		return nil, errors.New("No player exists")
 	}
 
 	// First: explicitly supported players
@@ -112,7 +110,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 		playerName := mpris.BaseInterface + "." + p
 		if slices.Contains(players, playerName) {
 			slog.Debug("Player selected", "name", playerName)
-			return mpris.New(conn, playerName), DefaultParser, nil
+			return mpris.New(conn, playerName), nil
 		}
 	}
 
@@ -136,11 +134,23 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 		if strings.Contains(host, "music.youtube.com") ||
 			strings.Contains(host, "open.spotify.com") {
 			slog.Debug("Player selected", "name", "firefox")
-			return fp, DefaultParser, nil
+			return fp, nil
 		}
 	}
 
-	return nil, nil, errors.New("No player exists")
+	chromeRe := regexp.MustCompile(
+		`^org\.mpris\.MediaPlayer2\.\w+\.instance\d+$`,
+	)
+
+	if config.ExperimentalChromiumSupport {
+		for player := range slices.Values(players) {
+			if chromeRe.MatchString(player) {
+				return mpris.New(conn, player), nil
+			}
+		}
+	}
+
+	return nil, errors.New("No player exists")
 }
 
 func should[T any](v T, _ error) T {
@@ -182,8 +192,8 @@ func normalizeArtist(artist string) string {
 	return strings.TrimSpace(s)
 }
 
-// DefaultParser takes *mpris.Player of spotify and return *PlayerInfo
-func DefaultParser(player *mpris.Player) (*Metadata, error) {
+// Parse takes *mpris.Player of supported play and return *Metadata
+func Parse(player *mpris.Player) (*Metadata, error) {
 	meta, err := player.GetMetadata()
 	if err != nil {
 		return nil, err
@@ -195,7 +205,11 @@ func DefaultParser(player *mpris.Player) (*Metadata, error) {
 	shuffle := should(player.GetShuffle())
 	cover := should(player.GetCoverURL())
 	volume := should(player.GetVolume())
-	album := should(player.GetAlbum())
+
+	album, err := player.GetAlbum()
+	if err != nil {
+		return nil, err
+	}
 
 	urlStr := should(player.GetURL())
 	trackURL := should(NewURL(urlStr))

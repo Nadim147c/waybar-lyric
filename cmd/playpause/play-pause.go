@@ -25,7 +25,7 @@ var Command = &cobra.Command{
 
 		var mp *mpris.Player
 		for mp == nil {
-			p, _, err := player.Select(conn)
+			p, err := player.Select(conn)
 			if err == nil {
 				slog.Debug("Failed to select player", "error", err)
 				mp = p
