@@ -26,7 +26,7 @@ desktop music experience.
 ## Supported Players
 
 - [Spotify](https://spotify.com)
-- [YouTubeMusic](https://github.com/th-ch/youtube-music)
+- YouTubeMusic ([Pear-Desktop](https://github.com/pear-devs/pear-desktop))
 - [Amarok](https://amarok.kde.org/)
 - [Amberol](https://apps.gnome.org/en/Amberol/)
 - Firefox (Specific domains)
