@@ -12,7 +12,7 @@ buildGoModule rec {
 
   src = ../.;
 
-  vendorHash = "sha256-TeAZDSiww9/v3uQl8THJZdN/Ffp+FsZ3TsRStE3ndKA=";
+  vendorHash = "sha256-yu39Kba/ZkreAm4CztdXPehP29g1qk5BS5JzrAd7Ef4=";
 
   ldflags = [
     "-s"
