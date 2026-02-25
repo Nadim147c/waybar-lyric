@@ -91,6 +91,7 @@ var supportedPlayers = []string{
 	"YoutubeMusic",
 	"amarok",
 	"io.bassi.Amberol",
+	"tauon",
 }
 
 // Select selects correct parses for player

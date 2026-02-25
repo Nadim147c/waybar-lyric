@@ -29,6 +29,7 @@ desktop music experience.
 - YouTubeMusic ([Pear-Desktop](https://github.com/pear-devs/pear-desktop))
 - [Amarok](https://amarok.kde.org/)
 - [Amberol](https://apps.gnome.org/en/Amberol/)
+- [TauonMB](https://tauonmusicbox.rocks/)
 - Firefox (Specific domains)
   - `open.spotify.com`
   - `music.youtube.com`
