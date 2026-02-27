@@ -11,6 +11,7 @@ import (
 	"github.com/Nadim147c/go-mpris"
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/waybar"
 	"github.com/godbus/dbus/v5"
@@ -125,9 +126,9 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			w.Encode()
 			lyrics, err = lyric.GetLyrics(ctx, info)
 			if err != nil {
-				var scoreErr *lyric.ErrLyricsMatchScore
-				if errors.Is(err, lyric.ErrLyricsNotFound) ||
-					errors.Is(err, lyric.ErrLyricsNotSynced) ||
+				var scoreErr *models.ErrLyricsMatchScore
+				if errors.Is(err, models.ErrLyricsNotFound) ||
+					errors.Is(err, models.ErrLyricsNotSynced) ||
 					errors.As(err, &scoreErr) {
 					slog.Info("Lyrics not available", "reason", err)
 				} else {

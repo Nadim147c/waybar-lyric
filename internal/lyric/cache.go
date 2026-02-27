@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 )
 
 // CacheSize is the max amount lyrics to save into the cache
@@ -19,13 +21,13 @@ var Store = NewCache()
 // Cache is used to cache lyrics in memory
 type Cache struct {
 	mu    sync.Mutex
-	store map[string]Lyrics
+	store map[string]models.Lyrics
 }
 
 // NewCache creates a new instance of Cachhe
 func NewCache() *Cache {
 	c := new(Cache)
-	c.store = make(map[string]Lyrics, CacheSize)
+	c.store = make(map[string]models.Lyrics, CacheSize)
 	return c
 }
 
@@ -38,11 +40,11 @@ func (s *Cache) NotFound(id string) {
 		clear(s.store) // clear in memory cache
 	}
 
-	s.store[id] = Lyrics{}
+	s.store[id] = models.Lyrics{}
 }
 
 // Save saves lyrics to Cache
-func (s *Cache) Save(lyrics Lyrics) error {
+func (s *Cache) Save(lyrics models.Lyrics) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -55,7 +57,7 @@ func (s *Cache) Save(lyrics Lyrics) error {
 }
 
 // Load loads lyrics from Cache
-func (s *Cache) Load(id string) (Lyrics, error) {
+func (s *Cache) Load(id string) (models.Lyrics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -94,7 +96,7 @@ func (s *Cache) getCacheDir() (string, error) {
 const CacheExtension = ".json.gz"
 
 // SaveCache saves the lyrics to cache
-func (s *Cache) saveCache(lyrics Lyrics) error {
+func (s *Cache) saveCache(lyrics models.Lyrics) error {
 	cacheDir, err := s.getCacheDir()
 
 	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
@@ -120,8 +122,8 @@ func (s *Cache) saveCache(lyrics Lyrics) error {
 }
 
 // LoadCache loads the lyrics from cache
-func (s *Cache) loadCache(id string) (Lyrics, error) {
-	var lyrics Lyrics
+func (s *Cache) loadCache(id string) (models.Lyrics, error) {
+	var lyrics models.Lyrics
 
 	cacheDir, err := s.getCacheDir()
 	if err != nil {
