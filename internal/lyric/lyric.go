@@ -15,6 +15,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
+	"github.com/spf13/cast"
 )
 
 // Line is a line of synchronized lyrics
@@ -74,6 +75,35 @@ func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
 		return l, nil
 	}
 
+	asText, ok := info.Metadata["xesam:asText"]
+	if ok && asText.Value() != "" {
+		text, err := cast.ToStringE(asText.Value())
+		if err == nil {
+			lines, err := ParseLyrics(text)
+			if err != nil {
+				Store.NotFound(uri)
+				if errors.Is(err, ErrLyricsNotSynced) {
+					goto downloadLyrics
+				}
+				return lyrics, fmt.Errorf("failed to parse lyrics: %w", err)
+			}
+
+			slices.SortFunc(lines, func(a, b Line) int {
+				return int((a.Timestamp - b.Timestamp) / time.Millisecond)
+			})
+
+			lyrics.Lines = lines
+
+			if err := Store.Save(lyrics); err != nil {
+				return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
+			}
+			CensorLyrics(lyrics)
+			TruncateLyrics(lyrics)
+			return lyrics, nil
+		}
+	}
+
+downloadLyrics:
 	queryParams := url.Values{}
 	queryParams.Set("track_name", info.RawTitle)
 	queryParams.Set("artist_name", info.RawArtist)
