@@ -4,17 +4,19 @@ on:
   push:
     branches: [main]
     paths:
-      - "**.go"
-      - "go.mod"
-      - "go.sum"
+      - "**/*.go"
+      - "*.go"
+      - "go.*"
       - "revive.toml"
+      - ".github/workflows/*"
   pull_request:
     branches: [main]
     paths:
-      - "**.go"
-      - "go.mod"
-      - "go.sum"
+      - "**/*.go"
+      - "*.go"
+      - "go.*"
       - "revive.toml"
+      - ".github/workflows/*"
 
 permissions:
   contents: read
@@ -38,10 +40,18 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Run tests
-        run: go test -v ./...
+      - name: Run Gofumpt
+        run: |
+          go install mvdan.cc/gofumpt@latest
+          gofumpt -d -e .
 
-      - name: Run Revive Action
+      - name: Run tests
+        run: |
+          go build ./...
+          go vet ./...
+          go test ./...
+
+      - name: Run Lint
         uses: docker://morphy/revive-action:v2
         with:
           config: revive.toml
