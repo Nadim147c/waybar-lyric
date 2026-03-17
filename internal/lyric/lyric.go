@@ -13,6 +13,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
@@ -31,6 +32,7 @@ const lyricTimeout = 10 * time.Second
 var providers = []provider.LyricProvider{
 	asText.Provider,
 	lrclib.Provider,
+	simpmusic.Provider,
 }
 
 // GetLyrics returns lyrics for given *player.Info
@@ -45,10 +47,7 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	locked, err := flocker.TryLockContext(lockCtx, 200*time.Millisecond)
 	if err != nil {
 		Store.NotFound(metadata.ID)
-		return lyrics, fmt.Errorf(
-			"failed to take flock for id(%s): %v",
-			metadata.ID, err,
-		)
+		return lyrics, fmt.Errorf("failed to take flock for id(%s): %v", metadata.ID, err)
 	}
 	defer os.Remove(lockFile)
 	defer flocker.Close()
