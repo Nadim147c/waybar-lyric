@@ -53,7 +53,7 @@ type LyricsResult struct {
 // to determine if the lyrics are suitable for the current track. Returns true
 // is lyrics is suitable.
 func Score(track *player.Metadata, result LyricsResult) float64 {
-	durationScore := match.Durations(track.Length, result.Duration) * 1.5
+	durationScore := match.Durations(track.Length, result.Duration) * 2
 	titleScore := match.Strings(track.Title, result.Title) * 2
 	artistsScore := match.Strings(track.Artist, result.Artist)
 	albumScore := match.Strings(track.Album, result.Album)
