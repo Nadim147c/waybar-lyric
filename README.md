@@ -48,6 +48,13 @@ desktop music experience.
   - Partial (`badword` -> `b*****d`)
   - Full (`badword` -> `*******`)
 
+## Lyric Source
+
+- [LrcLib](https://lrclib.net/)
+- [SimpMusic](https://simpmusic.org/)
+- MPRIS metadata `(only works with TaounMB Lyrics)`
+- More...? `(Suggestions are welcome)`
+
 ## Installation
 
 ### Prerequisites
@@ -188,5 +195,4 @@ Contributions are welcome! Feel free to submit a Pull Request.
 
 ## License
 
-This repository is licensed under [AGPL-3.0](./LICENSE). Thanks to
-[LrcLib](https://lrclib.net/) for providing lyrics.
+This repository is licensed under [AGPL-3.0](./LICENSE).
