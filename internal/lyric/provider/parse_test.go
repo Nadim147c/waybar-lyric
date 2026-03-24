@@ -1,9 +1,11 @@
-package lyric
+package provider
 
 import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 )
 
 func TestParseTimestamp(t *testing.T) {
@@ -130,24 +132,24 @@ func TestParseLines(t *testing.T) {
 	tests := []struct {
 		name string
 		file string
-		want Lines
+		want models.Lines
 	}{
 		{
 			name: "Empty file",
 			file: "",
-			want: Lines{},
+			want: models.Lines{},
 		},
 		{
 			name: "Single valid line",
 			file: "[00:15.00]Hello world",
-			want: Lines{
+			want: models.Lines{
 				{Timestamp: 15 * time.Second, Text: "Hello world"},
 			},
 		},
 		{
 			name: "Multiple valid lines",
 			file: "[00:05.00]First line\n[00:10.50]Second line\n[01:30.75]Third line",
-			want: Lines{
+			want: models.Lines{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{
 					Timestamp: 10*time.Second + 500*time.Millisecond,
@@ -162,7 +164,7 @@ func TestParseLines(t *testing.T) {
 		{
 			name: "Skip empty lines",
 			file: "[00:05.00]First line\n\n[00:10.50]Second line",
-			want: Lines{
+			want: models.Lines{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{
 					Timestamp: 10*time.Second + 500*time.Millisecond,
@@ -173,7 +175,7 @@ func TestParseLines(t *testing.T) {
 		{
 			name: "Skip invalid format lines",
 			file: "[00:05.00]First line\nInvalid line\n[00:10.50]Second line",
-			want: Lines{
+			want: models.Lines{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{
 					Timestamp: 10*time.Second + 500*time.Millisecond,
@@ -184,7 +186,7 @@ func TestParseLines(t *testing.T) {
 		{
 			name: "Skip invalid timestamp",
 			file: "[00:05.00]First line\n[invalid]Not parsed\n[00:10.50]Second line",
-			want: Lines{
+			want: models.Lines{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{
 					Timestamp: 10*time.Second + 500*time.Millisecond,
@@ -195,7 +197,7 @@ func TestParseLines(t *testing.T) {
 		{
 			name: "Handles whitespace in text",
 			file: "[00:05.00]  Text with spaces  ",
-			want: Lines{
+			want: models.Lines{
 				{Timestamp: 5 * time.Second, Text: "Text with spaces"},
 			},
 		},
@@ -203,7 +205,7 @@ func TestParseLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := ParseLyrics(tt.file)
+			got, gotErr := ParseText(tt.file)
 			if len(got) >= 1 {
 				// Drop the first empty line
 				got = got[1:]

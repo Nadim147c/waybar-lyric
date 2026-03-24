@@ -8,6 +8,7 @@ import (
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cast"
@@ -68,7 +69,7 @@ func setPercentPosition(p *mpris.Player, s string, length time.Duration) error {
 // setLyricPosition sets the player position to a specific lyric line.
 // Positive indices count from the start (0-indexed), negative indices count
 // from the end (-1 is the last line).
-func setLyricPosition(p *mpris.Player, lines lyric.Lines, s string) error {
+func setLyricPosition(p *mpris.Player, lines models.Lines, s string) error {
 	lineNumber, err := cast.ToIntE(s)
 	if err != nil {
 		return fmt.Errorf("failed to convert lyric index: %w", err)

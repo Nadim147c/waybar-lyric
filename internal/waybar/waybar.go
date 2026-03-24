@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 )
@@ -40,7 +40,7 @@ func ForPlayer(p *player.Metadata) *Waybar {
 }
 
 // ForLyrics returns Waybar for lyrics
-func ForLyrics(lyrics lyric.Lyrics, idx int) *Waybar {
+func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 	lines := lyrics.Lines
 	currentLine := lines[idx]
 	start := max(idx-2, 0)
@@ -127,7 +127,7 @@ type Waybar struct {
 	Tooltip    string           `json:"tooltip,omitempty"`
 	Percentage int              `json:"percentage"`
 	Info       *player.Metadata `json:"info,omitempty"`
-	Lines      lyric.Lines      `json:"lines,omitempty"`
+	Lines      models.Lines     `json:"lines,omitempty"`
 }
 
 // JSON is the json encoder for waybar

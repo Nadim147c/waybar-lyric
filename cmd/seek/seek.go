@@ -8,6 +8,7 @@ import (
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cast"
@@ -72,7 +73,7 @@ func seekPercentOffset(p *mpris.Player, s string, length time.Duration) error {
 func seekLyricLine(
 	p *mpris.Player,
 	info *player.Metadata,
-	lines lyric.Lines,
+	lines models.Lines,
 	s string,
 ) error {
 	offset, err := cast.ToIntE(s)

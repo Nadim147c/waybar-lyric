@@ -2,190 +2,94 @@ package lyric
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
-	"net/url"
+	"log/slog"
 	"os"
 	"slices"
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
+	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
-	"github.com/spf13/cast"
 )
-
-// Line is a line of synchronized lyrics
-type Line struct {
-	Timestamp time.Duration `json:"time"`
-	Text      string        `json:"line"`
-}
-
-// Lines is a slice of Line
-type Lines []Line
-
-// Lyrics is the synchronized structured lyrics
-type Lyrics struct {
-	Metadata *player.Metadata `json:"metadata,omitempty"`
-	Lines    Lines            `json:"lyrics"`
-}
 
 const flockPathPrefix = "/tmp/waybar-lyric"
 
-// LyricTimeout is the timeout duration for lyrics download.
+// lyricTimeout is the timeout duration for lyrics download.
 //
-// NOTE: LyricTimeout doesn't ensure that GetLyrics will only run for given
+// NOTE: lyricTimeout doesn't ensure that GetLyrics will only run for given
 // duration
 //
 // TODO: add cli flag for user defined duration
-const LyricTimeout = 10 * time.Second
+const lyricTimeout = 10 * time.Second
+
+var providers = []provider.LyricProvider{
+	asText.Provider,
+	lrclib.Provider,
+	simpmusic.Provider,
+}
 
 // GetLyrics returns lyrics for given *player.Info
-func GetLyrics(ctx context.Context, info *player.Metadata) (Lyrics, error) {
-	lyrics := Lyrics{Metadata: info}
+func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
+	lyrics := models.Lyrics{Metadata: metadata}
 
-	lockCtx, cancel := context.WithTimeout(ctx, LyricTimeout)
+	lockCtx, cancel := context.WithTimeout(ctx, lyricTimeout)
 	defer cancel()
 
-	lockFile := fmt.Sprintf("%s-%s.lock", flockPathPrefix, info.ID)
+	lockFile := fmt.Sprintf("%s-%s.lock", flockPathPrefix, metadata.ID)
 	flocker := flock.New(lockFile)
 	locked, err := flocker.TryLockContext(lockCtx, 200*time.Millisecond)
 	if err != nil {
-		Store.NotFound(info.ID)
-		return lyrics, fmt.Errorf(
-			"failed to take flock for id(%s): %v",
-			info.ID, err,
-		)
+		Store.NotFound(metadata.ID)
+		return lyrics, fmt.Errorf("failed to take flock for id(%s): %v", metadata.ID, err)
 	}
 	defer os.Remove(lockFile)
 	defer flocker.Close()
 
 	if !locked {
-		return lyrics, fmt.Errorf(
-			"another instance is trying to download: id(%s)",
-			info.ID,
-		)
+		return lyrics, fmt.Errorf("another instance is trying to download: id(%s)", metadata.ID)
 	}
 
-	uri := info.ID
+	uri := metadata.ID
 	if l, err := Store.Load(uri); err == nil {
 		return l, nil
 	}
 
-	asText, ok := info.Metadata["xesam:asText"]
-	if ok && asText.Value() != "" {
-		text, err := cast.ToStringE(asText.Value())
-		if err == nil {
-			lines, err := ParseLyrics(text)
-			if err != nil {
-				Store.NotFound(uri)
-				if errors.Is(err, ErrLyricsNotSynced) {
-					goto downloadLyrics
-				}
-				return lyrics, fmt.Errorf("failed to parse lyrics: %w", err)
-			}
-
-			slices.SortFunc(lines, func(a, b Line) int {
-				return int((a.Timestamp - b.Timestamp) / time.Millisecond)
-			})
-
-			lyrics.Lines = lines
-
-			if err := Store.Save(lyrics); err != nil {
-				return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
-			}
-			CensorLyrics(lyrics)
-			TruncateLyrics(lyrics)
-			return lyrics, nil
-		}
-	}
-
-downloadLyrics:
-	queryParams := url.Values{}
-	queryParams.Set("track_name", info.RawTitle)
-	queryParams.Set("artist_name", info.RawArtist)
-	if info.Album != "" {
-		queryParams.Set("album_name", info.Album)
-	}
-
-	header := http.Header{}
-	header.Set("User-Agent", config.Version)
-
-	resp, err := request(ctx, queryParams, header)
-	if err != nil {
-		Store.NotFound(uri)
-		return lyrics, fmt.Errorf("failed to fetch lyrics: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		Store.NotFound(uri)
-		return lyrics, ErrLyricsNotFound
-	}
-
-	if resp.StatusCode >= 300 {
-		Store.NotFound(uri)
-		return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
-	}
-
-	var items []LrcLibResponse
-	err = json.NewDecoder(resp.Body).Decode(&items)
-	if err != nil {
-		Store.NotFound(uri)
-		return lyrics, fmt.Errorf("failed to parse body: %w", err)
-	}
-
-	var best *LrcLibResponse
-	var bestScore float64
-
-	for item := range slices.Values(items) {
-		if item.SyncedLyrics == "" {
+	for p := range slices.Values(providers) {
+		ctx, cancel := context.WithTimeout(ctx, lyricTimeout)
+		defer cancel()
+		lyrics, err := p.Fetch(ctx, metadata)
+		if err != nil {
+			slog.Warn("Provider failed", "name", p.Name(), "error", err)
 			continue
 		}
-		itemScore := score(info, item)
-		if itemScore > bestScore {
-			best = &item
-			bestScore = itemScore
+
+		slices.SortFunc(lyrics.Lines, func(a, b models.Line) int {
+			return int((a.Timestamp - b.Timestamp) / time.Millisecond)
+		})
+
+		if err := Store.Save(lyrics); err != nil {
+			return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
 		}
+
+		CensorLyrics(lyrics)
+		TruncateLyrics(lyrics)
+		return lyrics, nil
 	}
 
-	if bestScore < MinimumScore {
-		Store.NotFound(uri)
-		return lyrics, &ErrLyricsMatchScore{
-			Score:     bestScore,
-			Threshold: MinimumScore,
-		}
-	}
+	Store.NotFound(metadata.ID)
 
-	lines, err := ParseLyrics(best.SyncedLyrics)
-	if err != nil {
-		Store.NotFound(uri)
-		if errors.Is(err, ErrLyricsNotSynced) {
-			return lyrics, err
-		}
-		return lyrics, fmt.Errorf("failed to parse lyrics: %w", err)
-	}
-
-	slices.SortFunc(lines, func(a, b Line) int {
-		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
-	})
-
-	lyrics.Lines = lines
-
-	if err := Store.Save(lyrics); err != nil {
-		return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
-	}
-
-	CensorLyrics(lyrics)
-	TruncateLyrics(lyrics)
-	return lyrics, nil
+	return models.Lyrics{}, models.ErrLyricsNotFound
 }
 
 // CensorLyrics censors the lyrics with given filtering type
-func CensorLyrics(lyrics Lyrics) {
+func CensorLyrics(lyrics models.Lyrics) {
 	if config.FilterProfanity {
 		for i, l := range lyrics.Lines {
 			lyrics.Lines[i].Text = str.CensorText(l.Text)
@@ -195,7 +99,7 @@ func CensorLyrics(lyrics Lyrics) {
 
 // TruncateLyrics truncates all lines using utf8 character length from user
 // input
-func TruncateLyrics(lyrics Lyrics) {
+func TruncateLyrics(lyrics models.Lyrics) {
 	for i, l := range lyrics.Lines {
 		lyrics.Lines[i].Text = str.Truncate(l.Text)
 	}

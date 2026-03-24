@@ -1,4 +1,4 @@
-package lyric
+package provider
 
 import (
 	"fmt"
@@ -7,16 +7,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 )
 
-// ParseLyrics parses a string containing time-synchronized lyrics in the format
+// ParseText parses a string containing time-synchronized lyrics in the format
 // [MM:SS.ss]Lyric text and returns a slice of LyricLine structs. Each line in
 // the input should follow the format "[timestamp]lyric text", where timestamp
 // is in a format parseable by ParseTimestamp. Empty lines and malformed lines
 // are skipped.
-func ParseLyrics(file string) (Lines, error) {
-	lyrics := Lines{{}} // add empty line a start of the lyrics
-	for line := range strings.SplitSeq(file, "\n") {
+func ParseText(text string) (models.Lines, error) {
+	lyrics := make(models.Lines, 1) // add empty line a start of the lyrics
+	for line := range strings.SplitSeq(text, "\n") {
 		if line == "" {
 			continue
 		}
@@ -33,20 +35,21 @@ func ParseLyrics(file string) (Lines, error) {
 		if err != nil {
 			slog.Debug(
 				"Failed to parse timestamp",
-				"timestamp",
-				timestampStr,
-				"error",
-				err,
+				"timestamp", timestampStr,
+				"error", err,
 			)
 			continue
 		}
 
-		lyric := Line{timestamp, lyricLine}
+		lyric := models.Line{
+			Timestamp: timestamp,
+			Text:      lyricLine,
+		}
 		lyrics = append(lyrics, lyric)
 	}
 
 	if len(lyrics) == 1 {
-		return nil, ErrLyricsNotSynced
+		return nil, models.ErrLyricsNotSynced
 	}
 
 	return lyrics, nil
