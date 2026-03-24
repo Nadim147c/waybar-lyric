@@ -1,7 +1,7 @@
 * {
   min-height: 0;
   min-width: 0;
-  font-family: "JetBrainsMono Nerd Font";
+  font-family: "JetBrainsMono Nerd Font Propo";
   font-size: 12px;
   font-weight: 600;
   border-radius: 6px;
@@ -65,7 +65,7 @@ window#waybar {
 }
 
 #custom-lyrics {
-  font-family: "Noto Font";
+  font-family: "Noto Font, JetBrainsMono Nerd Font Propo";
 }
 #custom-lyrics.paused {
   font-style: italic;
@@ -73,7 +73,7 @@ window#waybar {
 }
 
 tooltip {
-  font-family: "Noto Font";
+  font-family: "Noto Font, JetBrainsMono Nerd Font Propo";
   border-radius: 15px;
   background-color: #13131a;
   border: 2px solid #272e4f;
