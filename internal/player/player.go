@@ -1,13 +1,12 @@
 package player
 
 import (
-	"encoding/hex"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"hash/fnv"
 	"log/slog"
 	"net/url"
-	"path"
 	"regexp"
 	"slices"
 	"strings"
@@ -31,8 +30,8 @@ var (
 	ErrNoLength = errors.New("track length is empty")
 )
 
-// hash return sha256 hash for given string
-func hash(v ...any) string {
+// hashValues return sha256 hashValues for given string
+func hashValues(v ...any) string {
 	h := fnv.New128a()
 
 	switch len(v) {
@@ -50,40 +49,40 @@ func hash(v ...any) string {
 	}
 
 	hash := h.Sum(nil)
-	return hex.EncodeToString(hash)
+	return base64.RawURLEncoding.EncodeToString(hash)
 }
 
-// getID: derive ID from URL for fallback players like Firefox
+var reSanitize = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+
+var reInstance = regexp.MustCompile(`\.instance.+$`)
+
+const maxIDLength = 150
+
 func getID(p *mpris.Player, m *Metadata) string {
-	u, err := p.GetURL()
-	if err != nil || u == "" {
-		return hash(m.Player, m.RawArtist, m.RawTitle)
+	playerName, _ := strings.CutPrefix(p.GetName(), "org.mpris.MediaPlayer2.")
+	playerName = reInstance.ReplaceAllString(playerName, "")
+	playerName = strings.ToLower(playerName)
+
+	hash := hashValues(
+		playerName,
+		m.RawArtist,
+		m.RawTitle,
+		m.URL.String(),
+	)
+
+	asciiName := reSanitize.ReplaceAllString(m.Title, "-")
+	name := strings.Trim(asciiName, "-")
+
+	var id string
+	if name != "" {
+		id = playerName + "-" + hash + "-" + name
+	} else {
+		id = playerName + "-" + hash
 	}
-
-	parsed, err := url.Parse(u)
-	if err != nil {
-		return hash(m.Player, m.RawArtist, m.RawTitle)
+	if len(id) > maxIDLength {
+		id = id[:maxIDLength]
 	}
-
-	host := strings.ToLower(parsed.Host)
-
-	// Only allow music.youtube.com and open.spotify.com
-	if !(strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com")) {
-		return hash(m.Player, m.RawArtist, m.RawTitle)
-	}
-
-	id := ""
-	if strings.Contains(host, "music.youtube.com") {
-		id = parsed.Query().Get("v") // ?v=xxx
-	} else if strings.Contains(host, "open.spotify.com") {
-		id = path.Base(parsed.Path) // /track/xxx
-	}
-
-	if id == "" {
-		return hash(m.Player, m.RawArtist, m.RawTitle)
-	}
-
-	return hash(host, id, m.RawArtist, m.RawTitle)
+	return id
 }
 
 var supportedPlayers = []string{
