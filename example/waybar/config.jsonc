@@ -13,7 +13,7 @@
   "modules-right": ["cpu", "network", "clock"],
   "custom/lyrics": {
     "return-type": "json",
-    "format": "{icon}  {0}",
+    "format": "{icon} {0}",
     "hide-empty-text": true,
     "format-icons": {
       "playing": "",
@@ -22,8 +22,8 @@
       "music": "󰝚",
     },
     "exec-if": "which waybar-lyric",
-    "exec": "waybar-lyric -qm 150 -f partial",
-    "on-click": "waybar-lyric --toggle",
+    "exec": "waybar-lyric -qfpartial",
+    "on-click": "waybar-lyric play-pause",
   },
   "tray": {
     "show-passive-items": true,
