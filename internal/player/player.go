@@ -63,11 +63,12 @@ func getID(p *mpris.Player, m *Metadata) string {
 	playerName = reInstance.ReplaceAllString(playerName, "")
 	playerName = strings.ToLower(playerName)
 
+	urlStr := fixURLNoise(m.URL)
 	hash := hashValues(
 		playerName,
 		m.RawArtist,
 		m.RawTitle,
-		m.URL.String(),
+		urlStr,
 	)
 
 	asciiName := reSanitize.ReplaceAllString(m.Title, "-")
@@ -83,6 +84,28 @@ func getID(p *mpris.Player, m *Metadata) string {
 		id = id[:maxIDLength]
 	}
 	return id
+}
+
+func fixURLNoise(u *URL) string {
+	host := u.Hostname()
+
+	if strings.HasSuffix(host, "youtube.com") {
+		query := u.Query()
+		for k := range query {
+			if k != "v" { // delete all key except v=<id>
+				delete(query, k)
+			}
+		}
+		u.RawQuery = query.Encode()
+		return u.String()
+	}
+
+	if strings.HasSuffix(host, "spotify.com") {
+		u.RawQuery = ""
+		return u.String()
+	}
+
+	return u.String()
 }
 
 var supportedPlayers = []string{
@@ -138,9 +161,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 		}
 	}
 
-	chromeRe := regexp.MustCompile(
-		`^org\.mpris\.MediaPlayer2\.\w+\.instance\d+$`,
-	)
+	chromeRe := regexp.MustCompile(`^org\.mpris\.MediaPlayer2\.\w+\.instance\d+$`)
 
 	if config.ExperimentalChromiumSupport {
 		for player := range slices.Values(players) {
