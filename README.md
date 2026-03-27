@@ -1,27 +1,33 @@
-# waybar-lyric
+<h1 align="center">Waybar Lyric</h1>
+<h3 align="center">A waybar module for song lyrics</h3>
 
-[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Nadim147c/waybar-lyric?style=for-the-badge&logo=go&labelColor=11140F&color=BBE9AA)](https://pkg.go.dev/github.com/Nadim147c/waybar-lyric)
-[![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/waybar-lyric?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/waybar-lyric)
-[![GitHub License](https://img.shields.io/github/license/Nadim147c/waybar-lyric?style=for-the-badge&logo=gplv3&labelColor=11140F&color=BBE9AA)](./LICENSE)
-[![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/waybar-lyric?include_prereleases&sort=semver&style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/waybar-lyric/tags)
-[![Git Commit](https://img.shields.io/github/last-commit/Nadim147c/waybar-lyric?style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/waybar-lyric/tags)
+<h1 align="center">
+<a href="https://github.com/Nadim147c/waybar-lyric/blob/main/LICENSE">
+  <img src="https://github.com/Nadim147c/waybar-lyric/raw/main/example/waybar/screenshot.png">
+</a>
+<a href="https://pkg.go.dev/github.com/Nadim147c/waybar-lyric">
+<img src="https://img.shields.io/github/go-mod/go-version/Nadim147c/waybar-lyric?style=for-the-badge&logo=go&labelColor=11140F&color=BBE9AA">
+</a>
+<a href="https://github.com/Nadim147c/waybar-lyric">
+<img src="https://img.shields.io/github/stars/Nadim147c/waybar-lyric?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA">
+</a>
+<a href="https://github.com/Nadim147c/waybar-lyric/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/Nadim147c/waybar-lyric?style=for-the-badge&logo=gplv3&labelColor=11140F&color=BBE9AA">
+</a>
+<a href="https://github.com/Nadim147c/waybar-lyric/commits">
+<img src="https://img.shields.io/github/last-commit/Nadim147c/waybar-lyric?style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA">
+</a>
+</h1>
 
 > [!IMPORTANT]
 > 🔥 Found this useful? A quick star goes a long way.
-
-A CLI tool that displays lyrics on your
-[Waybar](https://github.com/Alexays/Waybar) for Linux systems.
-
-> [!NOTE]
-> If you're using waybar for the first time checkout the [example](./example/waybar/) configuration.
-
-![Example](./example/waybar/screenshot.png)
 
 ## Description
 
 `waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
 scrolling lyrics display that syncs with your currently playing music, enhancing your
-desktop music experience.
+desktop music experience. Checkout the [Example](./example/waybar/) waybar
+configuration.
 
 ## Supported Players
 
