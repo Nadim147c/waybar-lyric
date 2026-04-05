@@ -14,23 +14,24 @@ import (
 	"github.com/Nadim147c/go-mpris"
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/godbus/dbus/v5"
-	"github.com/spf13/cast"
 )
 
 var (
-	// ErrNoPlayerVolume when failed to get player volume
+	// ErrNoPlayerVolume when failed to get player volume.
 	ErrNoPlayerVolume = errors.New("failed to get player volume")
-	// ErrNoArtists when failed to get artists
+	// ErrNoArtists when failed to get artists.
 	ErrNoArtists = errors.New("failed to get artists")
-	// ErrNoTitle when failed to get title
+	// ErrNoTitle when failed to get title.
 	ErrNoTitle = errors.New("failed to get title")
-	// ErrNoID when failed to get id
+	// ErrNoID when failed to get id.
 	ErrNoID = errors.New("failed to get track id")
-	// ErrNoLength when mpris track length is 0
+	// ErrNoLength when mpris track length is 0.
 	ErrNoLength = errors.New("track length is empty")
+	// ErrNoPlayer when there is no active mpris player.
+	ErrNoPlayer = errors.New("no preferred player")
 )
 
-// hashValues return sha256 hashValues for given string
+// hashValues return sha256 hashValues for given string.
 func hashValues(v ...any) string {
 	h := fnv.New128a()
 
@@ -38,14 +39,14 @@ func hashValues(v ...any) string {
 	case 0:
 		panic("nothing to hash")
 	case 1:
-		fmt.Fprintf(h, "%s", v[0])
+		fmt.Fprintf(h, "%s", v[0]) //nolint:errcheck // hash writer should never return err
 	default:
 		lastIndex := len(v) - 1
 		for i := range lastIndex {
-			fmt.Fprint(h, v[i])
-			fmt.Fprint(h, ":")
+			fmt.Fprint(h, v[i]) //nolint:errcheck
+			fmt.Fprint(h, ":")  //nolint:errcheck
 		}
-		fmt.Fprint(h, v[lastIndex])
+		fmt.Fprint(h, v[lastIndex]) //nolint:errcheck
 	}
 
 	hash := h.Sum(nil)
@@ -116,7 +117,7 @@ var supportedPlayers = []string{
 	"tauon",
 }
 
-// Select selects correct parses for player
+// Select selects correct parses for player.
 func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	players, err := mpris.List(conn)
 	if err != nil {
@@ -125,7 +126,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	slog.Debug("Player names", "players", players)
 
 	if len(players) == 0 {
-		return nil, errors.New("No player exists")
+		return nil, ErrNoPlayer
 	}
 
 	// First: explicitly supported players
@@ -171,14 +172,14 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 		}
 	}
 
-	return nil, errors.New("No player exists")
+	return nil, ErrNoPlayer
 }
 
 func should[T any](v T, _ error) T {
 	return v
 }
 
-// Precompiled regex patterns
+// Precompiled regex patterns.
 var (
 	reParen1 = regexp.MustCompile(`\(.*\)`)
 	reParen2 = regexp.MustCompile(`（.*）`)
@@ -213,7 +214,7 @@ func normalizeArtist(artist string) string {
 	return strings.TrimSpace(s)
 }
 
-// Parse takes *mpris.Player of supported play and return *Metadata
+// Parse takes *mpris.Player of supported play and return *Metadata.
 func Parse(player *mpris.Player) (*Metadata, error) {
 	meta, err := player.GetMetadata()
 	if err != nil {
@@ -268,25 +269,26 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		return nil, ErrNoArtists
 	}
 
-	idValue, _ := meta["mpris:trackid"]
-	trackid := cast.ToString(idValue.Value())
+	trackid, err := player.GetTrackID()
+	if err != nil {
+		return nil, err
+	}
 
-	metadata := &Metadata{
+	metadata := &Metadata{ //nolint:exhaustruct
 		Artist:    normalizeArtist(artist),
 		Title:     normalizeTitle(title),
 		RawArtist: artist,
 		RawTitle:  title,
-
-		Player:   player.GetName(),
-		Album:    album,
-		Cover:    cover,
-		ID:       trackid,
-		Length:   length,
-		Metadata: meta,
-		Shuffle:  shuffle,
-		Status:   status,
-		URL:      trackURL,
-		Volume:   volume,
+		Player:    player.GetName(),
+		Album:     album,
+		Cover:     cover,
+		ID:        string(trackid),
+		Length:    length,
+		Metadata:  meta,
+		Shuffle:   shuffle,
+		Status:    status,
+		URL:       trackURL,
+		Volume:    volume,
 	}
 
 	metadata.ID = getID(player, metadata)

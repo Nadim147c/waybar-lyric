@@ -18,10 +18,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// SleepTime is the time for main fixed loop
+// SleepTime is the time for main fixed loop.
 const SleepTime = time.Second / 4
 
-// Execute is the main function for lyrics
+// Execute is the main function for lyrics.
 func Execute(cmd *cobra.Command, _ []string) error {
 	if !config.Quiet {
 		fmt.Fprintln(os.Stderr, cmd.Version)
@@ -62,7 +62,9 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	slog.Debug("Player selected", "player", mprisPlayer)
 
 	position := make(chan time.Duration)
-	go mprisPlayer.OnSeeked(ctx, position)
+
+	// TODO: mpris.OnSingal
+	go mprisPlayer.OnSeeked(ctx, position) //nolint:errcheck
 
 	var lastWaybar *waybar.Waybar
 
@@ -126,7 +128,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			w.Encode()
 			lyrics, err = lyric.GetLyrics(ctx, info)
 			if err != nil {
-				var scoreErr *models.ErrLyricsMatchScore
+				var scoreErr *models.LyricsMatchScoreError
 				if errors.Is(err, models.ErrLyricsNotFound) ||
 					errors.Is(err, models.ErrLyricsNotSynced) ||
 					errors.As(err, &scoreErr) {

@@ -11,12 +11,12 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-// URL wraps net.URL to provide JSON marshaling/unmarshaling
+// URL wraps net.URL to provide JSON marshaling/unmarshaling.
 type URL struct {
 	*url.URL
 }
 
-// NewURL creates a new URL from a string
+// NewURL creates a new URL from a string.
 func NewURL(rawURL string) (*URL, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -25,7 +25,7 @@ func NewURL(rawURL string) (*URL, error) {
 	return &URL{URL: u}, nil
 }
 
-// MarshalJSON implements json.Marshaler
+// MarshalJSON implements json.Marshaler.
 func (u URL) MarshalJSON() ([]byte, error) {
 	if u.URL == nil {
 		return []byte("null"), nil
@@ -33,7 +33,7 @@ func (u URL) MarshalJSON() ([]byte, error) {
 	return json.Marshal(u.URL.String())
 }
 
-// UnmarshalJSON implements json.Unmarshaler
+// UnmarshalJSON implements json.Unmarshaler.
 func (u *URL) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -56,7 +56,7 @@ func (u *URL) UnmarshalJSON(data []byte) error {
 }
 
 // String returns the string representation of the URL
-// Implements the fmt.Stringer interface
+// Implements the fmt.Stringer interface.
 func (u URL) String() string {
 	if u.URL == nil {
 		return ""
@@ -64,12 +64,12 @@ func (u URL) String() string {
 	return u.URL.String()
 }
 
-// IsNil checks if the underlying URL is nil
+// IsNil checks if the underlying URL is nil.
 func (u *URL) IsNil() bool {
 	return u == nil || u.URL == nil
 }
 
-// Metadata holds all information of currently playing track metadata
+// Metadata holds all information of currently playing track metadata.
 type Metadata struct {
 	Player    string `json:"player"`
 	ID        string `json:"id"`
@@ -91,7 +91,7 @@ type Metadata struct {
 	Status mpris.PlaybackStatus `json:"status"`
 }
 
-// Percentage is player position in percentage rounded to int
+// Percentage is player position in percentage rounded to int.
 func (p *Metadata) Percentage() int {
 	if p.Length == 0 {
 		return 0
@@ -99,7 +99,7 @@ func (p *Metadata) Percentage() int {
 	return int(((p.Position * 100) / p.Length))
 }
 
-// UpdatePosition updates the position of player
+// UpdatePosition updates the position of player.
 func (p *Metadata) UpdatePosition(player *mpris.Player) error {
 	pos, err := player.GetPosition()
 	if err != nil {

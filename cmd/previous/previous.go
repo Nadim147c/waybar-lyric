@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Command is the track skipper command
+// Command is the track skipper command.
 var Command = &cobra.Command{
 	Use:     "previous",
 	Example: `waybar-lyric previous # Goes to the previous track`,

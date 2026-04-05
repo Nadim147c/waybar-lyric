@@ -24,9 +24,9 @@ const flockPathPrefix = "/tmp/waybar-lyric"
 // lyricTimeout is the timeout duration for lyrics download.
 //
 // NOTE: lyricTimeout doesn't ensure that GetLyrics will only run for given
-// duration
+// duration.
 //
-// TODO: add cli flag for user defined duration
+// TODO: add cli flag for user defined duration.
 const lyricTimeout = 10 * time.Second
 
 var providers = []provider.LyricProvider{
@@ -35,9 +35,12 @@ var providers = []provider.LyricProvider{
 	simpmusic.Provider,
 }
 
-// GetLyrics returns lyrics for given *player.Info
+// GetLyrics returns lyrics for given *player.Info.
 func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-	lyrics := models.Lyrics{Metadata: metadata}
+	lyrics := models.Lyrics{
+		Metadata: metadata,
+		Lines:    nil,
+	}
 
 	lockCtx, cancel := context.WithTimeout(ctx, lyricTimeout)
 	defer cancel()
@@ -88,7 +91,7 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	return models.Lyrics{}, models.ErrLyricsNotFound
 }
 
-// CensorLyrics censors the lyrics with given filtering type
+// CensorLyrics censors the lyrics with given filtering type.
 func CensorLyrics(lyrics models.Lyrics) {
 	if config.FilterProfanity {
 		for i, l := range lyrics.Lines {
@@ -98,7 +101,7 @@ func CensorLyrics(lyrics models.Lyrics) {
 }
 
 // TruncateLyrics truncates all lines using utf8 character length from user
-// input
+// input.
 func TruncateLyrics(lyrics models.Lyrics) {
 	for i, l := range lyrics.Lines {
 		lyrics.Lines[i].Text = str.Truncate(l.Text)

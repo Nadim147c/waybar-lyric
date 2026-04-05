@@ -58,7 +58,7 @@ func ParseText(text string) (models.Lines, error) {
 // ParseTimestamp converts a timestamp string (in "HH:MM:SS", "MM:SS" or "SS"
 // format) into a time.Duration value representing the total number of
 // nanoseconds. Example inputs: "1:30:45" (1h 30m 45s), "5:20" (5m 20s), "42"
-// (42s)
+// (42s).
 func ParseTimestamp(ts string) (time.Duration, error) {
 	durationConst := []time.Duration{time.Second, time.Minute, time.Hour}
 

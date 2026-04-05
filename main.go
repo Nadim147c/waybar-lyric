@@ -32,7 +32,7 @@ func main() {
 		fang.WithoutManpage(),
 		fang.WithErrorHandler(func(w io.Writer, styles fang.Styles, err error) {
 			if errors.Is(err, context.Canceled) {
-				err = errors.New("Closed by user")
+				err = errors.New("closed by user")
 			}
 			fang.DefaultErrorHandler(w, styles, err)
 		}),

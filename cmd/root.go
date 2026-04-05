@@ -20,6 +20,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func assertNoErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func init() {
 	Command.Flags().
 		BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
@@ -48,8 +54,8 @@ func init() {
 	Command.Flags().
 		StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
 
-	Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'.")
-	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")
+	assertNoErr(Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'."))
+	assertNoErr(Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'."))
 
 	Command.MarkFlagsMutuallyExclusive("toggle", "init")
 
@@ -82,7 +88,7 @@ func init() {
 
 var logFile *os.File
 
-// Command is root command for waybar
+// Command is root command for waybar.
 var Command = &cobra.Command{
 	Use:          "waybar-lyric",
 	Short:        "A waybar module for song lyrics",
@@ -98,7 +104,7 @@ var Command = &cobra.Command{
 		if config.ToggleState {
 			defer func() {
 				cmd.RemoveCommand(playpause.Command)
-				playpause.Command.Execute()
+				playpause.Command.Execute() //nolint // TODO: fix this
 				os.Exit(0)
 			}()
 		}
@@ -106,7 +112,7 @@ var Command = &cobra.Command{
 		if config.PrintInit {
 			defer func() {
 				cmd.RemoveCommand(initcmd.Command)
-				initcmd.Command.Execute()
+				initcmd.Command.Execute() //nolint // TODO: fix this
 				os.Exit(0)
 			}()
 		}
@@ -117,13 +123,11 @@ var Command = &cobra.Command{
 		case "full", "partial":
 			config.FilterProfanity = true
 		default:
-			return errors.New(
-				"Profanity filter must one of 'full' or 'partial'",
-			)
+			return errors.New("profanity filter must one of 'full' or 'partial'")
 		}
 
 		if config.TooltipLines < 4 {
-			return errors.New("Tooltip lines limit must be at least 4")
+			return errors.New("tooltip lines limit must be at least 4")
 		}
 
 		var level log.Level
@@ -136,28 +140,27 @@ var Command = &cobra.Command{
 			level = log.DebugLevel
 		}
 
-		handler := slog.New(log.NewWithOptions(os.Stderr, log.Options{
-			Level: log.Level(level),
-		}))
+		//nolint:exhaustruct
+		handler := slog.New(log.NewWithOptions(os.Stderr, log.Options{Level: level}))
 
 		if config.LogFilePath == "" {
 			slog.SetDefault(handler)
 			return nil
 		}
 
-		os.MkdirAll(filepath.Dir(config.LogFilePath), 0o755)
+		if err := os.MkdirAll(filepath.Dir(config.LogFilePath), 0o750); err != nil {
+			return err
+		}
 
-		file, err := os.OpenFile(
-			config.LogFilePath,
-			os.O_CREATE|os.O_APPEND|os.O_WRONLY,
-			0o666,
-		)
+		const flags = os.O_CREATE | os.O_APPEND | os.O_WRONLY
+		file, err := os.OpenFile(config.LogFilePath, flags, 0o600)
 		if err != nil {
 			slog.SetDefault(handler)
 			slog.Error("Failed to open log-file", "error", err)
 			return err
 		}
 
+		//nolint:exhaustruct
 		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
 			Level:     slog.LevelDebug, // file logging always verbose
 			AddSource: true,
