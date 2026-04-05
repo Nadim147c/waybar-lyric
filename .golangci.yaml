@@ -43,7 +43,7 @@ linters:
       - text: '(slog|log)\.\w+'
         linters:
           - noctx
-      - source: "^\\s*defer\\s+.*"
+      - source: "^\\s*(defer|go)\\s+.*"
         linters:
           - errcheck
     generated: lax

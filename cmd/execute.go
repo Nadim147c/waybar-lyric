@@ -61,10 +61,9 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	}
 	slog.Debug("Player selected", "player", mprisPlayer)
 
-	position := make(chan time.Duration)
+	signals := make(chan *dbus.Signal)
 
-	// TODO: mpris.OnSingal
-	go mprisPlayer.OnSeeked(ctx, position) //nolint:errcheck
+	go mpris.OnSignal(conn, signals)
 
 	var lastWaybar *waybar.Waybar
 
@@ -72,7 +71,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-position:
+		case <-signals:
 			slog.Debug("Received player update signal")
 		case <-ticker.C:
 		}

@@ -1,10 +1,10 @@
 module github.com/Nadim147c/waybar-lyric
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/Nadim147c/fang v0.6.0
-	github.com/Nadim147c/go-mpris v0.8.0
+	github.com/Nadim147c/go-mpris v0.9.0
 	github.com/carapace-sh/carapace v1.11.1
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v0.4.2
@@ -46,7 +46,7 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
