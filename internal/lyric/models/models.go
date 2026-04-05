@@ -26,6 +26,8 @@ type Lyrics struct {
 var (
 	// ErrLyricsNotFound indicates that the requested lyrics could not be found.
 	ErrLyricsNotFound = errors.New("lyrics not found")
+	// ErrLyricsNotFound indicates that the requested lyrics could not be found.
+	ErrSearchResultEmpty = errors.New("search result is empty")
 	// ErrLyricsNotSynced indicates that the lyrics are available but not
 	// time-synchronized.
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")

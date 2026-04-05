@@ -84,7 +84,7 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		}
 
 		if len(respData.Items) == 0 {
-			return lyrics, models.ErrLyricsNotFound
+			return lyrics, models.ErrSearchResultEmpty
 		}
 
 		var best *item

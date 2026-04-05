@@ -78,7 +78,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		}
 
 		if len(items) == 0 {
-			return lyrics, models.ErrLyricsNotFound
+			return lyrics, models.ErrSearchResultEmpty
 		}
 
 		var best *response
