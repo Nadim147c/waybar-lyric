@@ -16,7 +16,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
-// Endpoint is simpmusic lyrics api endpoint
+// Endpoint is simpmusic lyrics api endpoint.
 const Endpoint = "https://api-lyrics.simpmusic.org/v1/search"
 
 type response struct {
@@ -40,7 +40,7 @@ type item struct {
 	ContributorEmail string  `json:"contributorEmail"`
 }
 
-// Provider is the lrclib lyrics provider
+// Provider is the lrclib lyrics provider.
 var Provider = provider.NewProvider("simpmusic lyrics",
 	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
 		lyrics.Metadata = metadata
@@ -54,7 +54,7 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
 		if err != nil {
-			return
+			return lyrics, err
 		}
 
 		req.URL.RawQuery = params.Encode()
@@ -107,12 +107,12 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		}
 
 		if bestScore < provider.MinimumScore {
-			return lyrics, &models.ErrLyricsMatchScore{
+			return lyrics, &models.LyricsMatchScoreError{
 				Score:     bestScore,
 				Threshold: provider.MinimumScore,
 			}
 		}
 
 		lyrics.Lines, err = provider.ParseText(best.SyncedLyrics)
-		return
+		return lyrics, err
 	})

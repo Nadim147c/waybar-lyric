@@ -12,26 +12,26 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 )
 
-// CacheSize is the max amount lyrics to save into the cache
+// CacheSize is the max amount lyrics to save into the cache.
 const CacheSize = 20
 
-// Store is in-memorey lyrics cache
+// Store is in-memorey lyrics cache.
 var Store = NewCache()
 
-// Cache is used to cache lyrics in memory
+// Cache is used to cache lyrics in memory.
 type Cache struct {
 	mu    sync.Mutex
 	store map[string]models.Lyrics
 }
 
-// NewCache creates a new instance of Cachhe
+// NewCache creates a new instance of Cachhe.
 func NewCache() *Cache {
 	c := new(Cache)
 	c.store = make(map[string]models.Lyrics, CacheSize)
 	return c
 }
 
-// NotFound saves a empty lyrics to Cache
+// NotFound saves a empty lyrics to Cache.
 func (s *Cache) NotFound(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -43,7 +43,7 @@ func (s *Cache) NotFound(id string) {
 	s.store[id] = models.Lyrics{}
 }
 
-// Save saves lyrics to Cache
+// Save saves lyrics to Cache.
 func (s *Cache) Save(lyrics models.Lyrics) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -56,7 +56,7 @@ func (s *Cache) Save(lyrics models.Lyrics) error {
 	return s.saveCache(lyrics)
 }
 
-// Load loads lyrics from Cache
+// Load loads lyrics from Cache.
 func (s *Cache) Load(id string) (models.Lyrics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -92,14 +92,17 @@ func (s *Cache) getCacheDir() (string, error) {
 	return filepath.Join(userCacheDir, "waybar-lyric"), nil
 }
 
-// CacheExtension is the extension use for cache files
+// CacheExtension is the extension use for cache files.
 const CacheExtension = ".json.gz"
 
-// SaveCache saves the lyrics to cache
+// SaveCache saves the lyrics to cache.
 func (s *Cache) saveCache(lyrics models.Lyrics) error {
 	cacheDir, err := s.getCacheDir()
+	if err != nil {
+		return err
+	}
 
-	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
+	if err := os.MkdirAll(cacheDir, 0o750); err != nil {
 		return err
 	}
 
@@ -121,7 +124,7 @@ func (s *Cache) saveCache(lyrics models.Lyrics) error {
 	return gz.Flush()
 }
 
-// LoadCache loads the lyrics from cache
+// LoadCache loads the lyrics from cache.
 func (s *Cache) loadCache(id string) (models.Lyrics, error) {
 	var lyrics models.Lyrics
 

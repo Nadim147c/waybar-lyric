@@ -16,7 +16,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
-// Response is the response sent from LrcLib api
+// Response is the response sent from LrcLib api.
 type response struct {
 	ID           int     `json:"id"`
 	TrackName    string  `json:"trackName"`
@@ -28,7 +28,7 @@ type response struct {
 	SyncedLyrics string  `json:"syncedLyrics"`
 }
 
-// Endpoint is api endpoint for lrclib
+// Endpoint is api endpoint for lrclib.
 const Endpoint = "https://lrclib.net/api/search"
 
 // Provider is a lyrics provider that fetches lyrics from lrclib.
@@ -48,7 +48,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
 		if err != nil {
-			return
+			return lyrics, err
 		}
 
 		req.URL.RawQuery = params.Encode()
@@ -101,12 +101,12 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		}
 
 		if bestScore < provider.MinimumScore {
-			return lyrics, &models.ErrLyricsMatchScore{
+			return lyrics, &models.LyricsMatchScoreError{
 				Score:     bestScore,
 				Threshold: provider.MinimumScore,
 			}
 		}
 
 		lyrics.Lines, err = provider.ParseText(best.SyncedLyrics)
-		return
+		return lyrics, err
 	})

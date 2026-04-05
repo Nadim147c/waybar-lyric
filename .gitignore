@@ -6,3 +6,4 @@ waybar-lyric
 bin
 Makefile.local
 result
+.direnv/*

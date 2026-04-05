@@ -86,7 +86,10 @@ func seekLyricLine(
 		"artist", info.Artist,
 	)
 
-	info.UpdatePosition(p)
+	if err := info.UpdatePosition(p); err != nil {
+		return err
+	}
+
 	slog.Debug("Current position", "position", info.Position)
 
 	// Find current lyric line based on position
@@ -142,7 +145,7 @@ func seekLyricLine(
 	return setPosition(p, pos)
 }
 
-// Command is the position seeker command
+// Command is the position seeker command.
 var Command = &cobra.Command{
 	Use: "seek",
 	Example: `

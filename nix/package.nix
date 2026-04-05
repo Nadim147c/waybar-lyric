@@ -6,11 +6,27 @@
   stdenv,
   versionCheckHook,
 }:
+let
+  fs = lib.fileset;
+in
 buildGoModule rec {
   pname = "waybar-lyric";
   version = "0-unstable";
 
-  src = ../.;
+  src = lib.cleanSource (
+    fs.toSource {
+      root = ../.;
+      fileset = fs.unions [
+        ../cmd
+        ../internal
+        ../ascii.go
+        ../ascii.txt
+        ../main.go
+        ../go.mod
+        ../go.sum
+      ];
+    }
+  );
 
   vendorHash = "sha256-yu39Kba/ZkreAm4CztdXPehP29g1qk5BS5JzrAd7Ef4=";
 

@@ -8,7 +8,7 @@ pkgs.mkShell {
     gofumpt
     golines
     gopls
-    revive
+    golangci-lint
     waybar
   ];
 }
