@@ -101,22 +101,6 @@ var Command = &cobra.Command{
 		return nil
 	},
 	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
-		if config.ToggleState {
-			defer func() {
-				cmd.RemoveCommand(playpause.Command)
-				playpause.Command.Execute() //nolint // TODO: fix this
-				os.Exit(0)
-			}()
-		}
-
-		if config.PrintInit {
-			defer func() {
-				cmd.RemoveCommand(initcmd.Command)
-				initcmd.Command.Execute() //nolint // TODO: fix this
-				os.Exit(0)
-			}()
-		}
-
 		switch config.FilterProfanityType {
 		case "":
 			config.FilterProfanity = false
@@ -145,28 +129,41 @@ var Command = &cobra.Command{
 
 		if config.LogFilePath == "" {
 			slog.SetDefault(handler)
-			return nil
+			goto runDeprecatedFlagsCommand
 		}
 
-		if err := os.MkdirAll(filepath.Dir(config.LogFilePath), 0o750); err != nil {
-			return err
+		// create block for goto statement
+		{
+			if err := os.MkdirAll(filepath.Dir(config.LogFilePath), 0o750); err != nil {
+				return err
+			}
+
+			const flags = os.O_CREATE | os.O_APPEND | os.O_WRONLY
+			file, err := os.OpenFile(config.LogFilePath, flags, 0o600)
+			if err != nil {
+				slog.SetDefault(handler)
+				slog.Error("Failed to open log-file", "error", err)
+				return err
+			}
+
+			//nolint:exhaustruct
+			slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+				Level:     slog.LevelDebug, // file logging always verbose
+				AddSource: true,
+			})))
+			logFile = file
 		}
 
-		const flags = os.O_CREATE | os.O_APPEND | os.O_WRONLY
-		file, err := os.OpenFile(config.LogFilePath, flags, 0o600)
-		if err != nil {
-			slog.SetDefault(handler)
-			slog.Error("Failed to open log-file", "error", err)
-			return err
+	runDeprecatedFlagsCommand:
+		if config.ToggleState {
+			cmd.RemoveCommand(playpause.Command)
+			return playpause.Command.Execute()
 		}
 
-		//nolint:exhaustruct
-		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
-			Level:     slog.LevelDebug, // file logging always verbose
-			AddSource: true,
-		})))
-		logFile = file
-
+		if config.PrintInit {
+			cmd.RemoveCommand(initcmd.Command)
+			return initcmd.Command.Execute()
+		}
 		return nil
 	},
 }
