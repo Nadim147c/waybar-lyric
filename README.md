@@ -57,7 +57,7 @@ configuration.
 ## Lyric Source
 
 - [LrcLib](https://lrclib.net/)
-- [SimpMusic](https://simpmusic.org/)
+- [`SimpMusic`](https://simpmusic.org/) (Disabled)
 - MPRIS metadata `(only works with TaounMB Lyrics)`
 - More...? `(Suggestions are welcome)`
 

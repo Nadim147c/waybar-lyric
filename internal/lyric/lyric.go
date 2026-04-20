@@ -13,7 +13,6 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
@@ -32,7 +31,7 @@ const lyricTimeout = 10 * time.Second
 var providers = []provider.LyricProvider{
 	asText.Provider,
 	lrclib.Provider,
-	simpmusic.Provider,
+	// simpmusic.Provider, TODO: unavailable
 }
 
 // GetLyrics returns lyrics for given *player.Info.
