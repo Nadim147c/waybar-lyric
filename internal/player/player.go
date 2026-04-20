@@ -205,10 +205,10 @@ func normalizeTitle(title string) string {
 }
 
 func normalizeArtist(artist string) string {
-	s := strings.ReplaceAll(artist, ", ", "、")
-	s = strings.ReplaceAll(s, " & ", "、")
+	s := strings.ReplaceAll(artist, ", ", ", ")
+	s = strings.ReplaceAll(s, " & ", ", ")
 	s = strings.ReplaceAll(s, ".", "")
-	s = strings.ReplaceAll(s, "和", "、")
+	s = strings.ReplaceAll(s, "和", ", ")
 	s = reParen1.ReplaceAllString(s, "")
 	s = reParen2.ReplaceAllString(s, "")
 	return strings.TrimSpace(s)

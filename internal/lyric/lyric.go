@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"regexp"
 	"slices"
 	"time"
 
@@ -34,6 +35,8 @@ var providers = []provider.LyricProvider{
 	// simpmusic.Provider, TODO: unavailable
 }
 
+var reArtists = regexp.MustCompile(`(, | and )`)
+
 // GetLyrics returns lyrics for given *player.Info.
 func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
 	lyrics := models.Lyrics{
@@ -61,6 +64,10 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	uri := metadata.ID
 	if l, err := Store.Load(uri); err == nil {
 		return l, nil
+	}
+
+	if metadata.URL != nil || metadata.URL.Hostname() == "music.youtube.com" {
+		metadata.RawArtist = reArtists.ReplaceAllLiteralString(metadata.RawArtist, ", ")
 	}
 
 	for p := range slices.Values(providers) {

@@ -54,20 +54,23 @@ type LyricsResult struct {
 // is lyrics is suitable.
 func Score(track *player.Metadata, result LyricsResult) float64 {
 	durationScore := match.Durations(track.Length, result.Duration) * 2
-	titleScore := match.Strings(track.Title, result.Title) * 2
-	artistsScore := match.Strings(track.Artist, result.Artist)
+	titleScore := match.Strings(track.RawTitle, result.Title) * 2
+	artistsScore := match.Strings(track.RawArtist, result.Artist)
 	albumScore := match.Strings(track.Album, result.Album)
 
 	score := durationScore + titleScore + albumScore + artistsScore
 
 	slog.Debug("SmartMatch",
 		"score", score,
-		"album", result.Album,
+		"album_want", track.Album,
+		"album_got", result.Album,
 		"album_score", albumScore,
-		"artist", result.Artist,
+		"artist_want", track.RawArtist,
+		"artist_got", result.Artist,
 		"artists_score", artistsScore,
 		"duration_score", durationScore,
-		"title", result.Title,
+		"title_want", track.RawTitle,
+		"title_got", result.Title,
 		"title_score", titleScore,
 	)
 
