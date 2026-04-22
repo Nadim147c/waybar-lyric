@@ -3,6 +3,7 @@ package waybar
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"slices"
 	"strings"
@@ -13,9 +14,9 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 )
 
-// ForPlayer returns printable Waybar
+// ForPlayer returns printable Waybar.
 func ForPlayer(p *player.Metadata) *Waybar {
-	alt := Status(Playing)
+	alt := Playing
 	if p.Status == "Paused" {
 		alt = Paused
 	}
@@ -39,7 +40,7 @@ func ForPlayer(p *player.Metadata) *Waybar {
 	return waybar
 }
 
-// ForLyrics returns Waybar for lyrics
+// ForLyrics returns Waybar for lyrics.
 func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 	lines := lyrics.Lines
 	currentLine := lines[idx]
@@ -99,10 +100,10 @@ func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 	return waybar
 }
 
-// Zero is a empty Waybar
+// Zero is a empty Waybar.
 var Zero = &Waybar{}
 
-// Status is the alt/class for waybar
+// Status is the alt/class for waybar.
 type Status string
 
 const (
@@ -116,10 +117,10 @@ const (
 	//revive:enable
 )
 
-// Class is waybar class which can be either a string slice or string
+// Class is waybar class which can be either a string slice or string.
 type Class []Status
 
-// Waybar is structure data which can be printed to for waybar output
+// Waybar is structure data which can be printed to for waybar output.
 type Waybar struct {
 	Text       string           `json:"text"`
 	Class      Class            `json:"class,omitempty"`
@@ -130,44 +131,46 @@ type Waybar struct {
 	Lines      models.Lines     `json:"lines,omitempty"`
 }
 
-// JSON is the json encoder for waybar
+// JSON is the json encoder for waybar.
 var JSON = json.NewEncoder(os.Stdout)
 
 func init() {
 	JSON.SetEscapeHTML(false)
 }
 
-// SetText sets truncates the given txt and sets to text value
+// SetText sets truncates the given txt and sets to text value.
 func (w *Waybar) SetText(txt string) {
 	w.Text = str.Truncate(txt)
 }
 
 var lastLine string
 
-// Encode prints the Waybar as json to Stdout
+// Encode prints the Waybar as json to Stdout.
 func (w *Waybar) Encode() {
 	if config.LyricOnly && (w.Alt == Paused || w.Alt == Music) {
-		fmt.Println("")
+		fmt.Println("") //nolint:forbidigo
 		return
 	}
 
 	if config.Compact {
 		if lastLine != w.Text {
-			fmt.Println(w.Text)
+			fmt.Println(w.Text) //nolint:forbidigo
 			lastLine = w.Text
 		}
 		return
 	}
 
 	if w == Zero {
-		fmt.Println("{}")
+		fmt.Println("{}") //nolint:forbidigo
 		return
 	}
 
-	JSON.Encode(w)
+	if err := JSON.Encode(w); err != nil {
+		slog.Error("failed to print output", "error", err)
+	}
 }
 
-// Is indecates if current Waybar is equal to another Waybar
+// Is indecates if current Waybar is equal to another Waybar.
 func (w *Waybar) Is(other *Waybar) bool {
 	if w == other {
 		return true
@@ -191,28 +194,30 @@ func (w *Waybar) Is(other *Waybar) bool {
 		}
 	}
 
-	if config.Detailed {
-		if w.Info == nil && other.Info == nil {
-			return true
-		}
-		if w.Info == nil || other.Info == nil {
-			return false
-		}
-		if w.Info.Shuffle != other.Info.Shuffle {
-			return false
-		}
-		if w.Info.Status != other.Info.Status {
-			return false
-		}
-		if w.Info.Volume != other.Info.Volume {
-			return false
-		}
+	if !config.Detailed {
+		return true
+	}
+
+	if w.Info == nil && other.Info == nil {
+		return true
+	}
+	if w.Info == nil || other.Info == nil {
+		return false
+	}
+	if w.Info.Shuffle != other.Info.Shuffle {
+		return false
+	}
+	if w.Info.Status != other.Info.Status {
+		return false
+	}
+	if w.Info.Volume != other.Info.Volume {
+		return false
 	}
 
 	return true
 }
 
-// Paused set Text to artist and title on default mode
+// Paused set Text to artist and title on default mode.
 func (w *Waybar) Paused(info *player.Metadata) {
 	if !config.LyricOnly {
 		w.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)

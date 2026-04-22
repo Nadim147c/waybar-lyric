@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Command is the volume changer command
+// Command is the volume changer command.
 var Command = &cobra.Command{
 	Use: "volume",
 	Example: `  waybar-lyric volume 20% # Set player volume to 20%
@@ -38,8 +38,8 @@ var Command = &cobra.Command{
 		}
 
 		// Parse the volume value
-		if strings.HasSuffix(volStr, "%") {
-			vol, err := cast.ToFloat64E(strings.TrimSuffix(volStr, "%"))
+		if before, ok := strings.CutSuffix(volStr, "%"); ok {
+			vol, err := cast.ToFloat64E(before)
 			if err != nil {
 				slog.Error("Failed to convert volume to float", "error", err)
 				return fmt.Errorf("failed convert volume to float: %v", err)

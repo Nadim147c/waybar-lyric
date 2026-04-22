@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Command is the play-pause command
+// Command is the play-pause command.
 var Command = &cobra.Command{
 	Use:          "play-pause",
 	Short:        "Toggle play-pause state",

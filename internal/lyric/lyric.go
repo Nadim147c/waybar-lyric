@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"regexp"
 	"slices"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
@@ -24,20 +24,25 @@ const flockPathPrefix = "/tmp/waybar-lyric"
 // lyricTimeout is the timeout duration for lyrics download.
 //
 // NOTE: lyricTimeout doesn't ensure that GetLyrics will only run for given
-// duration
+// duration.
 //
-// TODO: add cli flag for user defined duration
+// TODO: add cli flag for user defined duration.
 const lyricTimeout = 10 * time.Second
 
 var providers = []provider.LyricProvider{
 	asText.Provider,
 	lrclib.Provider,
-	simpmusic.Provider,
+	// simpmusic.Provider, TODO: unavailable
 }
 
-// GetLyrics returns lyrics for given *player.Info
+var reArtists = regexp.MustCompile(`(, | and )`)
+
+// GetLyrics returns lyrics for given *player.Info.
 func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-	lyrics := models.Lyrics{Metadata: metadata}
+	lyrics := models.Lyrics{
+		Metadata: metadata,
+		Lines:    nil,
+	}
 
 	lockCtx, cancel := context.WithTimeout(ctx, lyricTimeout)
 	defer cancel()
@@ -59,6 +64,10 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	uri := metadata.ID
 	if l, err := Store.Load(uri); err == nil {
 		return l, nil
+	}
+
+	if metadata.URL != nil || metadata.URL.Hostname() == "music.youtube.com" {
+		metadata.RawArtist = reArtists.ReplaceAllLiteralString(metadata.RawArtist, ", ")
 	}
 
 	for p := range slices.Values(providers) {
@@ -88,7 +97,7 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	return models.Lyrics{}, models.ErrLyricsNotFound
 }
 
-// CensorLyrics censors the lyrics with given filtering type
+// CensorLyrics censors the lyrics with given filtering type.
 func CensorLyrics(lyrics models.Lyrics) {
 	if config.FilterProfanity {
 		for i, l := range lyrics.Lines {
@@ -98,7 +107,7 @@ func CensorLyrics(lyrics models.Lyrics) {
 }
 
 // TruncateLyrics truncates all lines using utf8 character length from user
-// input
+// input.
 func TruncateLyrics(lyrics models.Lyrics) {
 	for i, l := range lyrics.Lines {
 		lyrics.Lines[i].Text = str.Truncate(l.Text)

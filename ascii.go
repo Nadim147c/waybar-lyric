@@ -10,7 +10,7 @@ import (
 //go:embed ascii.txt
 var ascii string
 
-// GetASCII prints ASCII logo with rainbow colors
+// GetASCII prints ASCII logo with rainbow colors.
 func GetASCII() string {
 	asciiStyle := lipgloss.NewRenderer(os.Stderr).
 		NewStyle().

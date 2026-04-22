@@ -112,7 +112,7 @@ func setLyricPosition(p *mpris.Player, lines models.Lines, s string) error {
 	return setPosition(p, pos)
 }
 
-// Command is the position changer command
+// Command is the position changer command.
 var Command = &cobra.Command{
 	Use: "position",
 	Example: `
