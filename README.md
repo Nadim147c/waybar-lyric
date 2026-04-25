@@ -56,9 +56,10 @@ configuration.
 
 ## Lyric Source
 
+- MPRIS metadata `(Only works with TaounMB Lyrics)`
+- Local `.lrc` files
 - [LrcLib](https://lrclib.net/)
 - [`SimpMusic`](https://simpmusic.org/) (Disabled)
-- MPRIS metadata `(only works with TaounMB Lyrics)`
 - More...? `(Suggestions are welcome)`
 
 ## Installation

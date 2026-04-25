@@ -13,6 +13,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
+	lrcFile "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrc_file"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
@@ -31,6 +32,7 @@ const lyricTimeout = 10 * time.Second
 
 var providers = []provider.LyricProvider{
 	asText.Provider,
+	lrcFile.Provider,
 	lrclib.Provider,
 	// simpmusic.Provider, TODO: unavailable
 }
