@@ -42,6 +42,7 @@ var reArtists = regexp.MustCompile(`(, | and )`)
 // GetLyrics returns lyrics for given *player.Info.
 func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
 	lyrics := models.Lyrics{
+		NoCache:  false,
 		Metadata: metadata,
 		Lines:    nil,
 	}

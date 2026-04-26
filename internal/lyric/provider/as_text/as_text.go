@@ -13,6 +13,8 @@ import (
 var Provider = provider.NewProvider("asText metadata parser",
 	func(_ context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
 		lyrics.Metadata = metadata
+		lyrics.NoCache = true
+
 		asText, ok := metadata.Metadata["xesam:asText"]
 		if !ok && asText.Value() == "" {
 			return lyrics, models.ErrLyricsNotFound

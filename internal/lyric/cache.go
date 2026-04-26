@@ -97,6 +97,10 @@ const CacheExtension = ".json.gz"
 
 // SaveCache saves the lyrics to cache.
 func (s *Cache) saveCache(lyrics models.Lyrics) error {
+	if lyrics.NoCache {
+		return nil
+	}
+
 	cacheDir, err := s.getCacheDir()
 	if err != nil {
 		return err

@@ -14,6 +14,7 @@ import (
 var Provider = provider.NewProvider("local lrc file",
 	func(_ context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
 		lyrics.Metadata = metadata
+		lyrics.NoCache = true
 
 		if metadata.URL.Scheme != "file" {
 			return lyrics, models.ErrLyricsNotFound
