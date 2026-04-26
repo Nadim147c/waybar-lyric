@@ -31,6 +31,12 @@ func ParseText(text string) (models.Lines, error) {
 		timestampStr := strings.TrimPrefix(parts[0], "[")
 		lyricLine := strings.TrimSpace(parts[1])
 
+		// Discard all empty lines at the begin since the parser
+		// automaticall adds am empty line
+		if len(lyrics) == 1 && lyricLine == "" {
+			continue
+		}
+
 		timestamp, err := ParseTimestamp(timestampStr)
 		if err != nil {
 			slog.Debug(
