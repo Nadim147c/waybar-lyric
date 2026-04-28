@@ -13,6 +13,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/embedded"
 	lrcFile "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrc_file"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -33,6 +34,7 @@ const lyricTimeout = 10 * time.Second
 var providers = []provider.LyricProvider{
 	asText.Provider,
 	lrcFile.Provider,
+	embedded.Provider,
 	lrclib.Provider,
 	// simpmusic.Provider, TODO: unavailable
 }
@@ -81,6 +83,8 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 			slog.Warn("Provider failed", "name", p.Name(), "error", err)
 			continue
 		}
+
+		slog.Info("Lyrics found", "provider", p.Name())
 
 		slices.SortFunc(lyrics.Lines, func(a, b models.Line) int {
 			return int((a.Timestamp - b.Timestamp) / time.Millisecond)
