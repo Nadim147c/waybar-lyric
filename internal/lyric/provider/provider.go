@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
@@ -55,7 +56,17 @@ type LyricsResult struct {
 func Score(track *player.Metadata, result LyricsResult) float64 {
 	durationScore := match.Durations(track.Length, result.Duration) * 2
 	titleScore := match.Strings(track.RawTitle, result.Title) * 2
-	artistsScore := match.Strings(track.RawArtist, result.Artist)
+	var artistsScore float64
+	if len(track.Artists) > 1 {
+		var separate float64
+		for _, artist := range track.Artists {
+			separate += match.Strings(artist, result.Artist)
+		}
+		joined := match.Strings(strings.Join(track.Artists, ", "), result.Artist)
+		artistsScore = max(separate, joined)
+	} else {
+		artistsScore = match.Strings(track.RawArtist, result.Artist)
+	}
 	albumScore := match.Strings(track.Album, result.Album)
 
 	score := durationScore + titleScore + albumScore + artistsScore

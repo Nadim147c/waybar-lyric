@@ -274,8 +274,9 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		return nil, err
 	}
 
-	metadata := &Metadata{ //nolint:exhaustruct
+	metadata := &Metadata{
 		Artist:    normalizeArtist(artist),
+		Artists:   artistList,
 		Title:     normalizeTitle(title),
 		RawArtist: artist,
 		RawTitle:  title,
@@ -289,6 +290,7 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		Status:    status,
 		URL:       trackURL,
 		Volume:    volume,
+		Position:  0, // will be updated by UpdatePosition
 	}
 
 	metadata.ID = getID(player, metadata)
