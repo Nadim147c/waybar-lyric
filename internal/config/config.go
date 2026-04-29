@@ -8,6 +8,7 @@ var (
 	Verbose         = false
 	Quiet           = false
 	LyricOnly       = false
+	IgnoreAlbum     = false
 	Compact         = false
 	Detailed        = false
 	BreakTooltip    = 100000

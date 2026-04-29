@@ -44,6 +44,8 @@ func init() {
 	Command.Flags().
 		BoolVarP(&config.ExperimentalChromiumSupport, "experimental-chromium-support", "x", config.ToggleState, "Enable experimental chromium support.")
 	Command.Flags().
+		BoolVarP(&config.IgnoreAlbum, "ignore-album", "a", config.IgnoreAlbum, "Ignore album when searching for lyrics")
+	Command.Flags().
 		IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
 	Command.Flags().
 		IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")

@@ -39,7 +39,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		params := url.Values{}
 		params.Set("track_name", metadata.RawTitle)
 		params.Set("artist_name", metadata.RawArtist)
-		if metadata.Album != "" {
+		if !config.IgnoreAlbum && metadata.Album != "" {
 			params.Set("album_name", metadata.Album)
 		}
 
