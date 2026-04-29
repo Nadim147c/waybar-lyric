@@ -31,14 +31,22 @@ configuration.
 
 ## Supported Players
 
+`waybar-lyric` will work with any player that has `xesam:album` and `xesam:artist`
+metadata.
+
+> Run `playerctl metadata -a` to check if your player has those metadata.
+
+I've test these following player:
+
 - [Spotify](https://spotify.com)
-- YouTubeMusic ([Pear-Desktop](https://github.com/pear-devs/pear-desktop))
+- [Pear-Desktop](https://github.com/pear-devs/pear-desktop)
 - [Amarok](https://amarok.kde.org/)
 - [Amberol](https://apps.gnome.org/en/Amberol/)
 - [TauonMB](https://tauonmusicbox.rocks/)
 - Firefox (Specific domains)
   - `open.spotify.com`
   - `music.youtube.com`
+- Chromium with `--experimental-chromium-support` (Not recommended)!
 
 ## Features
 

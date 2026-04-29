@@ -117,6 +117,23 @@ var supportedPlayers = []string{
 	"tauon",
 }
 
+func isNonZero[T comparable](v T) bool {
+	var zero T
+	return zero != v
+}
+
+func hasAlbumAndArtists(p *mpris.Player) bool {
+	album, err := p.GetAlbum()
+	if err != nil || album == "" {
+		return false
+	}
+	artists, err := p.GetArtist()
+	if err != nil || len(artists) == 0 {
+		return false
+	}
+	return slices.ContainsFunc(artists, isNonZero)
+}
+
 // Select selects correct parses for player.
 func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	players, err := mpris.List(conn)
@@ -138,27 +155,33 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 		}
 	}
 
-	// Fallback: Firefox only if URL is on music.youtube.com or open.spotify.com
 	for _, playerName := range players {
+		slog.Debug("Checking player url", "for", playerName)
+		player := mpris.New(conn, playerName)
+
+		if hasAlbumAndArtists(player) {
+			return player, nil
+		}
+
+		// Fallback: Firefox only if URL is on music.youtube.com or open.spotify.com
 		if !strings.Contains(strings.ToLower(playerName), "firefox") {
 			continue
 		}
-		slog.Debug("Checking player url", "for", "firefox")
-		fp := mpris.New(conn, playerName)
-		u, err := fp.GetURL()
-		if err != nil || u == "" {
+
+		rawURL, err := player.GetURL()
+		if err != nil || rawURL == "" {
 			slog.Debug("Checking player url", "for", "firefox")
 			continue
 		}
-		pu, err := url.Parse(u)
+		trackURL, err := url.Parse(rawURL)
 		if err != nil {
 			continue
 		}
-		host := strings.ToLower(pu.Host)
+		host := strings.ToLower(trackURL.Host)
 		if strings.Contains(host, "music.youtube.com") ||
 			strings.Contains(host, "open.spotify.com") {
 			slog.Debug("Player selected", "name", "firefox")
-			return fp, nil
+			return player, nil
 		}
 	}
 
@@ -274,8 +297,9 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		return nil, err
 	}
 
-	metadata := &Metadata{ //nolint:exhaustruct
+	metadata := &Metadata{
 		Artist:    normalizeArtist(artist),
+		Artists:   artistList,
 		Title:     normalizeTitle(title),
 		RawArtist: artist,
 		RawTitle:  title,
@@ -289,6 +313,7 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		Status:    status,
 		URL:       trackURL,
 		Volume:    volume,
+		Position:  0, // will be updated by UpdatePosition
 	}
 
 	metadata.ID = getID(player, metadata)
