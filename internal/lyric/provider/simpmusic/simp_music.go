@@ -6,26 +6,25 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"slices"
+	"strings"
 	"time"
 
-	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
 // Endpoint is simpmusic lyrics api endpoint.
-const Endpoint = "https://api-lyrics.simpmusic.org/v1/search"
+const Endpoint = "https://api-lyrics.simpmusic.org/"
 
 type response struct {
 	Type    string `json:"type"`
-	Items   []item `json:"data"`
+	Data    []data `json:"data"`
 	Success bool   `json:"success"`
 }
 
-type item struct {
+type data struct {
 	ID               string  `json:"id"`
 	VideoID          string  `json:"videoId"`
 	SongTitle        string  `json:"songTitle"`
@@ -45,20 +44,18 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
 		lyrics.Metadata = metadata
 
-		params := url.Values{}
-		params.Set("q", fmt.Sprintf("%s - %s", metadata.Artist, metadata.Title))
-		params.Set("limit", "40")
-
-		header := http.Header{}
-		header.Set("User-Agent", config.Version)
+		vidoeID := metadata.URL.Query().Get("v")
+		isYoutubeVideo := strings.HasSuffix(metadata.URL.Hostname(), "youtube.com")
+		if !isYoutubeVideo || vidoeID == "" {
+			return lyrics, models.ErrLyricsNotFound
+		}
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
 		if err != nil {
 			return lyrics, err
 		}
 
-		req.URL.RawQuery = params.Encode()
-		req.Header = header
+		req.URL.Path = "/v1/" + vidoeID
 
 		slog.Info("Fetching lyrics from simpmusic api", "url", req.URL.String())
 
@@ -77,20 +74,20 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 			return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 		}
 
-		var respData response
-		err = json.NewDecoder(resp.Body).Decode(&respData)
+		var responseData response
+		err = json.NewDecoder(resp.Body).Decode(&responseData)
 		if err != nil {
 			return lyrics, fmt.Errorf("failed to parse body: %w", err)
 		}
 
-		if len(respData.Items) == 0 {
+		if !responseData.Success {
 			return lyrics, models.ErrSearchResultEmpty
 		}
 
-		var best *item
+		var best *data
 		var bestScore float64
 
-		for item := range slices.Values(respData.Items) {
+		for item := range slices.Values(responseData.Data) {
 			if item.SyncedLyrics == "" {
 				continue
 			}
