@@ -68,7 +68,8 @@ I've test these following player:
 - Lyrics files _(`.lrc` files)_
 - Embedded lyrics _(Using ffprobe)_
 - [LrcLib](https://lrclib.net/)
-- More? — _suggestions welcome_
+- [Simpmusic](https://api-lyrics.simpmusic.org/)
+- More? _(Suggestions welcome)_
 
 ## Installation
 
