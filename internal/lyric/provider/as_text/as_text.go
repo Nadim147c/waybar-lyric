@@ -3,6 +3,7 @@ package astext
 import (
 	"context"
 
+	"github.com/Nadim147c/go-mpris"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -15,12 +16,12 @@ var Provider = provider.NewProvider("asText metadata parser",
 		lyrics.Metadata = metadata
 		lyrics.NoCache = true
 
-		asText, ok := metadata.Metadata["xesam:asText"]
-		if !ok && asText.Value() == "" {
-			return lyrics, models.ErrLyricsNotFound
+		asText, err := metadata.Metadata.Get(mpris.KeyAsText)
+		if err != nil {
+			return lyrics, err
 		}
 
-		text, err := cast.ToStringE(asText.Value())
+		text, err := cast.ToStringE(asText)
 		if err != nil {
 			return
 		}
