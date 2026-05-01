@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Nadim147c/go-mpris"
-	"github.com/godbus/dbus/v5"
 )
 
 // URL wraps net.URL to provide JSON marshaling/unmarshaling.
@@ -82,7 +81,7 @@ type Metadata struct {
 	Cover     string   `json:"cover"`
 	URL       *URL     `json:"url"`
 
-	Metadata map[string]dbus.Variant `json:"-"`
+	Metadata mpris.Metadata `json:"-"`
 
 	Volume   float64       `json:"volume"`
 	Position time.Duration `json:"position"`

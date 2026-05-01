@@ -248,7 +248,7 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 	}
 
 	shuffle := should(player.GetShuffle())
-	cover := should(player.GetCoverURL())
+	cover := should(player.GetArtURL())
 	volume := should(player.GetVolume())
 
 	album, err := player.GetAlbum()
