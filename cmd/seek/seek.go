@@ -23,7 +23,8 @@ func init() {
 }
 
 func seek(p *mpris.Player, offset time.Duration) error {
-	slog.Info("Seeking player position",
+	slog.Info(
+		"Seeking player position",
 		"player", p.GetName(),
 		"offset", offset,
 	)
@@ -34,7 +35,8 @@ func seek(p *mpris.Player, offset time.Duration) error {
 }
 
 func setPosition(p *mpris.Player, pos time.Duration) error {
-	slog.Info("Setting player position",
+	slog.Info(
+		"Setting player position",
 		"player", p.GetName(),
 		"position", pos,
 	)
@@ -81,7 +83,8 @@ func seekLyricLine(
 		return fmt.Errorf("failed to convert lyric offset: %w", err)
 	}
 
-	slog.Debug("Parsed player information",
+	slog.Debug(
+		"Parsed player information",
 		"title", info.Title,
 		"artist", info.Artist,
 	)
@@ -116,7 +119,8 @@ func seekLyricLine(
 			)
 		}
 
-		slog.Debug("Seeking to negative index",
+		slog.Debug(
+			"Seeking to negative index",
 			"line-number", lineNumber,
 			"resolved-index", idx,
 		)
@@ -131,12 +135,14 @@ func seekLyricLine(
 		)
 	}
 
-	slog.Debug("Seeking to positive line number",
+	slog.Debug(
+		"Seeking to positive line number",
 		"line-number", lineNumber,
 	)
 	pos = lines[lineNumber].Timestamp
 
-	slog.Info("Setting player position from lyric seek",
+	slog.Info(
+		"Setting player position from lyric seek",
 		"player", p.GetName(),
 		"position", pos,
 		"line-number", lineNumber,
@@ -192,7 +198,8 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to parse player informations: %w", err)
 		}
 
-		slog.Debug("Parsed player information",
+		slog.Debug(
+			"Parsed player information",
 			"title", info.Title,
 			"artist", info.Artist,
 		)

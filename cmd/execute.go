@@ -100,7 +100,8 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			continue
 		}
 
-		slog.Debug("PlayerInfo",
+		slog.Debug(
+			"PlayerInfo",
 			"id", info.ID,
 			"title", info.Title,
 			"artist", info.Artist,
@@ -177,7 +178,8 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		if info.Status == mpris.PlaybackPaused {
 			w.Paused(info)
 			if !w.Is(lastWaybar) {
-				slog.Info("Lyrics",
+				slog.Info(
+					"Lyrics",
 					"line", currentLyric.Text,
 					"line-time", currentLyric.Timestamp.String(),
 					"position", info.Position.String(),
@@ -194,7 +196,8 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		}
 
 		if !w.Is(lastWaybar) {
-			slog.Info("Lyrics",
+			slog.Info(
+				"Lyrics",
 				"line", currentLyric.Text,
 				"line-time", currentLyric.Timestamp.String(),
 				"position", info.Position.String(),

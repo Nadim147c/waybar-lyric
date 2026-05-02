@@ -6,7 +6,6 @@ pkgs.mkShell {
     gnumake
     go
     gofumpt
-    golines
     gopls
     golangci-lint
     waybar

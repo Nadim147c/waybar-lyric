@@ -23,7 +23,8 @@ func init() {
 }
 
 func setPosition(p *mpris.Player, pos time.Duration) error {
-	slog.Info("Setting player position",
+	slog.Info(
+		"Setting player position",
 		"player", p.GetName(),
 		"position", pos,
 	)
@@ -86,7 +87,8 @@ func setLyricPosition(p *mpris.Player, lines models.Lines, s string) error {
 			)
 		}
 
-		slog.Debug("Setting position from positive line number",
+		slog.Debug(
+			"Setting position from positive line number",
 			"line-number", lineNumber,
 		)
 		pos = lines[lineNumber].Timestamp
@@ -160,7 +162,8 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to parse player informations: %w", err)
 		}
 
-		slog.Debug("Parsed player information",
+		slog.Debug(
+			"Parsed player information",
 			"title", info.Title,
 			"artist", info.Artist,
 		)
