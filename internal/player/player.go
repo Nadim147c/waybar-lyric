@@ -1,14 +1,10 @@
 package player
 
 import (
-	"encoding/base64"
 	"errors"
-	"fmt"
-	"hash/fnv"
 	"log/slog"
 	"net/url"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/Nadim147c/go-mpris"
@@ -31,109 +27,6 @@ var (
 	ErrNoPlayer = errors.New("no preferred player")
 )
 
-// hashValues return sha256 hashValues for given string.
-func hashValues(v ...any) string {
-	h := fnv.New128a()
-
-	switch len(v) {
-	case 0:
-		panic("nothing to hash")
-	case 1:
-		fmt.Fprintf(h, "%s", v[0]) //nolint:errcheck // hash writer should never return err
-	default:
-		lastIndex := len(v) - 1
-		for i := range lastIndex {
-			fmt.Fprint(h, v[i]) //nolint:errcheck
-			fmt.Fprint(h, ":")  //nolint:errcheck
-		}
-		fmt.Fprint(h, v[lastIndex]) //nolint:errcheck
-	}
-
-	hash := h.Sum(nil)
-	return base64.RawURLEncoding.EncodeToString(hash)
-}
-
-var reSanitize = regexp.MustCompile(`[^a-zA-Z0-9]+`)
-
-var reInstance = regexp.MustCompile(`\.instance.+$`)
-
-const maxIDLength = 150
-
-func getID(p *mpris.Player, m *Metadata) string {
-	playerName, _ := strings.CutPrefix(p.GetName(), "org.mpris.MediaPlayer2.")
-	playerName = reInstance.ReplaceAllString(playerName, "")
-	playerName = strings.ToLower(playerName)
-
-	urlStr := fixURLNoise(m.URL)
-	hash := hashValues(
-		playerName,
-		m.RawArtist,
-		m.RawTitle,
-		urlStr,
-	)
-
-	asciiName := reSanitize.ReplaceAllString(m.Title, "-")
-	name := strings.Trim(asciiName, "-")
-
-	var id string
-	if name != "" {
-		id = playerName + "-" + hash + "-" + name
-	} else {
-		id = playerName + "-" + hash
-	}
-	if len(id) > maxIDLength {
-		id = id[:maxIDLength]
-	}
-	return id
-}
-
-func fixURLNoise(u *URL) string {
-	host := u.Hostname()
-
-	if strings.HasSuffix(host, "youtube.com") {
-		query := u.Query()
-		for k := range query {
-			if k != "v" { // delete all key except v=<id>
-				delete(query, k)
-			}
-		}
-		u.RawQuery = query.Encode()
-		return u.String()
-	}
-
-	if strings.HasSuffix(host, "spotify.com") {
-		u.RawQuery = ""
-		return u.String()
-	}
-
-	return u.String()
-}
-
-var supportedPlayers = []string{
-	"spotify",
-	"YoutubeMusic",
-	"amarok",
-	"io.bassi.Amberol",
-	"tauon",
-}
-
-func isNonZero[T comparable](v T) bool {
-	var zero T
-	return zero != v
-}
-
-func hasAlbumAndArtists(p *mpris.Player) bool {
-	album, err := p.GetAlbum()
-	if err != nil || album == "" {
-		return false
-	}
-	artists, err := p.GetArtist()
-	if err != nil || len(artists) == 0 {
-		return false
-	}
-	return slices.ContainsFunc(artists, isNonZero)
-}
-
 // Select selects correct parses for player.
 func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	players, err := mpris.List(conn)
@@ -144,15 +37,6 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 
 	if len(players) == 0 {
 		return nil, ErrNoPlayer
-	}
-
-	// First: explicitly supported players
-	for p := range slices.Values(supportedPlayers) {
-		playerName := mpris.BaseInterface + "." + p
-		if slices.Contains(players, playerName) {
-			slog.Debug("Player selected", "name", playerName)
-			return mpris.New(conn, playerName), nil
-		}
 	}
 
 	for _, playerName := range players {
@@ -188,7 +72,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	chromeRe := regexp.MustCompile(`^org\.mpris\.MediaPlayer2\.\w+\.instance\d+$`)
 
 	if config.ExperimentalChromiumSupport {
-		for player := range slices.Values(players) {
+		for _, player := range players {
 			if chromeRe.MatchString(player) {
 				return mpris.New(conn, player), nil
 			}
@@ -198,9 +82,7 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 	return nil, ErrNoPlayer
 }
 
-func should[T any](v T, _ error) T {
-	return v
-}
+func should[T any](v T, _ error) T { return v }
 
 // Precompiled regex patterns.
 var (
@@ -292,10 +174,7 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		return nil, ErrNoArtists
 	}
 
-	trackid, err := player.GetTrackID()
-	if err != nil {
-		return nil, err
-	}
+	trackid := should(player.GetTrackID())
 
 	metadata := &Metadata{
 		Artist:    normalizeArtist(artist),
@@ -316,7 +195,7 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 		Position:  0, // will be updated by UpdatePosition
 	}
 
-	metadata.ID = getID(player, metadata)
+	metadata.ID = computeID(player, metadata)
 
 	err = metadata.UpdatePosition(player)
 	return metadata, err
