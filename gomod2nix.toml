@@ -1,0 +1,174 @@
+schema = 3
+
+[mod]
+  [mod.'charm.land/lipgloss/v2']
+    version = 'v2.0.0-beta.3.0.20251125170225-454007a0ad4e'
+    hash = 'sha256-4MUPUz/xcPuC3kYEzl+v6CEgDhUM+mUe7qZeB39o2RI='
+
+  [mod.'github.com/Nadim147c/fang']
+    version = 'v0.6.0'
+    hash = 'sha256-gfpJoUKaEXGUWlhYRCwwf1AaQHeae73KXnSCmZW8eRw='
+
+  [mod.'github.com/Nadim147c/go-mpris']
+    version = 'v0.10.1-0.20260430035150-283a6be93c96'
+    hash = 'sha256-1E2a7cO1SQdkSiEs1M/RvYEvIZxoJO0qp61lKNiC1pY='
+
+  [mod.'github.com/aymanbagabas/go-osc52/v2']
+    version = 'v2.0.1'
+    hash = 'sha256-6Bp0jBZ6npvsYcKZGHHIUSVSTAMEyieweAX2YAKDjjg='
+
+  [mod.'github.com/carapace-sh/carapace']
+    version = 'v1.11.1'
+    hash = 'sha256-hNv4OnjTtmb8sLRJfxfYdnERk70+rQzcZPUScdKa+zA='
+
+  [mod.'github.com/carapace-sh/carapace-shlex']
+    version = 'v1.1.1'
+    hash = 'sha256-XOMZOCUcpODDKp2E1FPUH9tBPkZTV5Vlr7XW40Q6dQw='
+
+  [mod.'github.com/charmbracelet/colorprofile']
+    version = 'v0.4.1'
+    hash = 'sha256-d/NjM/ybG+bGRRRMMcjbPCFGFS5noZRMaL05Ix5r/II='
+
+  [mod.'github.com/charmbracelet/lipgloss']
+    version = 'v1.1.0'
+    hash = 'sha256-RHsRT2EZ1nDOElxAK+6/DC9XAaGVjDTgPvRh3pyCfY4='
+
+  [mod.'github.com/charmbracelet/log']
+    version = 'v0.4.2'
+    hash = 'sha256-3w1PCM/c4JvVEh2d0sMfv4C77Xs1bPa1Ea84zdynC7I='
+
+  [mod.'github.com/charmbracelet/ultraviolet']
+    version = 'v0.0.0-20260202174740-29fb72879c98'
+    hash = 'sha256-uovovO0cKwbahNS+pwI4I8+qXT84VpuK8XLXlBsfkK0='
+
+  [mod.'github.com/charmbracelet/x/ansi']
+    version = 'v0.11.5'
+    hash = 'sha256-wN1s0rHnHWqQyw0HdJ46diMxaExifyGZNdAg5Wd1Gt4='
+
+  [mod.'github.com/charmbracelet/x/cellbuf']
+    version = 'v0.0.15'
+    hash = 'sha256-0S60XaWhKZG+TB3Kqe1oMn2Okwdq53nym8XayVSHHiM='
+
+  [mod.'github.com/charmbracelet/x/exp/charmtone']
+    version = 'v0.0.0-20260203065841-a1c614051099'
+    hash = 'sha256-Q6ouXSvCucqKj3S7J0r7lyxQ1NpiuF80mgkmgnvtvMw='
+
+  [mod.'github.com/charmbracelet/x/term']
+    version = 'v0.2.2'
+    hash = 'sha256-KF7IU1Luxl/sZP6XjomWB2e3lxSUS4/5AahhapGir/4='
+
+  [mod.'github.com/charmbracelet/x/termios']
+    version = 'v0.1.1'
+    hash = 'sha256-sri3LpHCBhGvnJldDzBxwbbZpeSGZVCJFOUL45uBFds='
+
+  [mod.'github.com/charmbracelet/x/windows']
+    version = 'v0.2.2'
+    hash = 'sha256-CvmE8kAC5wlPSeWjl2hc5xizvGS2FeOLHw84froldkk='
+
+  [mod.'github.com/clipperhouse/displaywidth']
+    version = 'v0.9.0'
+    hash = 'sha256-9CNyTZPSncKQ7Y0my9DR4WYXDjtDHYNL512D691WDAM='
+
+  [mod.'github.com/clipperhouse/stringish']
+    version = 'v0.1.1'
+    hash = 'sha256-Mp8M1CRbwr6dcJ4BD9tXD5I78ZgCFEm0GDxJv0GYReg='
+
+  [mod.'github.com/clipperhouse/uax29/v2']
+    version = 'v2.5.0'
+    hash = 'sha256-Men4JLhiuEtAx8ZSzId5ciRWhud68o3k/B48ppwyxkM='
+
+  [mod.'github.com/go-logfmt/logfmt']
+    version = 'v0.6.1'
+    hash = 'sha256-+gUGmdR/QOsB9qKESLrsbq6tK2VssNT/kDbRFpgrZL4='
+
+  [mod.'github.com/godbus/dbus/v5']
+    version = 'v5.2.2'
+    hash = 'sha256-j+LicPlXcB1R3oVFPa8cd4yVJLpBx+ca5gXmHqOJSN8='
+
+  [mod.'github.com/gofrs/flock']
+    version = 'v0.13.0'
+    hash = 'sha256-5imm90Iqstu+PnSX9RLZMHUG7qW2KX2t3xIpZ2cXSco='
+
+  [mod.'github.com/inconshreveable/mousetrap']
+    version = 'v1.1.0'
+    hash = 'sha256-XWlYH0c8IcxAwQTnIi6WYqq44nOKUylSWxWO/vi+8pE='
+
+  [mod.'github.com/lucasb-eyer/go-colorful']
+    version = 'v1.3.0'
+    hash = 'sha256-6BKrJsfmxie+YFAWzTYVPQfrwjQEXRo+J8LY+50C1BU='
+
+  [mod.'github.com/mattn/go-isatty']
+    version = 'v0.0.20'
+    hash = 'sha256-qhw9hWtU5wnyFyuMbKx+7RB8ckQaFQ8D+8GKPkN3HHQ='
+
+  [mod.'github.com/mattn/go-runewidth']
+    version = 'v0.0.19'
+    hash = 'sha256-GpnbKplhX410Q/eIdknvWbYZgdav1keN+7wNUeOSMHE='
+
+  [mod.'github.com/muesli/cancelreader']
+    version = 'v0.2.2'
+    hash = 'sha256-uEPpzwRJBJsQWBw6M71FDfgJuR7n55d/7IV8MO+rpwQ='
+
+  [mod.'github.com/muesli/mango']
+    version = 'v0.2.0'
+    hash = 'sha256-hEu9ZE2yYBCD2O9KNq8Lgc8dGeCPrTgx/b0tZtTToJk='
+
+  [mod.'github.com/muesli/mango-cobra']
+    version = 'v1.3.0'
+    hash = 'sha256-VPE2A9eyMI63789PcnM5Ltm5PWt/yewWVh7hKtyoe4c='
+
+  [mod.'github.com/muesli/mango-pflag']
+    version = 'v0.2.0'
+    hash = 'sha256-gF9oIQpH9iGFEzDOrfgurtVOd1BjGmSRMkNDnSJClcw='
+
+  [mod.'github.com/muesli/roff']
+    version = 'v0.1.0'
+    hash = 'sha256-0A/M8h0+dSF1NruiGjs4WbfWENFbV3VpyIwJzHEeRlA='
+
+  [mod.'github.com/muesli/termenv']
+    version = 'v0.16.0'
+    hash = 'sha256-hGo275DJlyLtcifSLpWnk8jardOksdeX9lH4lBeE3gI='
+
+  [mod.'github.com/rivo/uniseg']
+    version = 'v0.4.7'
+    hash = 'sha256-rDcdNYH6ZD8KouyyiZCUEy8JrjOQoAkxHBhugrfHjFo='
+
+  [mod.'github.com/spf13/cast']
+    version = 'v1.10.0'
+    hash = 'sha256-dQ6Qqf26IZsa6XsGKP7GDuCj+WmSsBmkBwGTDfue/rk='
+
+  [mod.'github.com/spf13/cobra']
+    version = 'v1.10.2'
+    hash = 'sha256-nbRCTFiDCC2jKK7AHi79n7urYCMP5yDZnWtNVJrDi+k='
+
+  [mod.'github.com/spf13/pflag']
+    version = 'v1.0.10'
+    hash = 'sha256-uDPnWjHpSrzXr17KEYEA1yAbizfcsfo5AyztY2tS6ZU='
+
+  [mod.'github.com/texttheater/golang-levenshtein/levenshtein']
+    version = 'v0.0.0-20200805054039-cae8b0eaed6c'
+    hash = 'sha256-2SFLg9MNeUm6ND/uMJ3T8axHM41Oosgv5imdWzxwVH0='
+
+  [mod.'github.com/xo/terminfo']
+    version = 'v0.0.0-20220910002029-abceb7e1c41e'
+    hash = 'sha256-GyCDxxMQhXA3Pi/TsWXpA8cX5akEoZV7CFx4RO3rARU='
+
+  [mod.'golang.org/x/exp']
+    version = 'v0.0.0-20260112195511-716be5621a96'
+    hash = 'sha256-rWqwXzLvvhcI/ZkOQMqCXMKI5FAuHd9YNoKTXujmboA='
+
+  [mod.'golang.org/x/sync']
+    version = 'v0.19.0'
+    hash = 'sha256-RbRZ+sKZUurOczGhhzOoY/sojTlta3H9XjL4PXX/cno='
+
+  [mod.'golang.org/x/sys']
+    version = 'v0.43.0'
+    hash = 'sha256-aDQXqSTZES2l/132PBxhZN4ywldpPyfm7LByYCHzzwM='
+
+  [mod.'golang.org/x/text']
+    version = 'v0.33.0'
+    hash = 'sha256-XdA6D39ESuJkaaM/SRBnqZzjKUwi6Gbt1Si1nvauTr4='
+
+  [mod.'gopkg.in/yaml.v3']
+    version = 'v3.0.1'
+    hash = 'sha256-FqL9TKYJ0XkNwJFnq9j0VvJ5ZUU1RvH/52h/f5bkYAU='

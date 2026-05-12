@@ -1,34 +1,17 @@
+# Do not call this package with regular arguments
 {
-  buildGoModule,
-  installShellFiles,
+  src,
   lib,
-  nix-update-script,
   stdenv,
-  versionCheckHook,
+  installShellFiles,
+  buildGoApplication,
 }:
-let
-  fs = lib.fileset;
-in
-buildGoModule rec {
+buildGoApplication rec {
   pname = "waybar-lyric";
   version = "0-unstable";
 
-  src = lib.cleanSource (
-    fs.toSource {
-      root = ../.;
-      fileset = fs.unions [
-        ../cmd
-        ../internal
-        ../ascii.go
-        ../ascii.txt
-        ../main.go
-        ../go.mod
-        ../go.sum
-      ];
-    }
-  );
-
-  vendorHash = "sha256-zVyUxpAqsWY3/dXlBhPX/o41UP5Afn38JauQsWUqLMk=";
+  inherit src;
+  modules = ../gomod2nix.toml;
 
   ldflags = [
     "-s"
@@ -37,23 +20,12 @@ buildGoModule rec {
   ];
 
   nativeBuildInputs = [ installShellFiles ];
-  postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
+  postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) /* bash */ ''
     installShellCompletion --cmd waybar-lyric \
       --bash <($out/bin/waybar-lyric _carapace bash) \
       --fish <($out/bin/waybar-lyric _carapace fish) \
       --zsh <($out/bin/waybar-lyric _carapace zsh)
   '';
-
-  doInstallCheck = true;
-  nativeInstallCheckInputs = [ versionCheckHook ];
-  versionCheckProgramArg = "--version";
-  versionCheckKeepEnvironment = [ "XDG_CACHE_HOME" ];
-  preInstallCheck = ''
-    # ERROR Failed to find cache directory
-    export XDG_CACHE_HOME=$(mktemp -d)
-  '';
-
-  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Waybar module for displaying song lyrics";

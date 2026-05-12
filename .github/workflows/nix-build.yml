@@ -1,13 +1,31 @@
-name: Nix build
+name: Nix Flack Check and Build
 on:
   pull_request:
   push:
+    branches:
+      - main
+
 jobs:
-  tests:
+  nix-builds:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: nix build
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          check-latest: true
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Go Mod Tidy
+        run: go mod tidy
+
+      - name: Nix Flake Check
+        run: nix run nixpkgs#nix-fast-build -- --no-nom --skip-cache
+
+      - name: Nix Build
+        run: nix run nixpkgs#nix-fast-build -- --no-nom --skip-cache -f .#packages
