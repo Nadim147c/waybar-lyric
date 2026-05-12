@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: mirror-repository
+        uses: spyoungtech/mirror-action@v0.5.1
+        with:
+          REMOTE: ssh://git@codeberg.org/Nadim147c/waybar-lyric.git
+          GIT_SSH_PRIVATE_KEY: ${{ secrets.CODEBERG_SSH_KEY }}
+          GIT_SSH_KNOWN_HOSTS: ${{ secrets.CODEBERG_KNOWN_HOST }}
