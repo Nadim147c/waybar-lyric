@@ -71,7 +71,8 @@ func Score(track *player.Metadata, result LyricsResult) float64 {
 
 	score := durationScore + titleScore + albumScore + artistsScore
 
-	slog.Debug("SmartMatch",
+	slog.Debug(
+		"SmartMatch",
 		"score", score,
 		"album_want", track.Album,
 		"album_got", result.Album,

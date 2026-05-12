@@ -35,7 +35,8 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 		}
 
 		path := metadata.URL.Path
-		output, err := exec.CommandContext(ctx, ffprobe,
+		output, err := exec.CommandContext(
+			ctx, ffprobe,
 			"-v", "quiet",
 			"-show_streams",
 			"-print_format", "json",
