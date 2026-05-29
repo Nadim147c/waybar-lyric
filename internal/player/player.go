@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/Nadim147c/go-mpris"
-	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/godbus/dbus/v5"
 )
 
@@ -66,16 +65,6 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 			strings.Contains(host, "open.spotify.com") {
 			slog.Debug("Player selected", "name", "firefox")
 			return player, nil
-		}
-	}
-
-	chromeRe := regexp.MustCompile(`^org\.mpris\.MediaPlayer2\.\w+\.instance\d+$`)
-
-	if config.ExperimentalChromiumSupport {
-		for _, player := range players {
-			if chromeRe.MatchString(player) {
-				return mpris.New(conn, player), nil
-			}
 		}
 	}
 

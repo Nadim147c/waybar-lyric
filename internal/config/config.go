@@ -17,8 +17,6 @@ var (
 	FilterProfanity = false
 	LogFilePath     = ""
 
-	ExperimentalChromiumSupport = false
-
 	FilterProfanityType = ""
 
 	Version string
