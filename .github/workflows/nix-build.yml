@@ -1,4 +1,5 @@
 name: Lint, Test and Build using nix
+
 on:
   pull_request:
   push:
@@ -21,11 +22,20 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
 
-      - name: Go Mod Tidy
-        run: go mod tidy
+      - name: Go Mod Download
+        run: go mod download
 
-      - name: Nix Flake Check
-        run: nix run nixpkgs#nix-fast-build -- --no-nom --skip-cache
+      - name: Go Mod Tidy
+        run: nix run .#ci-go-mod-tidy
+
+      - name: Format
+        run: nix run .#ci-format
+
+      - name: Go Lint
+        run: nix run .#ci-lint
+
+      - name: Go Tests
+        run: nix run .#ci-test
 
       - name: Nix Build
-        run: nix run nixpkgs#nix-fast-build -- --no-nom --skip-cache -f .#packages
+        run: nix build .#default

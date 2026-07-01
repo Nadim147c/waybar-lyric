@@ -1,92 +1,86 @@
 {
-
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    gomod2nix = {
-      url = "github:nix-community/gomod2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-  };
-
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   outputs =
+    { self, nixpkgs, ... }:
+    let
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+
+      inherit (nixpkgs) lib;
+
+      perSystem =
+        f:
+        lib.genAttrs systems (
+          system:
+          let
+            pkgs = import nixpkgs { inherit system; };
+          in
+          f { inherit lib system pkgs; }
+        );
+    in
     {
-      nixpkgs,
-      flake-utils,
-      gomod2nix,
-      ...
-    }:
-    (flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-        inherit (pkgs) callPackage lib;
-        gomod = gomod2nix.legacyPackages.${system};
+      packages = perSystem (
+        { pkgs, system, ... }: {
+          waybar-lyric = pkgs.callPackage ./nix/package.nix { };
+          default = self.packages.${system}.waybar-lyric;
 
-        src = lib.cleanSource (
-          lib.fileset.toSource {
-            root = ./.;
-            fileset = lib.fileset.unions [
-              ./.editorconfig
-              ./.golangci.yaml
-              ./cmd
-              ./internal
-              ./ascii.go
-              ./ascii.txt
-              ./main.go
-              ./go.mod
-              ./go.sum
+          ci-test = pkgs.writeShellApplication {
+            name = "test";
+            runtimeInputs = [ pkgs.go ];
+            text = ''
+              go test -v ./...
+            '';
+          };
+
+          ci-lint = pkgs.writeShellApplication {
+            name = "lint";
+            runtimeInputs = [
+              pkgs.go
+              pkgs.gotools
+              pkgs.fd
+              pkgs.deadnix
+              pkgs.golangci-lint
             ];
-          }
-        );
+            text = ''
+              golangci-lint run
+              deadcode -test ./...
+              go vet -v ./...
+              fd --type file '\.nix$' --exec-batch deadnix -f {}
+            '';
+          };
 
-        mkGoTest = lib.mapAttrs' (
-          name: value:
-          lib.nameValuePair name (
-            gomod.buildGoApplication {
-              inherit name src;
-              dontBuild = true;
-              modules = ./gomod2nix.toml;
-              doCheck = true;
-              nativeBuildInputs = with pkgs; [
-                go
-                golangci-lint
-                gofumpt
-                writableTmpDirAsHomeHook
-              ];
-              checkPhase = value;
-              installPhase = ''
-                touch "$out"
-              '';
-            }
+          ci-format = pkgs.writeShellApplication {
+            name = "format";
+            runtimeInputs = [
+              pkgs.gofumpt
+              pkgs.fd
+              pkgs.nixfmt
+            ];
+            text = ''
+              gofumpt -d -e .
+              fd --type file '\.nix$' --exec-batch nixfmt -c {}
+            '';
+          };
 
-          )
-        );
-
-      in
-      {
-        checks = mkGoTest {
-          go-test = /* bash */ ''
-            go test -v ./...
-          '';
-          go-vet = /* bash */ ''
-            go vet -v ./...
-          '';
-          go-lint = /* bash */ ''
-            golangci-lint run
-          '';
-          go-format = /* bash */ ''
-            gofumpt -d -e .
-          '';
-        };
-        packages.default = callPackage ./nix/package.nix {
-          inherit (gomod) buildGoApplication;
-          inherit src;
-        };
-        devShells.default = callPackage ./nix/shell.nix {
-          inherit (gomod) mkGoEnv gomod2nix;
-        };
-      }
-    ));
+          ci-go-mod-tidy = pkgs.writeShellApplication {
+            name = "go-mod-tidy";
+            runtimeInputs = [
+              pkgs.go
+              pkgs.git
+            ];
+            text = ''
+              go mod tidy
+              env PAGER= git diff --exit-code
+            '';
+          };
+        }
+      );
+      devShells = perSystem (
+        { pkgs, ... }: {
+          default = pkgs.callPackage ./nix/shell.nix { };
+        }
+      );
+    };
 }

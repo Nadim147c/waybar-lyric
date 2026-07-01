@@ -1,22 +1,12 @@
-{
-  pkgs,
-  mkGoEnv,
-  gomod2nix,
-  ...
-}:
-let
-  goEnv = mkGoEnv { pwd = ../.; };
-in
+{ pkgs }:
 pkgs.mkShell {
   name = "waybar-lyric";
-  buildInputs = with pkgs; [
-    goEnv
-    gomod2nix
-    nix-fast-build
-    gnumake
-    gofumpt
-    gopls
-    golangci-lint
-    waybar
+  buildInputs = [
+    pkgs.nix-fast-build
+    pkgs.gnumake
+    pkgs.gofumpt
+    pkgs.gopls
+    pkgs.golangci-lint
+    pkgs.waybar
   ];
 }
