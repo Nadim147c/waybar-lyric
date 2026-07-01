@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log/slog"
 	"slices"
 	"strconv"
@@ -17,8 +19,20 @@ import (
 // is in a format parseable by ParseTimestamp. Empty lines and malformed lines
 // are skipped.
 func ParseText(text string) (models.Lines, error) {
+	return ParseReader(strings.NewReader(text))
+}
+
+// ParseText parses a io.Reader containing time-synchronized lyrics in the
+// format [MM:SS.ss]Lyric text and returns a slice of LyricLine structs. Each
+// line in the input should follow the format "[timestamp]lyric text", where
+// timestamp is in a format parseable by ParseTimestamp. Empty lines and
+// malformed lines are skipped.
+func ParseReader(r io.Reader) (models.Lines, error) {
+	scanner := bufio.NewScanner(r)
+
 	lyrics := make(models.Lines, 1) // add empty line a start of the lyrics
-	for line := range strings.SplitSeq(text, "\n") {
+	for scanner.Scan() {
+		line := scanner.Text()
 		if line == "" {
 			continue
 		}
@@ -52,6 +66,9 @@ func ParseText(text string) (models.Lines, error) {
 			Text:      lyricLine,
 		}
 		lyrics = append(lyrics, lyric)
+	}
+	if scanner.Err() != nil {
+		return nil, scanner.Err()
 	}
 
 	if len(lyrics) == 1 {

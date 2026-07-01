@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	importcmd "github.com/Nadim147c/waybar-lyric/cmd/import"
 	initcmd "github.com/Nadim147c/waybar-lyric/cmd/init"
 	"github.com/Nadim147c/waybar-lyric/cmd/next"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
@@ -76,7 +77,9 @@ func init() {
 	Command.AddCommand(previous.Command)
 	Command.AddCommand(seek.Command)
 	Command.AddCommand(volume.Command)
+	Command.AddCommand(importcmd.Command)
 
+	carapace.Gen(importcmd.Command).PositionalAnyCompletion(carapace.ActionFiles())
 	comp := carapace.Gen(Command)
 	comp.Standalone()
 	comp.FlagCompletion(carapace.ActionMap{
