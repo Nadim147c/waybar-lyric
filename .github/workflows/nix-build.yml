@@ -1,4 +1,4 @@
-name: Nix Flack Check and Build
+name: Lint, Test and Build using nix
 on:
   pull_request:
   push:
