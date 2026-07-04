@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -26,11 +27,12 @@ var Provider = provider.NewProvider("local lrc file",
 		// lyrics file path
 		lrcFile := path[:len(path)-len(ext)] + ".lrc"
 
-		b, err := os.ReadFile(lrcFile)
+		f, err := os.Open(lrcFile)
 		if err != nil {
 			return
 		}
+		defer f.Close()
 
-		lyrics.Lines, err = provider.ParseText(string(b))
+		lyrics.Lines, err = lrc.Parse(f)
 		return
 	})

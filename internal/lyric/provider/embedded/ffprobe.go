@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os/exec"
 
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -63,7 +64,7 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 			if !ok || value == "" {
 				continue
 			}
-			lines, err := provider.ParseText(value)
+			lines, err := lrc.ParseText(value)
 			if err != nil {
 				continue
 			}

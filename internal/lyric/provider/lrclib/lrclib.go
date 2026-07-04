@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -104,6 +105,6 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 			}
 		}
 
-		lyrics.Lines, err = provider.ParseText(best.SyncedLyrics)
+		lyrics.Lines, err = lrc.ParseText(best.SyncedLyrics)
 		return lyrics, err
 	})

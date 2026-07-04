@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -26,6 +27,6 @@ var Provider = provider.NewProvider("asText metadata parser",
 			return
 		}
 
-		lyrics.Lines, err = provider.ParseText(text)
+		lyrics.Lines, err = lrc.ParseText(text)
 		return
 	})

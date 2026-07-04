@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/Nadim147c/waybar-lyric/internal/lyric"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cobra"
@@ -50,7 +50,7 @@ var Command = &cobra.Command{
 		}
 		defer f.Close()
 
-		lines, err := provider.ParseReader(f)
+		lines, err := lrc.Parse(f)
 		if err != nil {
 			return err
 		}

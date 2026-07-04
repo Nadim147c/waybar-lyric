@@ -72,14 +72,34 @@ func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 			}
 
 			if i != lastIndex {
-				tooltip.WriteString(line + "\n")
+				tooltip.WriteString(line)
+				tooltip.WriteByte('\n')
 			}
 		}
 
 		tooltip.WriteString("</span>")
 	}
 
-	line := str.Truncate(currentLine.Text)
+	var line string
+	if len(currentLine.Words) > 0 {
+		var b strings.Builder
+		pos := lyrics.Metadata.Position
+		for i, w := range currentLine.Words {
+			if i > 0 {
+				b.WriteByte(' ')
+			}
+			if pos < w.Start {
+				b.WriteString(w.Text)
+			} else {
+				b.WriteString("<b>")
+				b.WriteString(w.Text)
+				b.WriteString("</b>")
+			}
+		}
+		line = b.String()
+	} else {
+		line = str.Truncate(currentLine.Text)
+	}
 
 	class := Class{Lyric, Playing}
 	waybar := &Waybar{
