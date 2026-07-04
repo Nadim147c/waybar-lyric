@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"sync"
 
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/ttml"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
@@ -24,19 +25,45 @@ var Hosts = []string{
 	"https://lyricsplus-seven.vercel.app/",
 }
 
-// Provider is the lrclib lyrics provider.
+// Provider is the youlyplus lyrics provider.
 var Provider = provider.NewProvider("youlyplus",
 	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-		var errs []error
+		errChan := make(chan error)
+		resChan := make(chan models.Lyrics)
+		var wg sync.WaitGroup
+
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
 		for _, host := range Hosts {
-			lyrics, err := genericProvider(ctx, host, metadata)
-			if err != nil {
-				errs = append(errs, err)
-				continue
-			}
-			return lyrics, nil
+			wg.Go(func() {
+				lyrics, err := genericProvider(ctx, host, metadata)
+				if err != nil {
+					errChan <- err
+					return
+				}
+				resChan <- lyrics
+			})
 		}
-		return models.Lyrics{}, errors.Join(errs...)
+
+		var errs []error
+		go func() {
+			for err := range errChan {
+				errs = append(errs, err)
+			}
+		}()
+
+		go func() {
+			wg.Wait()
+			close(errChan)
+			close(resChan)
+		}()
+
+		lyrics, ok := <-resChan
+		if !ok {
+			return models.Lyrics{}, errors.Join(errs...)
+		}
+
+		return lyrics, nil
 	})
 
 func genericProvider(ctx context.Context, host string, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
