@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 )
@@ -41,16 +42,29 @@ func CensorText(input string) string {
 }
 
 func partialCensor(word string) string {
-	chars := []rune(word)
-	if len(chars) <= 3 {
-		return strings.Repeat("*", len(word))
+	if len(word) == 0 {
+		return ""
 	}
-	return string(
-		chars[0],
-	) + strings.Repeat(
-		"*",
-		len(word)-2,
-	) + string(
-		chars[len(word)-1],
-	)
+
+	firstRune, firstSize := utf8.DecodeRuneInString(word)
+	runeCount := utf8.RuneCountInString(word)
+
+	if runeCount <= 3 {
+		return strings.Repeat("*", runeCount)
+	}
+
+	lastRune, lastSize := utf8.DecodeLastRuneInString(word)
+
+	asteriskCount := runeCount - 2
+
+	var sb strings.Builder
+	sb.Grow(firstSize + asteriskCount + lastSize)
+
+	sb.WriteRune(firstRune)
+	for range asteriskCount {
+		sb.WriteByte('*')
+	}
+	sb.WriteRune(lastRune)
+
+	return sb.String()
 }

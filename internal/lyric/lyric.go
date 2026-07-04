@@ -111,9 +111,17 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 
 // CensorLyrics censors the lyrics with given filtering type.
 func CensorLyrics(lyrics models.Lyrics) {
-	if config.FilterProfanity {
-		for i, l := range lyrics.Lines {
-			lyrics.Lines[i].Text = str.CensorText(l.Text)
+	if !config.FilterProfanity {
+		return
+	}
+
+	for i, line := range lyrics.Lines {
+		lyrics.Lines[i].Text = str.CensorText(line.Text)
+		if len(lyrics.Lines[i].Words) == 0 {
+			continue
+		}
+		for j, word := range lyrics.Lines[i].Words {
+			lyrics.Lines[i].Words[j].Text = str.CensorText(word.Text)
 		}
 	}
 }
