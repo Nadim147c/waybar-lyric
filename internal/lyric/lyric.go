@@ -18,6 +18,7 @@ import (
 	lrcFile "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrc_file"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/youlyplus"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
@@ -37,6 +38,7 @@ var providers = []provider.LyricProvider{
 	asText.Provider,
 	lrcFile.Provider,
 	embedded.Provider,
+	youlyplus.Provider,
 	betterlyrics.Provider,
 	simpmusic.Provider,
 	lrclib.Provider,
