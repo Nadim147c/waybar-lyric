@@ -24,15 +24,15 @@
 
 ## Description
 
-`waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
-scrolling lyrics display that syncs with your currently playing music, enhancing your
-desktop music experience. Checkout the [Example](./example/waybar/) waybar
-configuration.
+`waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides
+a scrolling lyrics display that syncs with your currently playing music,
+enhancing your desktop music experience. Checkout the
+[Example](./example/waybar/) waybar configuration.
 
 ## Supported Players
 
-`waybar-lyric` will work with any player that has `xesam:album` and `xesam:artist`
-metadata.
+`waybar-lyric` will work with any player that has `xesam:album` and
+`xesam:artist` metadata.
 
 > Run `playerctl metadata -a` to check if your player has those metadata.
 
@@ -165,8 +165,8 @@ snippet using the built-in command:
 waybar-lyric init
 ```
 
-This will output the proper JSON configuration snippet that you can copy directly
-into your Waybar `config.jsonc` file.
+This will output the proper JSON configuration snippet that you can copy
+directly into your Waybar `config.jsonc` file.
 
 ### Style Example
 
@@ -212,3 +212,12 @@ Contributions are welcome! Feel free to submit a Pull Request.
 ## License
 
 This repository is licensed under [AGPL-3.0](./LICENSE).
+
+### Thanks To
+
+- [SimpMusic](https://github.com/maxrave-dev/SimpMusic) for lyrics API.
+- [BetterLyrics](https://better-lyrics.boidu.dev/) for lyrics API.
+- [YouLy+](./internal/lyric/provider/youlyplus/youlyplus.go) for lyrics API
+- [ArchiveTune](https://github.com/rukamori/ArchiveTune) and
+  [vivi-music](https://github.com/vivizzz007/vivi-music) for providers
+  implementations.
