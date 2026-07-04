@@ -3,11 +3,12 @@ package player
 import (
 	"errors"
 	"log/slog"
-	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/godbus/dbus/v5"
 )
 
@@ -38,32 +39,28 @@ func Select(conn *dbus.Conn) (*mpris.Player, error) {
 		return nil, ErrNoPlayer
 	}
 
+	if len(config.PlayerList) != 0 {
+		stripped := make([]string, len(players))
+		for i, p := range players {
+			stripped[i] = stripPlayerName(p)
+		}
+
+		for _, p := range config.PlayerList {
+			idx := slices.Index(stripped, p)
+			if idx < 0 {
+				continue
+			}
+			player := mpris.New(conn, players[idx])
+			if hasAlbumAndArtists(player) {
+				return player, nil
+			}
+		}
+	}
+
 	for _, playerName := range players {
 		slog.Debug("Checking player url", "for", playerName)
 		player := mpris.New(conn, playerName)
-
 		if hasAlbumAndArtists(player) {
-			return player, nil
-		}
-
-		// Fallback: Firefox only if URL is on music.youtube.com or open.spotify.com
-		if !strings.Contains(strings.ToLower(playerName), "firefox") {
-			continue
-		}
-
-		rawURL, err := player.GetURL()
-		if err != nil || rawURL == "" {
-			slog.Debug("Checking player url", "for", "firefox")
-			continue
-		}
-		trackURL, err := url.Parse(rawURL)
-		if err != nil {
-			continue
-		}
-		host := strings.ToLower(trackURL.Host)
-		if strings.Contains(host, "music.youtube.com") ||
-			strings.Contains(host, "open.spotify.com") {
-			slog.Debug("Player selected", "name", "firefox")
 			return player, nil
 		}
 	}
@@ -188,4 +185,12 @@ func Parse(player *mpris.Player) (*Metadata, error) {
 
 	err = metadata.UpdatePosition(player)
 	return metadata, err
+}
+
+func stripPlayerName(n string) string {
+	if idx := strings.Index(n, ".instance"); idx > 0 {
+		return n[PrefixSize:idx]
+	} else {
+		return n[PrefixSize:]
+	}
 }

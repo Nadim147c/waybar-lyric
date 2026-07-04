@@ -14,6 +14,7 @@ var (
 	MaxTextLength   = 150
 	TooltipLines    = 8
 	TooltipColor    = "#cccccc"
+	PlayerList      = []string{}
 	FilterProfanity = false
 	LogFilePath     = ""
 
