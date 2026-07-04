@@ -1,0 +1,329 @@
+<tt
+	xmlns="http://www.w3.org/ns/ttml"
+	xmlns:itunes="http://music.apple.com/lyric-ttml-internal"
+	xmlns:ttm="http://www.w3.org/ns/ttml#metadata" itunes:timing="Word" xml:lang="en">
+	<head>
+		<metadata>
+			<ttm:agent type="person" xml:id="v1"/>
+			<ttm:agent type="person" xml:id="v2"/>
+			<iTunesMetadata
+				xmlns="http://music.apple.com/lyric-ttml-internal" leadingSilence="0.160">
+				<translations/>
+				<songwriters>
+					<songwriter>John Doe</songwriter>
+					<songwriter>Jane Smith</songwriter>
+					<songwriter>Alex Taylor</songwriter>
+					<songwriter>Morgan Lee</songwriter>
+					<songwriter>Chris Jordan</songwriter>
+				</songwriters>
+			</iTunesMetadata>
+		</metadata>
+	</head>
+	<body dur="3:43.788">
+		<div begin="12.204" end="55.969" itunes:songPart="Verse">
+			<p begin="12.204" end="15.659" itunes:key="L1" ttm:agent="v1">
+				<span begin="12.204" end="15.659">Alpha</span>
+			</p>
+			<p begin="16.627" end="21.675" itunes:key="L2" ttm:agent="v1">
+				<span begin="16.627" end="17.133">Beta</span>
+				<span begin="17.133" end="17.467">gamma</span>
+				<span begin="17.467" end="17.877">delta</span>
+				<span begin="17.877" end="18.228">epsilon</span>
+				<span begin="18.228" end="19.376">zeta</span>
+				<span begin="19.376" end="19.799">eta</span>
+				<span begin="19.799" end="21.675">theta</span>
+			</p>
+			<p begin="22.422" end="27.555" itunes:key="L3" ttm:agent="v1">
+				<span begin="22.422" end="23.464">Iota</span>
+				<span begin="23.464" end="23.797">kappa</span>
+				<span begin="23.797" end="24.047">lambda</span>
+				<span begin="24.047" end="25.112">mu</span>
+				<span begin="25.112" end="27.555">nu</span>
+			</p>
+			<p begin="28.087" end="33.587" itunes:key="L4" ttm:agent="v1">
+				<span begin="28.087" end="29.081">Xi</span>
+				<span begin="29.081" end="29.371">omicron</span>
+				<span begin="29.371" end="29.861">pi</span>
+				<span begin="29.861" end="31.015">rho</span>
+				<span begin="31.015" end="33.587">sigma</span>
+			</p>
+			<p begin="35.425" end="39.386" itunes:key="L5" ttm:agent="v1">
+				<span begin="35.425" end="39.386">Tau</span>
+			</p>
+			<p begin="39.661" end="45.081" itunes:key="L6" ttm:agent="v1">
+				<span begin="39.661" end="40.971">Upsilon</span>
+				<span begin="40.971" end="41.351">phi</span>
+				<span begin="41.351" end="42.770">chi</span>
+				<span begin="42.770" end="43.344">psi</span>
+				<span begin="43.344" end="45.081">omega</span>
+			</p>
+			<p begin="45.507" end="50.242" itunes:key="L7" ttm:agent="v1">
+				<span begin="45.507" end="45.976">Alpha</span>
+				<span begin="45.976" end="46.501">beta</span>
+				<span begin="46.501" end="46.900">gamma</span>
+				<span begin="46.900" end="47.072">delta</span>
+				<span begin="47.072" end="50.242">epsilon</span>
+			</p>
+			<p begin="51.293" end="55.969" itunes:key="L8" ttm:agent="v1">
+				<span begin="51.293" end="51.698">Zeta</span>
+				<span begin="51.698" end="52.924">eta</span>
+				<span begin="52.924" end="55.969">theta</span>
+			</p>
+		</div>
+		<div begin="59.351" end="1:21.700" itunes:songPart="PreChorus">
+			<p begin="59.351" end="1:02.117" itunes:key="L9" ttm:agent="v1">
+				<span begin="59.351" end="59.839">Iota</span>
+				<span begin="59.839" end="1:00.037">kappa</span>
+				<span begin="1:00.037" end="1:00.550">lambda</span>
+				<span begin="1:00.550" end="1:00.782">mu</span>
+				<span begin="1:00.782" end="1:01.249">nu</span>
+				<span begin="1:01.249" end="1:01.464">xi</span>
+				<span begin="1:01.464" end="1:02.117">omicron</span>
+			</p>
+			<p begin="1:02.117" end="1:04.999" itunes:key="L10" ttm:agent="v1">
+				<span begin="1:02.117" end="1:02.682">Pi</span>
+				<span begin="1:02.682" end="1:03.048">rho</span>
+				<span begin="1:03.048" end="1:03.455">sigma</span>
+				<span begin="1:03.455" end="1:03.670">tau</span>
+				<span begin="1:03.670" end="1:04.129">upsilon</span>
+				<span begin="1:04.129" end="1:04.395">phi</span>
+				<span begin="1:04.395" end="1:04.999">chi</span>
+			</p>
+			<p begin="1:04.999" end="1:07.879" itunes:key="L11" ttm:agent="v1">
+				<span begin="1:04.999" end="1:05.749">Psi</span>
+				<span begin="1:05.749" end="1:06.570">omega</span>
+				<span begin="1:06.570" end="1:07.005">alpha</span>
+				<span begin="1:07.005" end="1:07.219">beta</span>
+				<span begin="1:07.219" end="1:07.879">gamma</span>
+			</p>
+			<p begin="1:07.879" end="1:10.463" itunes:key="L12" ttm:agent="v1">
+				<span begin="1:07.879" end="1:08.490">Delta</span>
+				<span begin="1:08.490" end="1:08.659">epsilon</span>
+				<span begin="1:08.659" end="1:10.463">zeta</span>
+			</p>
+			<p begin="1:10.820" end="1:13.671" itunes:key="L13" ttm:agent="v1">
+				<span begin="1:10.820" end="1:11.409">Eta</span>
+				<span begin="1:11.409" end="1:11.653">theta</span>
+				<span begin="1:11.653" end="1:12.379">iota</span>
+				<span begin="1:12.379" end="1:12.837">kappa</span>
+				<span begin="1:12.837" end="1:13.045">lambda</span>
+				<span begin="1:13.045" end="1:13.671">mu</span>
+			</p>
+			<p begin="1:13.671" end="1:16.599" itunes:key="L14" ttm:agent="v1">
+				<span begin="1:13.671" end="1:14.943">Nu</span>
+				<span begin="1:14.943" end="1:15.207">xi</span>
+				<span begin="1:15.207" end="1:15.675">omicron</span>
+				<span begin="1:15.675" end="1:15.932">pi</span>
+				<span begin="1:15.932" end="1:16.599">rho</span>
+			</p>
+			<p begin="1:16.599" end="1:19.524" itunes:key="L15" ttm:agent="v1">
+				<span begin="1:16.599" end="1:17.947">Sigma</span>
+				<span begin="1:17.947" end="1:18.175">tau</span>
+				<span begin="1:18.175" end="1:18.787">upsilon</span>
+				<span begin="1:18.787" end="1:19.524">phi</span>
+			</p>
+			<p begin="1:19.524" end="1:21.700" itunes:key="L16" ttm:agent="v1">
+				<span begin="1:19.524" end="1:20.097">Chi</span>
+				<span begin="1:20.097" end="1:20.349">psi</span>
+				<span begin="1:20.349" end="1:21.700">omega</span>
+			</p>
+		</div>
+		<div begin="1:21.831" end="1:42.794" itunes:songPart="Chorus">
+			<p begin="1:21.831" end="1:24.919" itunes:key="L17" ttm:agent="v1">
+				<span begin="1:21.831" end="1:24.919">Alpha</span>
+			</p>
+			<p begin="1:26.034" end="1:30.660" itunes:key="L18" ttm:agent="v1">
+				<span begin="1:26.034" end="1:26.720">Beta</span>
+				<span begin="1:26.720" end="1:27.267">gamma</span>
+				<span begin="1:27.267" end="1:28.105">delta</span>
+				<span begin="1:28.105" end="1:30.660">epsilon</span>
+			</p>
+			<p begin="1:31.824" end="1:37.084" itunes:key="L19" ttm:agent="v1">
+				<span begin="1:31.824" end="1:32.533">Zeta</span>
+				<span begin="1:32.533" end="1:33.032">eta</span>
+				<span begin="1:33.032" end="1:33.508">theta</span>
+				<span begin="1:33.508" end="1:34.485">iota</span>
+				<span begin="1:34.485" end="1:35.258">kappa</span>
+				<span begin="1:35.258" end="1:37.084">lambda</span>
+			</p>
+			<p begin="1:37.593" end="1:42.794" itunes:key="L20" ttm:agent="v1">
+				<span begin="1:37.593" end="1:38.266">Mu</span>
+				<span begin="1:38.266" end="1:38.873">nu</span>
+				<span begin="1:38.873" end="1:39.230">xi</span>
+				<span begin="1:39.230" end="1:40.318">omicron</span>
+				<span begin="1:40.318" end="1:41.104">pi</span>
+				<span begin="1:41.104" end="1:42.794">rho</span>
+			</p>
+		</div>
+		<div begin="1:45.934" end="2:33.521" itunes:songPart="Verse" ttm:agent="v2">
+			<p begin="1:45.934" end="1:54.060" itunes:key="L21" ttm:agent="v2">
+				<span begin="1:45.934" end="1:47.577">Sigma</span>
+				<span begin="1:47.577" end="1:48.806">tau</span>
+				<span begin="1:48.806" end="1:49.656">upsilon</span>
+				<span begin="1:49.656" end="1:50.522">phi</span>
+				<span begin="1:50.522" end="1:54.060">chi</span>
+			</p>
+			<p begin="1:54.533" end="1:59.285" itunes:key="L22" ttm:agent="v2">
+				<span begin="1:54.533" end="1:54.988">Psi</span>
+				<span begin="1:54.988" end="1:55.807">omega</span>
+				<span begin="1:55.807" end="1:59.285">alpha</span>
+			</p>
+			<p begin="1:59.642" end="2:05.402" itunes:key="L23" ttm:agent="v2">
+				<span begin="1:59.642" end="2:00.147">Beta</span>
+				<span begin="2:00.147" end="2:00.419">gamma</span>
+				<span begin="2:00.419" end="2:01.148">delta</span>
+				<span begin="2:01.148" end="2:05.402">epsilon</span>
+			</p>
+			<p begin="2:08.966" end="2:17.590" itunes:key="L24" ttm:agent="v2">
+				<span begin="2:08.966" end="2:10.531">Zeta</span>
+				<span begin="2:10.531" end="2:11.322">eta</span>
+				<span begin="2:11.322" end="2:12.054">theta</span>
+				<span begin="2:12.054" end="2:12.759">iota</span>
+				<span begin="2:12.759" end="2:13.542">kappa</span>
+				<span begin="2:13.542" end="2:17.590">lambda</span>
+				<span ttm:role="x-bg">
+					<span begin="2:14.355" end="2:14.997">(Mu</span>
+					<span begin="2:14.997" end="2:15.330">nu</span>
+					<span begin="2:15.330" end="2:15.680">xi</span>
+					<span begin="2:15.680" end="2:16.108">omicron</span>
+					<span begin="2:16.108" end="2:16.445">pi</span>
+					<span begin="2:16.445" end="2:17.590">rho)</span>
+				</span>
+			</p>
+			<p begin="2:17.869" end="2:22.922" itunes:key="L25" ttm:agent="v2">
+				<span begin="2:17.869" end="2:18.217">Sigma</span>
+				<span begin="2:18.217" end="2:18.960">tau</span>
+				<span begin="2:18.960" end="2:22.922">upsilon</span>
+				<span ttm:role="x-bg">
+					<span begin="2:20.186" end="2:20.817">(Phi chi</span>
+					<span begin="2:20.817" end="2:21.597">psi</span>
+					<span begin="2:21.597" end="2:21.965">omega</span>
+					<span begin="2:21.965" end="2:22.308">alpha</span>
+					<span begin="2:22.308" end="2:22.922">beta)</span>
+				</span>
+			</p>
+			<p begin="2:22.922" end="2:28.712" itunes:key="L26" ttm:agent="v2">
+				<span begin="2:22.922" end="2:23.295">Gamma</span>
+				<span begin="2:23.295" end="2:23.658">delta</span>
+				<span begin="2:23.658" end="2:24.396">epsilon</span>
+				<span begin="2:24.396" end="2:28.712">zeta</span>
+				<span ttm:role="x-bg">
+					<span begin="2:25.699" end="2:26.539">(Eta,</span>
+					<span begin="2:26.539" end="2:26.822">theta</span>
+					<span begin="2:26.822" end="2:27.221">iota</span>
+					<span begin="2:27.221" end="2:27.455">kappa</span>
+					<span begin="2:27.455" end="2:28.712">lambda)</span>
+				</span>
+			</p>
+			<p begin="2:28.712" end="2:33.521" itunes:key="L27" ttm:agent="v2">
+				<span begin="2:28.712" end="2:29.130">Mu,</span>
+				<span begin="2:29.130" end="2:29.323">nu</span>
+				<span begin="2:29.323" end="2:30.100">xi</span>
+				<span begin="2:30.100" end="2:33.521">omicron</span>
+			</p>
+		</div>
+		<div begin="2:31.774" end="2:54.397" itunes:songPart="PreChorus">
+			<p begin="2:31.774" end="2:34.704" itunes:key="L28" ttm:agent="v1">
+				<span begin="2:31.774" end="2:32.358">Pi</span>
+				<span begin="2:32.358" end="2:32.553">rho</span>
+				<span begin="2:32.553" end="2:33.048">sigma</span>
+				<span begin="2:33.048" end="2:33.332">tau</span>
+				<span begin="2:33.332" end="2:33.750">upsilon</span>
+				<span begin="2:33.750" end="2:33.862">phi</span>
+				<span begin="2:33.862" end="2:34.704">chi</span>
+			</p>
+			<p begin="2:34.704" end="2:37.480" itunes:key="L29" ttm:agent="v1">
+				<span begin="2:34.704" end="2:35.190">Psi</span>
+				<span begin="2:35.190" end="2:35.535">omega</span>
+				<span begin="2:35.535" end="2:35.966">alpha</span>
+				<span begin="2:35.966" end="2:36.195">beta</span>
+				<span begin="2:36.195" end="2:36.524">gamma</span>
+				<span begin="2:36.524" end="2:36.877">delta</span>
+				<span begin="2:36.877" end="2:37.480">epsilon</span>
+			</p>
+			<p begin="2:37.698" end="2:40.379" itunes:key="L30" ttm:agent="v1">
+				<span begin="2:37.698" end="2:38.385">Zeta</span>
+				<span begin="2:38.385" end="2:39.117">eta</span>
+				<span begin="2:39.117" end="2:39.565">theta</span>
+				<span begin="2:39.565" end="2:39.820">iota</span>
+				<span begin="2:39.820" end="2:40.379">kappa</span>
+			</p>
+			<p begin="2:40.379" end="2:42.885" itunes:key="L31" ttm:agent="v1">
+				<span begin="2:40.379" end="2:41.213">Lambda mu</span>
+				<span begin="2:41.213" end="2:42.885">nu</span>
+			</p>
+			<p begin="2:43.443" end="2:46.176" itunes:key="L32" ttm:agent="v1">
+				<span begin="2:43.443" end="2:43.883">Xi</span>
+				<span begin="2:43.883" end="2:44.200">omicron</span>
+				<span begin="2:44.200" end="2:44.957">pi</span>
+				<span begin="2:44.957" end="2:45.292">rho</span>
+				<span begin="2:45.292" end="2:45.483">sigma</span>
+				<span begin="2:45.483" end="2:46.176">tau</span>
+			</p>
+			<p begin="2:46.492" end="2:49.018" itunes:key="L33" ttm:agent="v1">
+				<span begin="2:46.492" end="2:47.537">Upsilon</span>
+				<span begin="2:47.537" end="2:47.789">phi</span>
+				<span begin="2:47.789" end="2:48.198">chi</span>
+				<span begin="2:48.198" end="2:48.453">psi</span>
+				<span begin="2:48.453" end="2:49.018">omega</span>
+			</p>
+			<p begin="2:49.080" end="2:52.005" itunes:key="L34" ttm:agent="v1">
+				<span begin="2:49.080" end="2:50.395">Alpha</span>
+				<span begin="2:50.395" end="2:50.721">beta</span>
+				<span begin="2:50.721" end="2:51.312">gamma</span>
+				<span begin="2:51.312" end="2:52.005">delta</span>
+			</p>
+			<p begin="2:52.005" end="2:54.397" itunes:key="L35" ttm:agent="v1">
+				<span begin="2:52.005" end="2:52.541">Epsilon</span>
+				<span begin="2:52.541" end="2:52.749">zeta</span>
+				<span begin="2:52.749" end="2:54.397">eta</span>
+			</p>
+		</div>
+		<div begin="2:54.397" end="3:15.358" itunes:songPart="Chorus">
+			<p begin="2:54.397" end="2:57.245" itunes:key="L36" ttm:agent="v1">
+				<span begin="2:54.397" end="2:57.245">Theta</span>
+			</p>
+			<p begin="2:58.635" end="3:03.064" itunes:key="L37" ttm:agent="v1">
+				<span begin="2:58.635" end="2:59.213">Iota</span>
+				<span begin="2:59.213" end="2:59.796">kappa</span>
+				<span begin="2:59.796" end="3:00.551">lambda</span>
+				<span begin="3:00.551" end="3:03.064">mu</span>
+			</p>
+			<p begin="3:04.180" end="3:09.366" itunes:key="L38" ttm:agent="v1">
+				<span begin="3:04.180" end="3:05.073">Nu</span>
+				<span begin="3:05.073" end="3:05.503">xi</span>
+				<span begin="3:05.503" end="3:05.894">omicron</span>
+				<span begin="3:05.894" end="3:07.042">pi</span>
+				<span begin="3:07.042" end="3:07.768">rho</span>
+				<span begin="3:07.768" end="3:09.366">sigma</span>
+			</p>
+			<p begin="3:10.056" end="3:15.358" itunes:key="L39" ttm:agent="v1">
+				<span begin="3:10.056" end="3:10.890">Tau</span>
+				<span begin="3:10.890" end="3:11.318">upsilon</span>
+				<span begin="3:11.318" end="3:11.865">phi</span>
+				<span begin="3:11.865" end="3:12.806">chi</span>
+				<span begin="3:12.806" end="3:13.478">psi</span>
+				<span begin="3:13.478" end="3:15.358">omega</span>
+			</p>
+		</div>
+		<div begin="3:17.342" end="3:36.472" itunes:songPart="Outro">
+			<p begin="3:17.342" end="3:18.803" itunes:key="L40" ttm:agent="v1">
+				<span begin="3:17.342" end="3:18.803">Alpha</span>
+			</p>
+			<p begin="3:21.699" end="3:26.897" itunes:key="L41" ttm:agent="v1">
+				<span begin="3:21.699" end="3:22.515">Beta</span>
+				<span begin="3:22.515" end="3:22.793">gamma</span>
+				<span begin="3:22.793" end="3:25.085">delta</span>
+				<span begin="3:25.085" end="3:26.897">epsilon</span>
+			</p>
+			<p begin="3:28.443" end="3:31.926" itunes:key="L42" ttm:agent="v1">
+				<span begin="3:28.443" end="3:30.092">Zeta</span>
+				<span begin="3:30.092" end="3:31.926">eta</span>
+			</p>
+			<p begin="3:34.343" end="3:36.472" itunes:key="L43" ttm:agent="v1">
+				<span begin="3:34.343" end="3:35.260">Theta</span>
+				<span begin="3:35.260" end="3:36.472">iota</span>
+			</p>
+		</div>
+	</body>
+</tt>
