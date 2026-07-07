@@ -20,11 +20,7 @@ func computeID(p *mpris.Player, m *Metadata) string {
 	var buf bytes.Buffer
 
 	playerName := p.GetName()
-	if idx := strings.Index(playerName, ".instance"); idx > 0 {
-		buf.WriteString(playerName[PrefixSize:idx])
-	} else {
-		buf.WriteString(playerName[PrefixSize:])
-	}
+	buf.WriteString(stripPlayerName(playerName))
 	buf.WriteByte('-')
 
 	urlStr := removeUnwantedURLParameters(m.URL)

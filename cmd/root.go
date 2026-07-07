@@ -28,44 +28,31 @@ func assertNoErr(err error) {
 }
 
 func init() {
-	Command.Flags().
-		BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
-	Command.Flags().
-		BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output")
-	Command.Flags().
-		BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
-	Command.Flags().
-		BoolVarP(&config.NoTooltip, "no-tooltip", "T", config.NoTooltip, "Disable tooltip from output")
-	Command.Flags().
-		BoolVarP(&config.PrintInit, "init", "i", config.PrintInit, "Display JSON snippet for waybar/config.jsonc")
-	Command.Flags().
-		BoolVarP(&config.PrintVersion, "version", "V", config.PrintVersion, "Display waybar-lyric version information")
-	Command.Flags().
-		BoolVarP(&config.ToggleState, "toggle", "t", config.ToggleState, "Toggle player state between pause and resume")
-	Command.Flags().
-		IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
-	Command.Flags().
-		IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")
-	Command.Flags().
-		IntVarP(&config.TooltipLines, "tooltip-lines", "L", config.TooltipLines, "Set maximum number of lines in waybar tooltip")
-	Command.Flags().
-		StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
-	Command.Flags().
-		StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
+	flags := Command.Flags()
+	flags.BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
+	flags.BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output")
+	flags.BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
+	flags.BoolVarP(&config.NoTooltip, "no-tooltip", "T", config.NoTooltip, "Disable tooltip from output")
+	flags.BoolVarP(&config.PrintInit, "init", "i", config.PrintInit, "Display JSON snippet for waybar/config.jsonc")
+	flags.BoolVarP(&config.PrintVersion, "version", "V", config.PrintVersion, "Display waybar-lyric version information")
+	flags.BoolVarP(&config.ToggleState, "toggle", "t", config.ToggleState, "Toggle player state between pause and resume")
+	flags.IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
+	flags.IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")
+	flags.IntVarP(&config.TooltipLines, "tooltip-lines", "L", config.TooltipLines, "Set maximum number of lines in waybar tooltip")
+	flags.StringArrayVarP(&config.PlayerList, "players", "p", config.PlayerList, "Set list of players to use (order indicates priority)")
+	flags.StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
+	flags.StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
 
 	assertNoErr(Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'."))
 	assertNoErr(Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'."))
 
 	Command.MarkFlagsMutuallyExclusive("toggle", "init")
 
-	Command.PersistentFlags().
-		BoolP("help", "h", false, "Display help for waybar-lyric")
-	Command.PersistentFlags().
-		BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
-	Command.PersistentFlags().
-		BoolVarP(&config.Verbose, "verbose", "v", config.Verbose, "Enable verbose logging")
-	Command.PersistentFlags().
-		StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
+	perFlags := Command.PersistentFlags()
+	perFlags.BoolP("help", "h", false, "Display help for waybar-lyric")
+	perFlags.BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
+	perFlags.BoolVarP(&config.Verbose, "verbose", "v", config.Verbose, "Enable verbose logging")
+	perFlags.StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
 
 	Command.MarkFlagsMutuallyExclusive("quiet", "verbose")
 	Command.MarkFlagsMutuallyExclusive("quiet", "log-file")
