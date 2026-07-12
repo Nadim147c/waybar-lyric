@@ -3,7 +3,7 @@ NAME = waybar-lyric
 GO      ?= go
 REVIVE  ?= revive
 SRC_BIN ?= bin/$(NAME)
-PREFIX  ?= /usr/local
+PREFIX  ?= $$HOME/.local
 VERSION ?= $(shell git describe --long --tags --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')
 
 BIN_DIR         = $(shell realpath -m "$(PREFIX)/bin")

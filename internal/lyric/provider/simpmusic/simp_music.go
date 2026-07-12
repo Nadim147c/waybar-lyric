@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -67,7 +68,7 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
-			return lyrics, models.ErrLyricsNotFound
+			return lyrics, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
 		}
 
 		if resp.StatusCode >= 300 {
@@ -88,7 +89,7 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		var bestScore float64
 
 		for item := range slices.Values(responseData.Data) {
-			if item.SyncedLyrics == "" {
+			if item.RichSyncLyrics == "" && item.SyncedLyrics == "" {
 				continue
 			}
 			itemScore := provider.Score(metadata, provider.LyricsResult{
@@ -109,7 +110,11 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 				Threshold: provider.MinimumScore,
 			}
 		}
+		text := best.RichSyncLyrics
+		if text == "" {
+			text = best.SyncedLyrics
+		}
 
-		lyrics.Lines, err = provider.ParseText(best.SyncedLyrics)
+		lyrics.Lines, err = lrc.ParseText(text)
 		return lyrics, err
 	})

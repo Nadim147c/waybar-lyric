@@ -1,0 +1,59 @@
+<tt
+	xmlns="http://www.w3.org/ns/ttml"
+	xmlns:itunes="http://music.apple.com/lyric-ttml-internal"
+	xmlns:ttm="http://www.w3.org/ns/ttml#metadata" itunes:timing="Line" xml:lang="en">
+	<head>
+		<metadata>
+			<ttm:agent type="person" xml:id="v1"/>
+			<iTunesMetadata
+				xmlns="http://music.apple.com/lyric-ttml-internal">
+				<translations/>
+				<songwriters>
+					<songwriter>John Doe</songwriter>
+					<songwriter>Jane Smith</songwriter>
+					<songwriter>Alex Taylor</songwriter>
+					<songwriter>Morgan Lee</songwriter>
+					<songwriter>Chris Jordan</songwriter>
+				</songwriters>
+			</iTunesMetadata>
+		</metadata>
+	</head>
+	<body dur="3:21.187">
+		<div begin="25.112" end="46.065" itunes:songPart="Verse">
+			<p begin="25.112" end="30.226" itunes:key="L1" ttm:agent="v1">Alpha beta gamma delta epsilon zeta eta theta iota kappa</p>
+			<p begin="31.060" end="34.093" itunes:key="L2" ttm:agent="v1">Lambda mu nu xi omicron pi</p>
+			<p begin="37.128" end="42.230" itunes:key="L3" ttm:agent="v1">Rho sigma tau upsilon phi, chi, psi, omega alpha beta gamma</p>
+			<p begin="43.097" end="46.065" itunes:key="L4" ttm:agent="v1">Delta epsilon zeta eta theta iota kappa</p>
+		</div>
+		<div begin="47.571" end="59.615" itunes:songPart="PreChorus">
+			<p begin="47.571" end="52.739" itunes:key="L5" ttm:agent="v1">Lambda mu nu, xi omicron pi</p>
+			<p begin="53.512" end="59.615" itunes:key="L6" ttm:agent="v1">Rho sigma tau upsilon phi chi psi omega, alpha</p>
+		</div>
+		<div begin="59.639" end="1:23.674" itunes:songPart="Chorus">
+			<p begin="59.639" end="1:04.724" itunes:key="L7" ttm:agent="v1">Beta gamma, delta epsilon</p>
+			<p begin="1:05.642" end="1:11.610" itunes:key="L8" ttm:agent="v1">Zeta eta theta, iota kappa lambda mu?</p>
+			<p begin="1:11.659" end="1:16.559" itunes:key="L9" ttm:agent="v1">Nu xi, omicron pi</p>
+			<p begin="1:17.676" end="1:23.674" itunes:key="L10" ttm:agent="v1">Rho sigma tau, upsilon phi chi psi?</p>
+		</div>
+		<div begin="1:37.461" end="1:59.600" itunes:songPart="Verse">
+			<p begin="1:37.461" end="1:41.981" itunes:key="L11" ttm:agent="v1">Omega alpha beta gamma delta epsilon zeta eta theta iota</p>
+			<p begin="1:43.216" end="1:48.669" itunes:key="L12" ttm:agent="v1">Kappa lambda mu nu xi omicron pi rho sigma</p>
+			<p begin="1:49.221" end="1:53.941" itunes:key="L13" ttm:agent="v1">Tau upsilon phi chi, psi omega alpha beta gamma delta epsilon</p>
+			<p begin="1:55.108" end="1:59.600" itunes:key="L14" ttm:agent="v1">Zeta eta theta iota kappa, lambda</p>
+		</div>
+		<div begin="1:59.600" end="2:23.688" itunes:songPart="Chorus">
+			<p begin="1:59.600" end="2:04.733" itunes:key="L15" ttm:agent="v1">Beta gamma, delta epsilon</p>
+			<p begin="2:05.683" end="2:11.619" itunes:key="L16" ttm:agent="v1">Zeta eta theta, iota kappa lambda mu?</p>
+			<p begin="2:11.668" end="2:16.571" itunes:key="L17" ttm:agent="v1">Nu xi, omicron pi</p>
+			<p begin="2:17.704" end="2:23.688" itunes:key="L18" ttm:agent="v1">Rho sigma tau, upsilon phi chi psi?</p>
+		</div>
+		<div begin="2:35.630" end="2:47.657" itunes:songPart="PreChorus">
+			<p begin="2:35.630" end="2:40.814" itunes:key="L19" ttm:agent="v1">Lambda mu nu, xi omicron pi</p>
+			<p begin="2:41.657" end="2:47.657" itunes:key="L20" ttm:agent="v1">Rho sigma tau upsilon phi chi psi omega, alpha</p>
+		</div>
+		<div begin="2:53.520" end="3:11.646" itunes:songPart="Outro">
+			<p begin="2:53.520" end="2:59.729" itunes:key="L21" ttm:agent="v1">Rho sigma tau, upsilon phi chi psi?</p>
+			<p begin="3:05.611" end="3:11.646" itunes:key="L22" ttm:agent="v1">Rho sigma tau, upsilon phi chi psi?</p>
+		</div>
+	</body>
+</tt>

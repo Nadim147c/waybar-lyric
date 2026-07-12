@@ -13,10 +13,12 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	asText "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/as_text"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/betterlyrics"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/embedded"
 	lrcFile "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrc_file"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/youlyplus"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 	"github.com/gofrs/flock"
@@ -36,8 +38,10 @@ var providers = []provider.LyricProvider{
 	asText.Provider,
 	lrcFile.Provider,
 	embedded.Provider,
-	lrclib.Provider,
+	youlyplus.Provider,
+	betterlyrics.Provider,
 	simpmusic.Provider,
+	lrclib.Provider,
 }
 
 var reArtists = regexp.MustCompile(`(, | and )`)
@@ -107,9 +111,17 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 
 // CensorLyrics censors the lyrics with given filtering type.
 func CensorLyrics(lyrics models.Lyrics) {
-	if config.FilterProfanity {
-		for i, l := range lyrics.Lines {
-			lyrics.Lines[i].Text = str.CensorText(l.Text)
+	if !config.FilterProfanity {
+		return
+	}
+
+	for i, line := range lyrics.Lines {
+		lyrics.Lines[i].Text = str.CensorText(line.Text)
+		if len(lyrics.Lines[i].Words) == 0 {
+			continue
+		}
+		for j, word := range lyrics.Lines[i].Words {
+			lyrics.Lines[i].Words[j].Text = str.CensorText(word.Text)
 		}
 	}
 }

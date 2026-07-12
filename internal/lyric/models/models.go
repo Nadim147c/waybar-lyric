@@ -12,6 +12,13 @@ import (
 type Line struct {
 	Timestamp time.Duration `json:"time"`
 	Text      string        `json:"line"`
+	Words     []Word        `json:"words,omitzero"`
+}
+
+type Word struct {
+	Start time.Duration `json:"start"`
+	End   time.Duration `json:"end"`
+	Text  string        `json:"word"`
 }
 
 // Lines is a slice of Line.
