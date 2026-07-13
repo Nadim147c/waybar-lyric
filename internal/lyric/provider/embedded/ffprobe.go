@@ -22,17 +22,16 @@ type streams struct {
 // Provider is a lyrics provider that gets lyrics from `LYRICS` tags of local
 // file.
 var Provider = provider.NewProvider("embedded lyrics in audio file",
-	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
+	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
 		lyrics.Metadata = metadata
-		lyrics.NoCache = true
 
 		if metadata.URL.Scheme != "file" {
-			return lyrics, models.ErrLyricsNotFound
+			return lyrics, score, models.ErrLyricsNotFound
 		}
 
 		ffprobe, err := exec.LookPath("ffprobe")
 		if err != nil {
-			return lyrics, err
+			return
 		}
 
 		path := metadata.URL.Path
@@ -44,13 +43,13 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 			path,
 		).Output()
 		if err != nil {
-			return lyrics, err
+			return
 		}
 
 		var result ffprobeOutput
 		err = json.Unmarshal(output, &result)
 		if err != nil {
-			return lyrics, err
+			return
 		}
 
 		tags := map[string]string{}
@@ -69,8 +68,11 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 				continue
 			}
 			lyrics.Lines = lines
-			return lyrics, nil
+			// Match score is always max since player ensure lyrics belongs to the track
+			const MatchScore = 1.0
+			score = provider.CalculateLyricsScore(lyrics.Lines) + MatchScore
+			return lyrics, score, nil
 		}
 
-		return lyrics, models.ErrLyricsNotFound
+		return lyrics, score, models.ErrLyricsNotFound
 	})

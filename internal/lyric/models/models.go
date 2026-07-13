@@ -26,8 +26,6 @@ type Lines []Line
 
 // Lyrics is the synchronized structured lyrics.
 type Lyrics struct {
-	// NoCache indicates that lyrics shouldn't be cached on disk.
-	NoCache  bool             `json:"-"`
 	Metadata *player.Metadata `json:"metadata,omitempty"`
 	Lines    Lines            `json:"lyrics"`
 }

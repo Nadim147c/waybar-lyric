@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
@@ -11,31 +12,47 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
-// FetchFunc fetches lyrics from a lyrics source.
-type FetchFunc func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error)
-
-// LyricProvider is fetches lyrics from a lyrics source.
-type LyricProvider interface {
-	Name() string
-	Fetch(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error)
+// Result is the lyrics result
+type Result struct {
+	Lyrics   models.Lyrics
+	Provider string
+	Score    float64 // extra score for word-level synced lyrics
+	Err      error
 }
+
+// CalculateLyricsScore returns score of lines sync.
+func CalculateLyricsScore(lines models.Lines) float64 {
+	size := len(lines)
+	var count int
+	for _, line := range lines {
+		if len(line.Words) != 0 {
+			count++
+		}
+	}
+	return float64(count) / float64(size)
+}
+
+// FetchFunc fetches lyrics from a lyrics source.
+type FetchFuncResult func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error)
+
+// FetchFunc fetches lyrics from a lyrics source.
+type FetchFunc func(ctx context.Context, wg *sync.WaitGroup, metadata *player.Metadata, out chan<- Result)
 
 // NewProvider creates a new LyricProvider.
-func NewProvider(name string, f FetchFunc) LyricProvider {
-	return &provider{name, f}
+func NewProvider(name string, f FetchFuncResult) *LyricProvider {
+	var wrapper FetchFunc = func(ctx context.Context, wg *sync.WaitGroup, metadata *player.Metadata, out chan<- Result) {
+		var res Result
+		res.Provider = name
+		res.Lyrics, res.Score, res.Err = f(ctx, metadata)
+		out <- res
+		wg.Done()
+	}
+	return &LyricProvider{name, wrapper}
 }
 
-type provider struct {
-	name string
-	f    FetchFunc
-}
-
-func (p *provider) Name() string {
-	return p.name
-}
-
-func (p *provider) Fetch(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-	return p.f(ctx, metadata)
+type LyricProvider struct {
+	Name  string
+	Fetch FetchFunc
 }
 
 // MinimumScore is the minimum score required to consider the downloaded lyrics
