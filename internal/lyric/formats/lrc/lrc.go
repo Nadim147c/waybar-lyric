@@ -68,31 +68,30 @@ func Parse(r io.Reader) (models.Lines, error) {
 			temp = temp[idx+tsLen:]
 		}
 
-		lastWordIdx := len(words) - 1
-		for i := range words {
-			words[i].Text = strings.TrimSpace(words[i].Text)
-			if i != lastWordIdx {
-				words[i].Text += " "
+		withSpace := make([]models.Word, len(words)*2)
+		var sb strings.Builder
+		if len(words) != 0 {
+			withSpace = append(withSpace, words[0])
+			for _, word := range words[1:] {
+				withSpace = append(withSpace, models.Word{
+					Start: -1, End: -1,
+					Text: " ",
+				})
+				sb.WriteByte(' ')
+
+				word.Text = strings.TrimSpace(word.Text)
+				withSpace = append(withSpace, word)
+				sb.WriteString(word.Text)
 			}
+		} else {
+			sb.WriteString(remaining)
 		}
 
 		for _, ts := range timestamps {
-			var wordsCopy []models.Word
-			var sb strings.Builder
-			if len(words) > 0 {
-				wordsCopy = make([]models.Word, len(words))
-				copy(wordsCopy, words)
-				for _, word := range words {
-					sb.WriteString(word.Text)
-				}
-			} else {
-				sb.WriteString(remaining)
-			}
-
 			lyrics = append(lyrics, models.Line{
 				Timestamp: ts,
 				Text:      remaining,
-				Words:     wordsCopy,
+				Words:     slices.Clone(withSpace),
 			})
 		}
 	}

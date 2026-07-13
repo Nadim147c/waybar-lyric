@@ -124,14 +124,12 @@ var Zero = &Waybar{}
 type Status string
 
 const (
-	//revive:disable
 	Music   Status = "music"
 	Lyric   Status = "lyric"
 	Playing Status = "playing"
 	Paused  Status = "paused"
 	NoLyric Status = "no_lyric"
 	Getting Status = "getting"
-	//revive:enable
 )
 
 // Class is waybar class which can be either a string slice or string.
@@ -187,7 +185,7 @@ func (w *Waybar) Encode() {
 	}
 }
 
-// Is indecates if current Waybar is equal to another Waybar.
+// Is indicates if current Waybar is equal to another Waybar.
 func (w *Waybar) Is(other *Waybar) bool {
 	if w == other {
 		return true

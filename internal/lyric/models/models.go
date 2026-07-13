@@ -21,6 +21,8 @@ type Word struct {
 	Text  string        `json:"word"`
 }
 
+func (w Word) IsSeparator() bool { return w.Start == -1 && w.End == -1 }
+
 // Lines is a slice of Line.
 type Lines []Line
 
