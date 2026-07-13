@@ -41,7 +41,7 @@ var Command = &cobra.Command{
 
 		info, err := player.Parse(mp)
 		if err != nil {
-			return fmt.Errorf("failed to parse player informations: %w", err)
+			return fmt.Errorf("failed to parse player information: %w", err)
 		}
 
 		f, err := os.Open(args[0])
