@@ -75,16 +75,18 @@ func Parse(r io.Reader) (models.Lines, error) {
 			if err != nil {
 				continue
 			}
+			var space string
+			if s := span.NextSibling; s != nil && s.Type == html.TextNode {
+				space = s.Data
+			}
 			words = append(words, models.Word{
 				Start: start,
 				End:   end,
-				Text:  span.FirstChild.Data,
+				Text:  span.FirstChild.Data + space,
 			})
-			buf.WriteByte(' ')
 			buf.WriteString(span.FirstChild.Data)
+			buf.WriteString(space)
 		}
-
-		buf.ReadByte() //nolint // remove the first byte
 
 		lines = append(lines, models.Line{
 			Timestamp: start,

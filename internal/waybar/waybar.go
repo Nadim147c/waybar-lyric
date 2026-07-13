@@ -84,10 +84,7 @@ func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 	if len(currentLine.Words) > 0 {
 		var b strings.Builder
 		pos := lyrics.Metadata.Position
-		for i, w := range currentLine.Words {
-			if i > 0 {
-				b.WriteByte(' ')
-			}
+		for _, w := range currentLine.Words {
 			if pos < w.Start {
 				b.WriteString(w.Text)
 			} else {
