@@ -2,6 +2,7 @@ package lyric
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -34,7 +35,7 @@ const flockPathPrefix = "/tmp/waybar-lyric"
 // duration.
 //
 // TODO: add cli flag for user defined duration.
-const lyricTimeout = 10 * time.Second
+const lyricTimeout = 15 * time.Second
 
 var providers = []*provider.LyricProvider{
 	asText.Provider,
@@ -113,7 +114,16 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 
 	if len(results) == 0 {
 		Store.NotFound(metadata.ID)
-		return models.Lyrics{}, models.ErrLyricsNotFound
+		return models.Lyrics{}, errors.Join(errs...)
+	}
+
+	errs = slices.DeleteFunc(errs, func(e error) bool {
+		return errors.Is(e, context.Canceled)
+	})
+
+	err = errors.Join(errs...)
+	if err != nil {
+		slog.Info("One or more provider failed (it is normal)", "error", err)
 	}
 
 	best := provider.Result{Score: math.Inf(-1)} //nolint
