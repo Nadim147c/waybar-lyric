@@ -12,7 +12,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
-// Result is the lyrics result
+// Result is the lyrics result.
 type Result struct {
 	Lyrics   models.Lyrics
 	Provider string
