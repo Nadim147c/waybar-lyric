@@ -84,10 +84,7 @@ func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 	if len(currentLine.Words) > 0 {
 		var b strings.Builder
 		pos := lyrics.Metadata.Position
-		for i, w := range currentLine.Words {
-			if i > 0 {
-				b.WriteByte(' ')
-			}
+		for _, w := range currentLine.Words {
 			if pos < w.Start {
 				b.WriteString(w.Text)
 			} else {
@@ -127,14 +124,12 @@ var Zero = &Waybar{}
 type Status string
 
 const (
-	//revive:disable
 	Music   Status = "music"
 	Lyric   Status = "lyric"
 	Playing Status = "playing"
 	Paused  Status = "paused"
 	NoLyric Status = "no_lyric"
 	Getting Status = "getting"
-	//revive:enable
 )
 
 // Class is waybar class which can be either a string slice or string.
@@ -190,7 +185,7 @@ func (w *Waybar) Encode() {
 	}
 }
 
-// Is indecates if current Waybar is equal to another Waybar.
+// Is indicates if current Waybar is equal to another Waybar.
 func (w *Waybar) Is(other *Waybar) bool {
 	if w == other {
 		return true

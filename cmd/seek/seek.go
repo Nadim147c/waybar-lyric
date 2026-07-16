@@ -195,7 +195,7 @@ var Command = &cobra.Command{
 		// Fetch lyrics for line-based seeking
 		info, err := player.Parse(mp)
 		if err != nil {
-			return fmt.Errorf("failed to parse player informations: %w", err)
+			return fmt.Errorf("failed to parse player information: %w", err)
 		}
 
 		slog.Debug(

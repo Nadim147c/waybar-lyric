@@ -66,31 +66,8 @@ func Parse(r io.Reader) (models.Lines, error) {
 			continue
 		}
 
-		var buf bytes.Buffer
-
-		spans := getElemens(filterWords, p)
-		words := make([]models.Word, 0, len(spans))
-		for _, span := range spans {
-			start, end, err := getTimestamps(span.Attr)
-			if err != nil {
-				continue
-			}
-			words = append(words, models.Word{
-				Start: start,
-				End:   end,
-				Text:  span.FirstChild.Data,
-			})
-			buf.WriteByte(' ')
-			buf.WriteString(span.FirstChild.Data)
-		}
-
-		buf.ReadByte() //nolint // remove the first byte
-
-		lines = append(lines, models.Line{
-			Timestamp: start,
-			Text:      buf.String(),
-			Words:     words,
-		})
+		line := collectLineWords(p, start)
+		lines = append(lines, line)
 	}
 
 	if len(lines) == 1 {
@@ -98,6 +75,52 @@ func Parse(r io.Reader) (models.Lines, error) {
 	}
 
 	return lines, nil
+}
+
+func collectLineWords(parentNode *html.Node, lineStart time.Duration) models.Line {
+	var buf bytes.Buffer
+
+	words := make([]models.Word, 0, 5)
+	for node := parentNode.FirstChild; node != nil; node = node.NextSibling {
+		if node.Type == html.TextNode {
+			words = append(words, models.Word{
+				Start: -1, End: -1,
+				Text: node.Data,
+			})
+			buf.WriteString(node.Data)
+			continue
+		}
+
+		start, end, err := getTimestamps(node.Attr)
+		if err != nil {
+			continue
+		}
+
+		if isBackground(node) {
+			line := collectLineWords(node, start)
+			buf.WriteString(line.Text)
+			words = append(words, line.Words...)
+			continue
+		}
+
+		if node.FirstChild == nil {
+			continue
+		}
+
+		text := node.FirstChild.Data
+
+		words = append(words, models.Word{
+			Start: start, End: end,
+			Text: text,
+		})
+		buf.WriteString(text)
+	}
+
+	return models.Line{
+		Timestamp: lineStart,
+		Text:      buf.String(),
+		Words:     words,
+	}
 }
 
 func getTimestamps(attrs []html.Attribute) (start, end time.Duration, err error) {
@@ -156,12 +179,13 @@ func filterLines(node *html.Node) bool {
 	return node.Type == html.ElementNode && node.Data == "p"
 }
 
-func filterWords(node *html.Node) bool {
-	return node.Type == html.ElementNode &&
-		node.Data == "span" &&
-		node.FirstChild != nil &&
-		node.FirstChild.Type == html.TextNode &&
-		node.FirstChild.NextSibling == nil
+func isBackground(n *html.Node) bool {
+	if n == nil {
+		return false
+	}
+	return slices.ContainsFunc(n.Attr, func(a html.Attribute) bool {
+		return a.Key == "ttm:role" && a.Val == "x-bg"
+	})
 }
 
 func getElemens(pred func(*html.Node) bool, nodes ...*html.Node) []*html.Node {

@@ -7,11 +7,18 @@ import (
 
 	"github.com/Nadim147c/waybar-lyric/internal/lyric"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/ttml"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cobra"
 )
+
+var format = "lrc"
+
+func init() {
+	Command.Flags().StringVarP(&format, "format", "f", format, "Lyrics file format (lrc or ttml)")
+}
 
 // Command is the track skipper command.
 var Command = &cobra.Command{
@@ -41,7 +48,7 @@ var Command = &cobra.Command{
 
 		info, err := player.Parse(mp)
 		if err != nil {
-			return fmt.Errorf("failed to parse player informations: %w", err)
+			return fmt.Errorf("failed to parse player information: %w", err)
 		}
 
 		f, err := os.Open(args[0])
@@ -50,12 +57,23 @@ var Command = &cobra.Command{
 		}
 		defer f.Close()
 
-		lines, err := lrc.Parse(f)
-		if err != nil {
-			return err
+		var lines models.Lines
+		switch format {
+		case "lrc":
+			lines, err = lrc.Parse(f)
+			if err != nil {
+				return err
+			}
+		case "ttml":
+			lines, err = ttml.Parse(f)
+			if err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("unknown lyrics format: %v", format)
 		}
 
-		m := models.Lyrics{Metadata: info, Lines: lines} //nolint:exhaustruct
+		m := models.Lyrics{Metadata: info, Lines: lines}
 
 		return lyric.Store.Save(m)
 	},

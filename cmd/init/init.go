@@ -14,7 +14,7 @@ var snippet string
 // Command is the init command.
 var Command = &cobra.Command{
 	Use:          "init",
-	Short:        "Print json snippet for waybar confg",
+	Short:        "Print json snippet for waybar config",
 	SilenceUsage: true,
 	// Disable flag parsing
 	DisableFlagParsing: true,

@@ -3,7 +3,6 @@ package youlyplus
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -26,52 +25,27 @@ var Hosts = []string{
 }
 
 // Provider is the youlyplus lyrics provider.
-var Provider = provider.NewProvider("youlyplus",
-	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-		errChan := make(chan error)
-		resChan := make(chan models.Lyrics)
-		var wg sync.WaitGroup
-
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
+var Provider = &provider.LyricProvider{
+	Name: "youlyplus",
+	Fetch: func(ctx context.Context, wg *sync.WaitGroup, metadata *player.Metadata, out chan<- provider.Result) {
+		defer wg.Done()
 		for _, host := range Hosts {
 			wg.Go(func() {
-				lyrics, err := genericProvider(ctx, host, metadata)
-				if err != nil {
-					errChan <- err
-					return
-				}
-				resChan <- lyrics
+				var res provider.Result
+				res.Provider = fmt.Sprintf("youlyplus [%s]", host)
+				res.Lyrics, res.Score, res.Err = genericProvider(ctx, host, metadata)
+				out <- res
 			})
 		}
+	},
+}
 
-		var errs []error
-		go func() {
-			for err := range errChan {
-				errs = append(errs, err)
-			}
-		}()
-
-		go func() {
-			wg.Wait()
-			close(errChan)
-			close(resChan)
-		}()
-
-		lyrics, ok := <-resChan
-		if !ok {
-			return models.Lyrics{}, errors.Join(errs...)
-		}
-
-		return lyrics, nil
-	})
-
-func genericProvider(ctx context.Context, host string, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
+func genericProvider(ctx context.Context, host string, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
 	lyrics.Metadata = metadata
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, host, nil)
 	if err != nil {
-		return lyrics, err
+		return lyrics, score, err
 	}
 
 	params := url.Values{}
@@ -86,16 +60,16 @@ func genericProvider(ctx context.Context, host string, metadata *player.Metadata
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return models.Lyrics{}, err
+		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return lyrics, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
+		return lyrics, score, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
 	}
 
 	if resp.StatusCode >= 300 {
-		return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+		return lyrics, score, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
 	var data struct {
@@ -103,19 +77,21 @@ func genericProvider(ctx context.Context, host string, metadata *player.Metadata
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return lyrics, err
+		return lyrics, score, err
 	}
 
 	l, err := ttml.GetTextLength(data.TTML)
 	if err != nil {
-		return lyrics, err
+		return lyrics, score, err
 	}
 
+	durScore := match.Durations(metadata.Length, l)
 	const minimumScore = 0.67
-	if score := match.Durations(metadata.Length, l); score < minimumScore {
-		return lyrics, &models.LyricsMatchScoreError{Score: score, Threshold: minimumScore}
+	if durScore < minimumScore {
+		return lyrics, score, &models.LyricsMatchScoreError{Score: durScore, Threshold: minimumScore}
 	}
 
 	lyrics.Lines, err = ttml.ParseText(data.TTML)
-	return lyrics, err
+	score = provider.CalculateLyricsScore(lyrics.Lines) + durScore
+	return lyrics, score, err
 }

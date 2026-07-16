@@ -6,6 +6,7 @@ run:
 linters:
   disable:
     - wrapcheck
+    - nakedret
   enable:
     - bodyclose
     - errname
@@ -24,7 +25,6 @@ linters:
     - mirror
     - misspell
     - modernize
-    - nakedret
     - nestif
     - nilerr
     - noctx

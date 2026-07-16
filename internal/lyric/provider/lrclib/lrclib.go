@@ -34,7 +34,7 @@ const Endpoint = "https://lrclib.net/api/search"
 
 // Provider is a lyrics provider that fetches lyrics from lrclib.
 var Provider = provider.NewProvider("lrclib lyrics api",
-	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
+	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
 		lyrics.Metadata = metadata
 
 		params := url.Values{}
@@ -46,7 +46,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
 		if err != nil {
-			return lyrics, err
+			return lyrics, score, err
 		}
 
 		req.URL.RawQuery = params.Encode()
@@ -57,26 +57,26 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		client := http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			return models.Lyrics{}, err
+			return
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
-			return lyrics, models.ErrLyricsNotFound
+			return lyrics, score, models.ErrLyricsNotFound
 		}
 
 		if resp.StatusCode >= 300 {
-			return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+			return lyrics, score, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 		}
 
 		var items []response
 		err = json.NewDecoder(resp.Body).Decode(&items)
 		if err != nil {
-			return lyrics, fmt.Errorf("failed to parse body: %w", err)
+			return lyrics, score, fmt.Errorf("failed to parse body: %w", err)
 		}
 
 		if len(items) == 0 {
-			return lyrics, models.ErrSearchResultEmpty
+			return lyrics, score, models.ErrSearchResultEmpty
 		}
 
 		var best *response
@@ -99,12 +99,13 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		}
 
 		if bestScore < provider.MinimumScore {
-			return lyrics, &models.LyricsMatchScoreError{
+			return lyrics, score, &models.LyricsMatchScoreError{
 				Score:     bestScore,
 				Threshold: provider.MinimumScore,
 			}
 		}
 
 		lyrics.Lines, err = lrc.ParseText(best.SyncedLyrics)
-		return lyrics, err
+		score = provider.CalculateLyricsScore(lyrics.Lines) + min(bestScore/5, 1)
+		return lyrics, score, err
 	})

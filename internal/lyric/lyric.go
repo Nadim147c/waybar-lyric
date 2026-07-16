@@ -2,11 +2,14 @@ package lyric
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"regexp"
 	"slices"
+	"sync"
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
@@ -32,9 +35,9 @@ const flockPathPrefix = "/tmp/waybar-lyric"
 // duration.
 //
 // TODO: add cli flag for user defined duration.
-const lyricTimeout = 10 * time.Second
+const lyricTimeout = 15 * time.Second
 
-var providers = []provider.LyricProvider{
+var providers = []*provider.LyricProvider{
 	asText.Provider,
 	lrcFile.Provider,
 	embedded.Provider,
@@ -49,7 +52,6 @@ var reArtists = regexp.MustCompile(`(, | and )`)
 // GetLyrics returns lyrics for given *player.Info.
 func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
 	lyrics := models.Lyrics{
-		NoCache:  false,
 		Metadata: metadata,
 		Lines:    nil,
 	}
@@ -80,33 +82,72 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 		metadata.RawArtist = reArtists.ReplaceAllLiteralString(metadata.RawArtist, ", ")
 	}
 
-	for p := range slices.Values(providers) {
-		ctx, cancel := context.WithTimeout(ctx, lyricTimeout)
-		defer cancel()
-		lyrics, err := p.Fetch(ctx, metadata)
-		if err != nil {
-			slog.Warn("Provider failed", "name", p.Name(), "error", err)
-			continue
-		}
+	var wg sync.WaitGroup
 
-		slog.Info("Lyrics found", "provider", p.Name())
+	ctx, cancel = context.WithTimeout(ctx, lyricTimeout)
+	defer cancel()
 
-		slices.SortFunc(lyrics.Lines, func(a, b models.Line) int {
-			return int((a.Timestamp - b.Timestamp) / time.Millisecond)
-		})
-
-		if err := Store.Save(lyrics); err != nil {
-			return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
-		}
-
-		CensorLyrics(lyrics)
-		TruncateLyrics(lyrics)
-		return lyrics, nil
+	out := make(chan provider.Result, 10)
+	for _, p := range providers {
+		wg.Add(1)
+		go p.Fetch(ctx, &wg, metadata, out)
 	}
 
-	Store.NotFound(metadata.ID)
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
 
-	return models.Lyrics{}, models.ErrLyricsNotFound
+	var errs []error
+	var results []provider.Result
+
+	for res := range out {
+		if res.Err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		results = append(results, res)
+		if res.Score > 1 {
+			cancel()
+		}
+	}
+
+	if len(results) == 0 {
+		Store.NotFound(metadata.ID)
+		return models.Lyrics{}, errors.Join(errs...)
+	}
+
+	errs = slices.DeleteFunc(errs, func(e error) bool {
+		return errors.Is(e, context.Canceled)
+	})
+
+	err = errors.Join(errs...)
+	if err != nil {
+		slog.Info("One or more provider failed (it is normal)", "error", err)
+	}
+
+	best := provider.Result{Score: math.Inf(-1)} //nolint
+
+	for _, res := range results {
+		if res.Score > best.Score {
+			best = res
+		}
+	}
+	slog.Info("lyrics found", "provider", best.Provider, "word-sync", best.Score > 1)
+
+	lyrics = best.Lyrics
+
+	slices.SortFunc(lyrics.Lines, func(a, b models.Line) int {
+		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
+	})
+
+	if err := Store.Save(lyrics); err != nil {
+		return lyrics, fmt.Errorf("failed to save lyrics cache json: %w", err)
+	}
+
+	CensorLyrics(lyrics)
+	TruncateLyrics(lyrics)
+	return lyrics, nil
 }
 
 // CensorLyrics censors the lyrics with given filtering type.

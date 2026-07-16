@@ -42,18 +42,18 @@ type data struct {
 
 // Provider is the lrclib lyrics provider.
 var Provider = provider.NewProvider("simpmusic lyrics",
-	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
+	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
 		lyrics.Metadata = metadata
 
 		vidoeID := metadata.URL.Query().Get("v")
 		isYoutubeVideo := strings.HasSuffix(metadata.URL.Hostname(), "youtube.com")
 		if !isYoutubeVideo || vidoeID == "" {
-			return lyrics, models.ErrLyricsNotFound
+			return lyrics, score, models.ErrLyricsNotFound
 		}
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
 		if err != nil {
-			return lyrics, err
+			return
 		}
 
 		req.URL.Path = "/v1/" + vidoeID
@@ -63,26 +63,26 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		client := http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			return models.Lyrics{}, err
+			return
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
-			return lyrics, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
+			return lyrics, score, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
 		}
 
 		if resp.StatusCode >= 300 {
-			return lyrics, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+			return lyrics, score, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 		}
 
 		var responseData response
 		err = json.NewDecoder(resp.Body).Decode(&responseData)
 		if err != nil {
-			return lyrics, fmt.Errorf("failed to parse body: %w", err)
+			return lyrics, score, fmt.Errorf("failed to parse body: %w", err)
 		}
 
 		if !responseData.Success {
-			return lyrics, models.ErrSearchResultEmpty
+			return lyrics, score, models.ErrSearchResultEmpty
 		}
 
 		var best *data
@@ -105,7 +105,7 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		}
 
 		if bestScore < provider.MinimumScore {
-			return lyrics, &models.LyricsMatchScoreError{
+			return lyrics, score, &models.LyricsMatchScoreError{
 				Score:     bestScore,
 				Threshold: provider.MinimumScore,
 			}
@@ -116,5 +116,6 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 		}
 
 		lyrics.Lines, err = lrc.ParseText(text)
-		return lyrics, err
+		score = provider.CalculateLyricsScore(lyrics.Lines) + min(bestScore/5, 1)
+		return lyrics, score, err
 	})

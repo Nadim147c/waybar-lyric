@@ -13,13 +13,12 @@ import (
 
 // Provider is a lyrics provider that gets lyrics from touan's asText metadata.
 var Provider = provider.NewProvider("asText metadata parser",
-	func(_ context.Context, metadata *player.Metadata) (lyrics models.Lyrics, err error) {
+	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
 		lyrics.Metadata = metadata
-		lyrics.NoCache = true
 
 		asText, err := metadata.Metadata.Get(mpris.KeyAsText)
 		if err != nil {
-			return lyrics, err
+			return lyrics, score, err
 		}
 
 		text, err := cast.ToStringE(asText)
@@ -28,5 +27,10 @@ var Provider = provider.NewProvider("asText metadata parser",
 		}
 
 		lyrics.Lines, err = lrc.ParseText(text)
+
+		// Match score is always max since player ensure lyrics belongs to the track
+		const MatchScore = 1.0
+		score = provider.CalculateLyricsScore(lyrics.Lines) + MatchScore
+
 		return
 	})
