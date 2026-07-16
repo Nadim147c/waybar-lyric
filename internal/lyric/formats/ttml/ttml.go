@@ -104,6 +104,10 @@ func collectLineWords(parentNode *html.Node, lineStart time.Duration) models.Lin
 		}
 
 		if node.FirstChild == nil {
+			words = append(words, models.Word{
+				Start: start, End: end,
+				Text: "",
+			})
 			continue
 		}
 
