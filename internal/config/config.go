@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 var (
 	PrintInit       = false
 	NoTooltip       = false
@@ -17,6 +19,7 @@ var (
 	PlayerList      = []string{}
 	FilterProfanity = false
 	LogFilePath     = ""
+	UpdateInterval  = time.Second / 4
 
 	FilterProfanityType = ""
 

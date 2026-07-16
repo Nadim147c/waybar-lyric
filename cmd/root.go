@@ -43,6 +43,7 @@ func init() {
 	flags.StringArrayVarP(&config.PlayerList, "players", "p", config.PlayerList, "Set list of players to use (order indicates priority)")
 	flags.StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
 	flags.StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
+	flags.DurationVarP(&config.UpdateInterval, "update-interval", "u", config.UpdateInterval, "Set updated interval of lyrics")
 
 	assertNoErr(Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'."))
 	assertNoErr(Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'."))

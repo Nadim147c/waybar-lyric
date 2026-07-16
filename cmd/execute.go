@@ -18,9 +18,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// SleepTime is the time for main fixed loop.
-const SleepTime = time.Second / 4
-
 // Execute is the main function for lyrics.
 func Execute(cmd *cobra.Command, _ []string) error {
 	if !config.Quiet {
@@ -42,7 +39,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	defer cancel()
 
 	// Main loop
-	ticker := time.NewTicker(SleepTime)
+	ticker := time.NewTicker(config.UpdateInterval)
 	defer ticker.Stop()
 
 	var mprisPlayer *mpris.Player
@@ -50,7 +47,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 		p, err := player.Select(conn)
 		if err != nil {
 			slog.Debug("Failed to select player", "error", err)
-			time.Sleep(SleepTime)
+			time.Sleep(config.UpdateInterval)
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
