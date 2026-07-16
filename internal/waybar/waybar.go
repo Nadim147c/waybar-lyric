@@ -27,6 +27,8 @@ func ForPlayer(p *player.Metadata) *Waybar {
 	}
 
 	waybar := &Waybar{
+		ID:         p.ID,
+		Player:     p.Player,
 		Class:      Class{alt},
 		Text:       text,
 		Alt:        alt,
@@ -100,6 +102,8 @@ func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 
 	class := Class{Lyric, Playing}
 	waybar := &Waybar{
+		ID:      lyrics.Metadata.ID,
+		Player:  lyrics.Metadata.Player,
 		Alt:     Lyric,
 		Class:   class,
 		Text:    line,
@@ -137,6 +141,8 @@ type Class []Status
 
 // Waybar is structure data which can be printed to for waybar output.
 type Waybar struct {
+	ID         string           `json:"id"`
+	Player     string           `json:"player"`
 	Text       string           `json:"text"`
 	Class      Class            `json:"class,omitempty"`
 	Alt        Status           `json:"alt,omitempty"`

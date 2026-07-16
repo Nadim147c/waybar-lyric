@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Nadim147c/waybar-lyric/cmd/export"
 	importcmd "github.com/Nadim147c/waybar-lyric/cmd/import"
 	initcmd "github.com/Nadim147c/waybar-lyric/cmd/init"
 	"github.com/Nadim147c/waybar-lyric/cmd/next"
@@ -65,6 +66,7 @@ func init() {
 	Command.AddCommand(seek.Command)
 	Command.AddCommand(volume.Command)
 	Command.AddCommand(importcmd.Command)
+	Command.AddCommand(export.Command)
 
 	carapace.Gen(importcmd.Command).PositionalAnyCompletion(carapace.ActionFiles())
 	comp := carapace.Gen(Command)

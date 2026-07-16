@@ -119,6 +119,8 @@ func Parse(r io.Reader) (models.Lines, error) {
 
 const tsLen = len("[mm:ss.xx]")
 
+const oneHundredthOfSecond = time.Second / 100
+
 func getNextTimestamp(start, end byte, s string) (int, time.Duration) {
 	startIndex := strings.IndexByte(s, start)
 	if startIndex < 0 {
@@ -137,7 +139,6 @@ func getNextTimestamp(start, end byte, s string) (int, time.Duration) {
 		return -1, 0
 	}
 
-	const oneHundredthOfSecond = time.Second / 100
 	return startIndex, mm*time.Minute + ss*time.Second + xx*oneHundredthOfSecond
 }
 
