@@ -30,6 +30,7 @@ type Lines []Line
 type Lyrics struct {
 	Metadata *player.Metadata `json:"metadata,omitempty"`
 	Lines    Lines            `json:"lyrics"`
+	Score    float64          `json:"score"`
 }
 
 var (

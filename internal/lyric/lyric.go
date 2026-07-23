@@ -107,7 +107,7 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 			continue
 		}
 		results = append(results, res)
-		if res.Score > 1 {
+		if res.Lyrics.Score > 1 {
 			cancel()
 		}
 	}
@@ -126,16 +126,18 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 		slog.Info("One or more provider failed (it is normal)", "error", err)
 	}
 
-	best := provider.Result{Score: math.Inf(-1)} //nolint
+	var best provider.Result
+	best.Lyrics.Score = math.Inf(-1)
 
 	for _, res := range results {
-		if res.Score > best.Score {
+		if res.Lyrics.Score > best.Lyrics.Score {
 			best = res
 		}
 	}
-	slog.Info("lyrics found", "provider", best.Provider, "word-sync", best.Score > 1)
+	slog.Info("lyrics found", "provider", best.Provider, "word-sync", best.Lyrics.Score > 1)
 
 	lyrics = best.Lyrics
+	lyrics.Metadata = metadata
 
 	slices.SortFunc(lyrics.Lines, func(a, b models.Line) int {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)

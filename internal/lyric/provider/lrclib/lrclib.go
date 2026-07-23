@@ -34,9 +34,7 @@ const Endpoint = "https://lrclib.net/api/search"
 
 // Provider is a lyrics provider that fetches lyrics from lrclib.
 var Provider = provider.NewProvider("lrclib lyrics api",
-	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
-		lyrics.Metadata = metadata
-
+	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
 		params := url.Values{}
 		params.Set("track_name", metadata.RawTitle)
 		params.Set("artist_name", metadata.RawArtist)
@@ -46,7 +44,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
 		if err != nil {
-			return lyrics, score, err
+			return models.Lyrics{}, err
 		}
 
 		req.URL.RawQuery = params.Encode()
@@ -57,26 +55,26 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		client := http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			return
+			return models.Lyrics{}, err
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
-			return lyrics, score, models.ErrLyricsNotFound
+			return models.Lyrics{}, models.ErrLyricsNotFound
 		}
 
 		if resp.StatusCode >= 300 {
-			return lyrics, score, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+			return models.Lyrics{}, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 		}
 
 		var items []response
 		err = json.NewDecoder(resp.Body).Decode(&items)
 		if err != nil {
-			return lyrics, score, fmt.Errorf("failed to parse body: %w", err)
+			return models.Lyrics{}, err
 		}
 
 		if len(items) == 0 {
-			return lyrics, score, models.ErrSearchResultEmpty
+			return models.Lyrics{}, models.ErrSearchResultEmpty
 		}
 
 		var best *response
@@ -99,13 +97,18 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 		}
 
 		if bestScore < provider.MinimumScore {
-			return lyrics, score, &models.LyricsMatchScoreError{
+			return models.Lyrics{}, &models.LyricsMatchScoreError{
 				Score:     bestScore,
 				Threshold: provider.MinimumScore,
 			}
 		}
 
-		lyrics.Lines, err = lrc.ParseText(best.SyncedLyrics)
-		score = provider.CalculateLyricsScore(lyrics.Lines) + min(bestScore/5, 1)
-		return lyrics, score, err
+		lines, err := lrc.ParseText(best.SyncedLyrics)
+		if err != nil {
+			return models.Lyrics{}, err
+		}
+
+		score := provider.CalculateLyricsScore(lines) + min(bestScore/5, 1)
+
+		return models.Lyrics{Lines: lines, Score: score}, nil
 	})

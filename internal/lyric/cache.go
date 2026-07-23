@@ -94,7 +94,7 @@ func (s *Cache) getCacheDir() (string, error) {
 
 // CacheExtension is the extension use for cache files.
 // 1 is the version counter to invalidated old caches.
-const CacheExtension = ".2.json.gz"
+const CacheExtension = ".3.json.gz"
 
 // SaveCache saves the lyrics to cache.
 func (s *Cache) saveCache(lyrics models.Lyrics) error {
