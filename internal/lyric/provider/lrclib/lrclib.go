@@ -96,19 +96,12 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 			}
 		}
 
-		if bestScore < provider.MinimumScore {
-			return models.Lyrics{}, &models.LyricsMatchScoreError{
-				Score:     bestScore,
-				Threshold: provider.MinimumScore,
-			}
-		}
-
 		lines, err := lrc.ParseText(best.SyncedLyrics)
 		if err != nil {
 			return models.Lyrics{}, err
 		}
 
-		score := provider.CalculateLyricsScore(lines) + min(bestScore/5, 1)
+		score := min(bestScore/5, 1)
 
-		return models.Lyrics{Lines: lines, Score: score}, nil
+		return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 	})

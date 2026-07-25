@@ -102,12 +102,6 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 			}
 		}
 
-		if bestScore < provider.MinimumScore {
-			return models.Lyrics{}, &models.LyricsMatchScoreError{
-				Score:     bestScore,
-				Threshold: provider.MinimumScore,
-			}
-		}
 		text := best.RichSyncLyrics
 		if text == "" {
 			text = best.SyncedLyrics
@@ -118,7 +112,7 @@ var Provider = provider.NewProvider("simpmusic lyrics",
 			return models.Lyrics{}, err
 		}
 
-		score := provider.CalculateLyricsScore(lines) + min(bestScore/5, 1)
+		score := min(bestScore/5, 1)
 
-		return models.Lyrics{Lines: lines, Score: score}, nil
+		return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 	})

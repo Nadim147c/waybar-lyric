@@ -28,9 +28,10 @@ type Lines []Line
 
 // Lyrics is the synchronized structured lyrics.
 type Lyrics struct {
-	Metadata *player.Metadata `json:"metadata,omitempty"`
-	Lines    Lines            `json:"lyrics"`
-	Score    float64          `json:"score"`
+	Metadata   *player.Metadata `json:"metadata,omitempty"`
+	LastUpdate time.Time        `json:"last_update"`
+	Lines      Lines            `json:"lyrics"`
+	Score      float64          `json:"score"`
 }
 
 var (

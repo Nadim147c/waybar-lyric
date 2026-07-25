@@ -56,7 +56,7 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 			maps.Copy(tags, stream.Tags)
 		}
 
-		var errs []error
+		errs := []error{models.ErrLyricsNotFound}
 
 		keys := []string{"LYRICS", "SYLT", "USLT", "lyrics", "lyrics-eng"}
 		for _, key := range keys {
@@ -69,11 +69,9 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 				errs = append(errs, err)
 				continue
 			}
-			// Match score is always max since player ensure lyrics belongs to the track
-			const MatchScore = 1.0
-			score := provider.CalculateLyricsScore(lines) + MatchScore
 
-			return models.Lyrics{Lines: lines, Score: score}, nil
+			const score = 1.0
+			return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 		}
 
 		return models.Lyrics{}, errors.Join(errs...)

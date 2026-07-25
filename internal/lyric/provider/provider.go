@@ -19,8 +19,8 @@ type Result struct {
 	Err      error
 }
 
-// CalculateLyricsScore returns score of lines sync.
-func CalculateLyricsScore(lines models.Lines) float64 {
+// WordLevelSyncScore returns score of lines sync.
+func WordLevelSyncScore(lines models.Lines) float64 {
 	size := len(lines)
 	var count int
 	for _, line := range lines {

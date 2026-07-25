@@ -84,18 +84,12 @@ func genericProvider(ctx context.Context, host string, metadata *player.Metadata
 		return models.Lyrics{}, err
 	}
 
-	durScore := match.Durations(metadata.Length, dur)
-	const minimumScore = 0.67
-	if durScore < minimumScore {
-		return models.Lyrics{}, &models.LyricsMatchScoreError{Score: durScore, Threshold: minimumScore}
-	}
+	score := match.Durations(metadata.Length, dur)
 
 	lines, err := ttml.ParseText(data.TTML)
 	if err != nil {
 		return models.Lyrics{}, err
 	}
 
-	score := provider.CalculateLyricsScore(lines) + durScore
-
-	return models.Lyrics{Lines: lines, Score: score}, nil
+	return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 }

@@ -54,7 +54,7 @@ var Command = &cobra.Command{
 			id = info.ID
 		}
 
-		lyrics, err := lyric.Store.Load(id)
+		lyrics, err := lyric.Store.Load(id, true)
 		if err != nil {
 			return err
 		}

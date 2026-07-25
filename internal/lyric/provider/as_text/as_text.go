@@ -29,9 +29,7 @@ var Provider = provider.NewProvider("asText metadata parser",
 			return models.Lyrics{}, err
 		}
 
-		// Match score is always max since player ensure lyrics belongs to the track
-		const MatchScore = 1.0
-		score := provider.CalculateLyricsScore(lines) + MatchScore
+		const score = 1.0
 
-		return models.Lyrics{Lines: lines, Score: score}, nil
+		return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 	})

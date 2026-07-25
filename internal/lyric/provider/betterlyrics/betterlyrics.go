@@ -3,6 +3,7 @@ package betterlyrics
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -15,67 +16,95 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
-// Endpoint is simpmusic lyrics api endpoint.
-const Endpoint = "https://lyrics-api.boidu.dev/getLyrics"
+const (
+	LyricsAPIEndpoint = "https://lyrics-api.boidu.dev/getLyrics"
+	UnisonEndpoint    = "https://unison.boidu.dev/lyrics"
+)
 
-// Provider is the lrclib lyrics provider.
-var Provider = provider.NewProvider("betterlyrics",
+// Provider is the betterlyrics lyrics provider.
+var Provider = provider.NewProvider(
+	"betterlyrics",
 	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, Endpoint, nil)
-		if err != nil {
-			return models.Lyrics{}, err
+		primary, primaryErr := genericProvider(ctx, LyricsAPIEndpoint, metadata)
+		if primaryErr == nil && provider.WordLevelSyncScore(primary.Lines) > 0 {
+			return primary, nil
 		}
 
-		params := url.Values{}
-		params.Set("song", metadata.RawTitle)
-		params.Set("artist", metadata.Artist)
-		params.Set("album", metadata.Album)
-		params.Set("duration", fmt.Sprintf("%.0f", metadata.Length.Seconds()))
-		req.URL.RawQuery = params.Encode()
+		// Fetch fallback lyrics
+		fallback, fallbackErr := genericProvider(ctx, UnisonEndpoint, metadata)
 
-		slog.Info("Fetching lyrics from betterlyrics api", "url", req.URL.String())
-
-		client := http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			return models.Lyrics{}, err
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode == http.StatusNotFound {
-			return models.Lyrics{}, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
+		if primaryErr != nil && fallbackErr != nil {
+			return models.Lyrics{}, errors.Join(primaryErr, fallbackErr)
 		}
 
-		if resp.StatusCode >= 300 {
-			return models.Lyrics{}, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+		if primaryErr != nil {
+			return fallback, nil
+		}
+		if fallbackErr != nil {
+			return primary, nil
 		}
 
-		var data struct {
-			TTML string `json:"ttml"`
+		// Both calls succeeded: Pick the best result
+		if provider.WordLevelSyncScore(fallback.Lines) > 0 {
+			return fallback, nil
+		}
+		if primary.Score > fallback.Score {
+			return primary, nil
 		}
 
-		err = json.NewDecoder(resp.Body).Decode(&data)
-		if err != nil {
-			return models.Lyrics{}, err
-		}
+		return fallback, nil
+	},
+)
 
-		l, err := ttml.GetTextLength(data.TTML)
-		if err != nil {
-			return models.Lyrics{}, err
-		}
+func genericProvider(ctx context.Context, endpoint string, metadata *player.Metadata) (models.Lyrics, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return models.Lyrics{}, err
+	}
 
-		durScore := match.Durations(metadata.Length, l)
-		const minimumScore = 0.67
-		if durScore < minimumScore {
-			return models.Lyrics{}, &models.LyricsMatchScoreError{Score: durScore, Threshold: minimumScore}
-		}
+	params := url.Values{}
+	params.Set("song", metadata.RawTitle)
+	params.Set("artist", metadata.Artist)
+	params.Set("album", metadata.Album)
+	req.URL.RawQuery = params.Encode()
 
-		lines, err := ttml.ParseText(data.TTML)
-		if err != nil {
-			return models.Lyrics{}, err
-		}
+	slog.Info("Fetching lyrics from betterlyrics api", "url", req.URL.String())
 
-		score := provider.CalculateLyricsScore(lines) + durScore
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return models.Lyrics{}, err
+	}
+	defer resp.Body.Close()
 
-		return models.Lyrics{Lines: lines, Score: score}, nil
-	})
+	if resp.StatusCode == http.StatusNotFound {
+		return models.Lyrics{}, fmt.Errorf("[%d] %w", resp.StatusCode, models.ErrLyricsNotFound)
+	}
+
+	if resp.StatusCode >= 300 {
+		return models.Lyrics{}, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+	}
+
+	var data struct {
+		TTML string `json:"ttml"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return models.Lyrics{}, err
+	}
+
+	l, err := ttml.GetTextLength(data.TTML)
+	if err != nil {
+		return models.Lyrics{}, err
+	}
+
+	score := match.Durations(metadata.Length, l)
+
+	lines, err := ttml.ParseText(data.TTML)
+	if err != nil {
+		return models.Lyrics{}, err
+	}
+
+	return models.Lyrics{Lines: lines, Score: score}, nil //nolint
+}
