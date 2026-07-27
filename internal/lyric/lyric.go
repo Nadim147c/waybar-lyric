@@ -113,7 +113,9 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 			errs = append(errs, err)
 			continue
 		}
-		results = append(results, res)
+		if res.Lyrics.Score > 0.5 {
+			results = append(results, res)
+		}
 	}
 
 	if len(results) == 0 {
