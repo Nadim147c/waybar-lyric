@@ -117,7 +117,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			continue
 		}
 
-		lyrics, err := lyric.Store.Load(info.ID)
+		lyrics, err := lyric.Store.Load(info.ID, false)
 		if err != nil {
 			w := waybar.ForPlayer(info)
 			w.Alt = waybar.Getting

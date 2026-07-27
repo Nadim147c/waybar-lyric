@@ -57,12 +57,16 @@ func (s *Cache) Save(lyrics models.Lyrics) error {
 }
 
 // Load loads lyrics from Cache.
-func (s *Cache) Load(id string) (models.Lyrics, error) {
+func (s *Cache) Load(id string, diskCache bool) (models.Lyrics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if v, ok := s.store[id]; ok {
 		return v, nil
+	}
+
+	if !diskCache {
+		return models.Lyrics{}, models.ErrLyricsNotFound
 	}
 
 	lyrics, err := s.loadCache(id)
@@ -94,7 +98,7 @@ func (s *Cache) getCacheDir() (string, error) {
 
 // CacheExtension is the extension use for cache files.
 // 1 is the version counter to invalidated old caches.
-const CacheExtension = ".2.json.gz"
+const CacheExtension = ".4.json.gz"
 
 // SaveCache saves the lyrics to cache.
 func (s *Cache) saveCache(lyrics models.Lyrics) error {

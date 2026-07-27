@@ -16,12 +16,11 @@ import (
 type Result struct {
 	Lyrics   models.Lyrics
 	Provider string
-	Score    float64 // extra score for word-level synced lyrics
 	Err      error
 }
 
-// CalculateLyricsScore returns score of lines sync.
-func CalculateLyricsScore(lines models.Lines) float64 {
+// WordLevelSyncScore returns score of lines sync.
+func WordLevelSyncScore(lines models.Lines) float64 {
 	size := len(lines)
 	var count int
 	for _, line := range lines {
@@ -33,7 +32,7 @@ func CalculateLyricsScore(lines models.Lines) float64 {
 }
 
 // FetchFunc fetches lyrics from a lyrics source.
-type FetchFuncResult func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error)
+type FetchFuncResult func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error)
 
 // FetchFunc fetches lyrics from a lyrics source.
 type FetchFunc func(ctx context.Context, wg *sync.WaitGroup, metadata *player.Metadata, out chan<- Result)
@@ -43,7 +42,7 @@ func NewProvider(name string, f FetchFuncResult) *LyricProvider {
 	var wrapper FetchFunc = func(ctx context.Context, wg *sync.WaitGroup, metadata *player.Metadata, out chan<- Result) {
 		var res Result
 		res.Provider = name
-		res.Lyrics, res.Score, res.Err = f(ctx, metadata)
+		res.Lyrics, res.Err = f(ctx, metadata)
 		out <- res
 		wg.Done()
 	}

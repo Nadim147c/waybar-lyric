@@ -35,9 +35,15 @@ const flockPathPrefix = "/tmp/waybar-lyric"
 // duration.
 //
 // TODO: add cli flag for user defined duration.
-const lyricTimeout = 15 * time.Second
+const lyricTimeout = 30 * time.Second
+
+var cacheProvider = provider.NewProvider("cache",
+	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
+		return Store.Load(metadata.ID, true)
+	})
 
 var providers = []*provider.LyricProvider{
+	cacheProvider,
 	asText.Provider,
 	lrcFile.Provider,
 	embedded.Provider,
@@ -49,12 +55,18 @@ var providers = []*provider.LyricProvider{
 
 var reArtists = regexp.MustCompile(`(, | and )`)
 
+const MinimumUpgradeInterval = 30 * time.Hour
+
 // GetLyrics returns lyrics for given *player.Info.
 func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
-	lyrics := models.Lyrics{
-		Metadata: metadata,
-		Lines:    nil,
+	uri := metadata.ID
+	lyrics, err := Store.Load(uri, true)
+	if err == nil && lyrics.Score > 1 ||
+		time.Since(lyrics.LastUpdate) < MinimumUpgradeInterval {
+		return lyrics, nil
 	}
+
+	// we try to upgrade
 
 	lockCtx, cancel := context.WithTimeout(ctx, lyricTimeout)
 	defer cancel()
@@ -64,18 +76,13 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	locked, err := flocker.TryLockContext(lockCtx, 200*time.Millisecond)
 	if err != nil {
 		Store.NotFound(metadata.ID)
-		return lyrics, fmt.Errorf("failed to take flock for id(%s): %v", metadata.ID, err)
+		return models.Lyrics{}, fmt.Errorf("failed to take flock for id(%s): %v", metadata.ID, err)
 	}
 	defer os.Remove(lockFile)
 	defer flocker.Close()
 
 	if !locked {
-		return lyrics, fmt.Errorf("another instance is trying to download: id(%s)", metadata.ID)
-	}
-
-	uri := metadata.ID
-	if l, err := Store.Load(uri); err == nil {
-		return l, nil
+		return models.Lyrics{}, fmt.Errorf("another instance is trying to download: id(%s)", metadata.ID)
 	}
 
 	if metadata.URL != nil || metadata.URL.Hostname() == "music.youtube.com" {
@@ -106,9 +113,8 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 			errs = append(errs, err)
 			continue
 		}
-		results = append(results, res)
-		if res.Score > 1 {
-			cancel()
+		if res.Lyrics.Score > 0.5 {
+			results = append(results, res)
 		}
 	}
 
@@ -126,16 +132,27 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 		slog.Info("One or more provider failed (it is normal)", "error", err)
 	}
 
-	best := provider.Result{Score: math.Inf(-1)} //nolint
+	var best provider.Result
+	score := math.Inf(-1)
 
-	for _, res := range results {
-		if res.Score > best.Score {
-			best = res
+	filtered := filterOutliers(results, 0.50)
+
+	for _, result := range filtered {
+		lyricsScore := provider.WordLevelSyncScore(result.Lyrics.Lines)
+		currentScore := result.Lyrics.Score + lyricsScore
+		if currentScore > score {
+			best = result
+			score = currentScore
 		}
 	}
-	slog.Info("lyrics found", "provider", best.Provider, "word-sync", best.Score > 1)
+
+	best.Lyrics.Score = score
+
+	slog.Info("lyrics found", "provider", best.Provider, "word-sync", best.Lyrics.Score > 1)
 
 	lyrics = best.Lyrics
+	lyrics.Metadata = metadata
+	lyrics.LastUpdate = time.Now()
 
 	slices.SortFunc(lyrics.Lines, func(a, b models.Line) int {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)

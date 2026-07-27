@@ -3,6 +3,7 @@ package embedded
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"maps"
 	"os/exec"
 
@@ -22,16 +23,14 @@ type streams struct {
 // Provider is a lyrics provider that gets lyrics from `LYRICS` tags of local
 // file.
 var Provider = provider.NewProvider("embedded lyrics in audio file",
-	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
-		lyrics.Metadata = metadata
-
+	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
 		if metadata.URL.Scheme != "file" {
-			return lyrics, score, models.ErrLyricsNotFound
+			return models.Lyrics{}, models.ErrLyricsNotFound
 		}
 
 		ffprobe, err := exec.LookPath("ffprobe")
 		if err != nil {
-			return
+			return models.Lyrics{}, err
 		}
 
 		path := metadata.URL.Path
@@ -43,19 +42,21 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 			path,
 		).Output()
 		if err != nil {
-			return
+			return models.Lyrics{}, err
 		}
 
 		var result ffprobeOutput
 		err = json.Unmarshal(output, &result)
 		if err != nil {
-			return
+			return models.Lyrics{}, err
 		}
 
 		tags := map[string]string{}
 		for _, stream := range result.Streams {
 			maps.Copy(tags, stream.Tags)
 		}
+
+		errs := []error{models.ErrLyricsNotFound}
 
 		keys := []string{"LYRICS", "SYLT", "USLT", "lyrics", "lyrics-eng"}
 		for _, key := range keys {
@@ -65,14 +66,13 @@ var Provider = provider.NewProvider("embedded lyrics in audio file",
 			}
 			lines, err := lrc.ParseText(value)
 			if err != nil {
+				errs = append(errs, err)
 				continue
 			}
-			lyrics.Lines = lines
-			// Match score is always max since player ensure lyrics belongs to the track
-			const MatchScore = 1.0
-			score = provider.CalculateLyricsScore(lyrics.Lines) + MatchScore
-			return lyrics, score, nil
+
+			const score = 1.0
+			return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 		}
 
-		return lyrics, score, models.ErrLyricsNotFound
+		return models.Lyrics{}, errors.Join(errs...)
 	})

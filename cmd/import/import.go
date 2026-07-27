@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/lyric"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
@@ -73,7 +74,12 @@ var Command = &cobra.Command{
 			return fmt.Errorf("unknown lyrics format: %v", format)
 		}
 
-		m := models.Lyrics{Metadata: info, Lines: lines}
+		m := models.Lyrics{
+			Metadata:   info,
+			LastUpdate: time.Now(),
+			Score:      1,
+			Lines:      lines,
+		}
 
 		return lyric.Store.Save(m)
 	},

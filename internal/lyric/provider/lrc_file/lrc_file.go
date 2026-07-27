@@ -13,11 +13,9 @@ import (
 
 // Provider is a lyrics provider that gets lyrics from touan's asText metadata.
 var Provider = provider.NewProvider("local .lrc file",
-	func(ctx context.Context, metadata *player.Metadata) (lyrics models.Lyrics, score float64, err error) {
-		lyrics.Metadata = metadata
-
+	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
 		if metadata.URL.Scheme != "file" {
-			return lyrics, score, models.ErrLyricsNotFound
+			return models.Lyrics{}, models.ErrLyricsNotFound
 		}
 
 		path := metadata.URL.Path
@@ -28,15 +26,16 @@ var Provider = provider.NewProvider("local .lrc file",
 
 		f, err := os.Open(lrcFile)
 		if err != nil {
-			return
+			return models.Lyrics{}, err
 		}
 		defer f.Close()
 
-		lyrics.Lines, err = lrc.Parse(f)
+		lines, err := lrc.Parse(f)
+		if err != nil {
+			return models.Lyrics{}, err
+		}
 
-		// Match score is always max since player ensure lyrics belongs to the track
-		const MatchScore = 1.0
-		score = provider.CalculateLyricsScore(lyrics.Lines) + MatchScore
+		const score = 1.0
 
-		return
+		return models.Lyrics{Lines: lines, Score: score}, nil //nolint
 	})

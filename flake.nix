@@ -28,7 +28,7 @@
 
           ci-test = pkgs.writeShellApplication {
             name = "test";
-            runtimeInputs = [ pkgs.go ];
+            runtimeInputs = with pkgs; [ go ];
             text = ''
               go test -v ./...
             '';
@@ -36,12 +36,12 @@
 
           ci-lint = pkgs.writeShellApplication {
             name = "lint";
-            runtimeInputs = [
-              pkgs.go
-              pkgs.gotools
-              pkgs.fd
-              pkgs.deadnix
-              pkgs.golangci-lint
+            runtimeInputs = with pkgs; [
+              go
+              gotools
+              fd
+              deadnix
+              golangci-lint
             ];
             text = ''
               golangci-lint run
@@ -54,10 +54,10 @@
 
           ci-format = pkgs.writeShellApplication {
             name = "format";
-            runtimeInputs = [
-              pkgs.gofumpt
-              pkgs.fd
-              pkgs.nixfmt
+            runtimeInputs = with pkgs; [
+              gofumpt
+              fd
+              nixfmt
             ];
             text = ''
               gofumpt -d -e .
@@ -67,9 +67,9 @@
 
           ci-go-mod-tidy = pkgs.writeShellApplication {
             name = "go-mod-tidy";
-            runtimeInputs = [
-              pkgs.go
-              pkgs.git
+            runtimeInputs = with pkgs; [
+              go
+              git
             ];
             text = ''
               go mod tidy
