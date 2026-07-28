@@ -30,12 +30,8 @@ import (
 const flockPathPrefix = "/tmp/waybar-lyric"
 
 // lyricTimeout is the timeout duration for lyrics download.
-//
-// NOTE: lyricTimeout doesn't ensure that GetLyrics will only run for given
-// duration.
-//
 // TODO: add cli flag for user defined duration.
-const lyricTimeout = 30 * time.Second
+const lyricTimeout = 20 * time.Second
 
 var cacheProvider = provider.NewProvider("cache",
 	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
