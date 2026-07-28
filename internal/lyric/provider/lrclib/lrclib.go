@@ -96,6 +96,10 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 			}
 		}
 
+		if best == nil {
+			return models.Lyrics{}, models.ErrLyricsNotSynced
+		}
+
 		lines, err := lrc.ParseText(best.SyncedLyrics)
 		if err != nil {
 			return models.Lyrics{}, err
