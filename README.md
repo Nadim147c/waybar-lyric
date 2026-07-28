@@ -62,15 +62,6 @@ I've test these following player:
   - Partial (`badword` -> `b*****d`)
   - Full (`badword` -> `*******`)
 
-## Lyric Source
-
-- MPRIS metadata _(TaounMB Lyrics only)_
-- Lyrics files _(`.lrc` files)_
-- Embedded lyrics _(Using ffprobe)_
-- [LrcLib](https://lrclib.net/)
-- [Simpmusic](https://api-lyrics.simpmusic.org/)
-- More? _(Suggestions welcome)_
-
 ## Installation
 
 ### Prerequisites
@@ -217,7 +208,7 @@ This repository is licensed under [AGPL-3.0](./LICENSE).
 
 - [SimpMusic](https://github.com/maxrave-dev/SimpMusic) for lyrics API.
 - [BetterLyrics](https://better-lyrics.boidu.dev/) for lyrics API.
-- [YouLy+](./internal/lyric/provider/youlyplus/youlyplus.go) for lyrics API
+- [YouLy+](./internal/lyric/provider/youlyplus/youlyplus.go) for lyrics API.
 - [ArchiveTune](https://github.com/rukamori/ArchiveTune) and
   [vivi-music](https://github.com/vivizzz007/vivi-music) for providers
   implementations.
