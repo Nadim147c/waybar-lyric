@@ -131,7 +131,7 @@ func GetLyrics(ctx context.Context, metadata *player.Metadata) (models.Lyrics, e
 	var best provider.Result
 	score := math.Inf(-1)
 
-	filtered := filterOutliers(results, 0.50)
+	filtered := filterOutliers(results, 0.7)
 
 	for _, result := range filtered {
 		lyricsScore := provider.WordLevelSyncScore(result.Lyrics.Lines)
