@@ -123,7 +123,8 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			w.Alt = waybar.Getting
 			w.Class = append(w.Class, waybar.Getting)
 			w.Encode()
-			lyrics, err = lyric.GetLyrics(ctx, info)
+			mctx, cancel := NewMprisContext(ctx, info.ID, mprisPlayer)
+			lyrics, err = lyric.GetLyrics(mctx, info)
 			if err != nil {
 				var scoreErr *models.LyricsMatchScoreError
 				if errors.Is(err, models.ErrLyricsNotFound) ||
@@ -138,6 +139,7 @@ func Execute(cmd *cobra.Command, _ []string) error {
 					)
 				}
 			}
+			cancel()
 		}
 
 		// replace load metadata with current
