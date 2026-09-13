@@ -46,7 +46,6 @@ I've test these following player:
 - Firefox (Specific domains)
   - `open.spotify.com`
   - `music.youtube.com`
-- Chromium with `--experimental-chromium-support` (Not recommended)!
 
 ## Features
 
@@ -66,7 +65,7 @@ I've test these following player:
 
 ### Prerequisites
 
-- Any of the supported browser
+- Any of the supported browser or player
 - DBus connectivity
 - [waybar](https://github.com/Alexays/Waybar)
 - [go](https://go.dev/)
@@ -190,7 +189,7 @@ waybar-lyric -v --log-file=/tmp/waybar-lyric.log
 
 ```bash
 dbus-send --print-reply \
-    --dest=org.mpris.MediaPlayer2.spotify \
+    --dest=org.mpris.MediaPlayer2.<player> \
     /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get \
     string:org.mpris.MediaPlayer2.Player \
     string:PlaybackStatus
