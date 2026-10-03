@@ -11,31 +11,31 @@ import (
 )
 
 type Lyrics struct {
-	Version  string   `json:"version"`
-	Metadata Metadata `json:"metadata"`
-	Plain    *string  `json:"plain,omitempty"`
-	Lines    []Line   `json:"lines,omitempty"`
+	Version  string   `yaml:"version"`
+	Metadata Metadata `yaml:"metadata"`
+	Plain    *string  `yaml:"plain"`
+	Lines    []Line   `yaml:"lines"`
 }
 
 type Word struct {
-	Text    string `json:"text"`
-	StartMS int64  `json:"start_ms"`
-	EndMS   int64  `json:"end_ms"`
+	Text    string `yaml:"text"`
+	StartMS int64  `yaml:"start_ms"`
+	EndMS   int64  `yaml:"end_ms"`
 }
 
 type Line struct {
-	Text    string `json:"text"`
-	StartMS int64  `json:"start_ms"`
-	EndMS   int64  `json:"end_ms"`
-	Words   []Word `json:"words,omitempty"`
+	Text    string `yaml:"text"`
+	StartMS int64  `yaml:"start_ms"`
+	EndMS   int64  `yaml:"end_ms"`
+	Words   []Word `yaml:"words"`
 }
 
 type Metadata struct {
-	Title        string  `json:"title"`
-	Artist       string  `json:"artist"`
-	DurationMS   *int64  `json:"duration_ms,omitempty"`
-	Language     *string `json:"language,omitempty"`
-	Instrumental *bool   `json:"instrumental,omitempty"`
+	Title        string  `yaml:"title"`
+	Artist       string  `yaml:"artist"`
+	DurationMS   *int64  `yaml:"duration_ms"`
+	Language     *string `yaml:"language"`
+	Instrumental *bool   `yaml:"instrumental"`
 }
 
 func ParseText(text string) (models.Lines, error) {
