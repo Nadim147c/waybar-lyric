@@ -8,14 +8,22 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
+	"sync/atomic"
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lyricsfile"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
+
+var retryAfter atomic.Value
+
+func init() {
+	retryAfter.Store(time.Now())
+}
 
 // Response is the response sent from LrcLib api.
 type response struct {
@@ -27,6 +35,7 @@ type response struct {
 	Instrumental bool    `json:"instrumental"`
 	PlainLyrics  string  `json:"plainLyrics"`
 	SyncedLyrics string  `json:"syncedLyrics"`
+	Lyricsfile   string  `json:"lyricsfile"`
 }
 
 // Endpoint is api endpoint for lrclib.
@@ -35,6 +44,10 @@ const Endpoint = "https://lrclib.net/api/search"
 // Provider is a lyrics provider that fetches lyrics from lrclib.
 var Provider = provider.NewProvider("lrclib lyrics api",
 	func(ctx context.Context, metadata *player.Metadata) (models.Lyrics, error) {
+		if retryAfter.Load().(time.Time).After(time.Now()) {
+			return models.Lyrics{}, models.ErrLyricsNotFound
+		}
+
 		params := url.Values{}
 		params.Set("track_name", metadata.RawTitle)
 		params.Set("artist_name", metadata.RawArtist)
@@ -61,6 +74,24 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 
 		if resp.StatusCode == http.StatusNotFound {
 			return models.Lyrics{}, models.ErrLyricsNotFound
+		}
+
+		if resp.StatusCode == http.StatusTooManyRequests {
+			const defaultWait = 10 * time.Minute
+			const maxWait = time.Hour
+			wait := defaultWait
+			h := resp.Header.Get("Retry-After")
+			if secs, perr := strconv.ParseInt(h, 10, 64); perr == nil {
+				if secs > 0 {
+					wait = min(time.Duration(secs)*time.Second, maxWait)
+				}
+			} else if t, perr := http.ParseTime(h); perr == nil {
+				if d := time.Until(t); d > 0 {
+					wait = min(d, maxWait)
+				}
+			}
+			retryAfter.Store(time.Now().Add(wait))
+			return models.Lyrics{}, fmt.Errorf("HTTP status: %d", resp.StatusCode)
 		}
 
 		if resp.StatusCode >= 300 {
@@ -100,7 +131,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 			return models.Lyrics{}, models.ErrLyricsNotSynced
 		}
 
-		lines, err := lrc.ParseText(best.SyncedLyrics)
+		lines, err := lyricsfile.ParseText(best.Lyricsfile)
 		if err != nil {
 			return models.Lyrics{}, err
 		}
