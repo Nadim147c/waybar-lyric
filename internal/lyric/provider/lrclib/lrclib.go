@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lrc"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/lyricsfile"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -35,6 +35,7 @@ type response struct {
 	Instrumental bool    `json:"instrumental"`
 	PlainLyrics  string  `json:"plainLyrics"`
 	SyncedLyrics string  `json:"syncedLyrics"`
+	Lyricsfile   string  `json:"lyricsfile"`
 }
 
 // Endpoint is api endpoint for lrclib.
@@ -130,7 +131,7 @@ var Provider = provider.NewProvider("lrclib lyrics api",
 			return models.Lyrics{}, models.ErrLyricsNotSynced
 		}
 
-		lines, err := lrc.ParseText(best.SyncedLyrics)
+		lines, err := lyricsfile.ParseText(best.Lyricsfile)
 		if err != nil {
 			return models.Lyrics{}, err
 		}
