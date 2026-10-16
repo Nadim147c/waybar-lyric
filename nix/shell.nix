@@ -1,12 +1,16 @@
-{ pkgs }:
-pkgs.mkShell {
-  name = "waybar-lyric";
-  buildInputs = [
-    pkgs.nix-fast-build
-    pkgs.gnumake
-    pkgs.gofumpt
-    pkgs.gopls
-    pkgs.golangci-lint
-    pkgs.waybar
-  ];
+{
+  perSystem = { pkgs, ... }: {
+    devShells.default = pkgs.mkShell {
+      name = "waybar-lyric";
+      buildInputs = with pkgs; [
+        nix-fast-build
+        gnumake
+        gofumpt
+        gopls
+        golangci-lint
+        waybar
+      ];
+    };
+  };
+
 }

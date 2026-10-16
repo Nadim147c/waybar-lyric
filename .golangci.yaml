@@ -11,7 +11,7 @@ linters:
     - bodyclose
     - errname
     - exhaustive
-    - exhaustruct
+    - exhaustruct_v5
     - fatcontext
     - forbidigo
     - goconst
@@ -59,10 +59,12 @@ linters:
     sloglint:
       kv-only: true
 
-    exhaustruct:
-      exclude:
+    exhaustruct_v5:
+      ignore-patterns:
         - '.+/cobra\.Command$'
         - '.+/http\.Server$'
+        - '.+/log\.Options$'
+        - '.+/slog\.HandlerOptions$'
         - ".+Waybar$"
       allow-empty: true
       allow-empty-rx:

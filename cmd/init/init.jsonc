@@ -9,10 +9,10 @@
       "lyric": "",
       "music": "󰝚",
       "no_lyric": "",
-      "getting": "",
+      "getting": ""
     },
     "exec-if": "which waybar-lyric",
     "exec": "waybar-lyric --quiet",
-    "on-click": "waybar-lyric play-pause",
-  },
+    "on-click": "waybar-lyric play-pause"
+  }
 }
