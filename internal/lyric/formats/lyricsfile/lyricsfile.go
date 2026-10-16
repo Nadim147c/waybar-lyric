@@ -57,7 +57,7 @@ func Parse(r io.Reader) (models.Lines, error) {
 		return nil, models.ErrLyricsNotSynced
 	}
 
-	lines := make(models.Lines, 0, len(data.Lines))
+	lines := make(models.Lines, 1, len(data.Lines)+1)
 	for _, line := range data.Lines {
 		var finalLine models.Line
 		finalLine.Text = line.Text
