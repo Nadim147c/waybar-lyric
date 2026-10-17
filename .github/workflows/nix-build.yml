@@ -27,14 +27,11 @@ jobs:
       - name: Go Mod Tidy
         run: nix run .#ci-go-mod-tidy
 
-      - name: Format
-        run: nix run .#ci-format
-
-      - name: Go Lint
-        run: nix run .#ci-lint
-
       - name: Go Tests
         run: nix run .#ci-test
+
+      - name: Treefmt
+        run: nix run .#ci-fmt
 
       - name: Nix Build
         run: nix build .#default

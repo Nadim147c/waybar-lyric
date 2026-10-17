@@ -19,20 +19,20 @@
       "playing": "",
       "paused": "",
       "lyric": "",
-      "music": "󰝚",
+      "music": "󰝚"
     },
     "exec-if": "which waybar-lyric",
     "exec": "waybar-lyric -qfpartial",
-    "on-click": "waybar-lyric play-pause",
+    "on-click": "waybar-lyric play-pause"
   },
   "tray": {
     "show-passive-items": true,
-    "spacing": 10,
+    "spacing": 10
   },
   "clock": {
     "format": "{:%I:%M%p}",
     "tooltip": false,
-    "on-click": "gnome-calendar",
+    "on-click": "gnome-calendar"
   },
   "network": {
     "interval": 5,
@@ -40,11 +40,11 @@
     "format-ethernet": " {bandwidthTotalBytes}",
     "format-linked": "󰛵 (No IP)",
     "format-disconnected": " ",
-    "tooltip-format": "Upload Speed: {bandwidthUpBytes}\nDownload Speed: {bandwidthDownBytes}",
+    "tooltip-format": "Upload Speed: {bandwidthUpBytes}\nDownload Speed: {bandwidthDownBytes}"
   },
   "cpu": {
     "format": " {usage}%",
     "tooltip": true,
-    "interval": 1,
-  },
+    "interval": 1
+  }
 }
