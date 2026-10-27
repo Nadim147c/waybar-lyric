@@ -19,7 +19,7 @@ var (
 	PlayerList      = []string{}
 	FilterProfanity = false
 	LogFilePath     = ""
-	UpdateInterval  = time.Second / 4
+	UpdateInterval  = time.Second / 15
 
 	FilterProfanityType = ""
 
