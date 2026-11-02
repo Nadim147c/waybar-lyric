@@ -1,3 +1,6 @@
+// This implemetation derived from https://github.com/sonorahq/sonora/blob/e3d4adfe04cd95d9a8b470bd98abc5b2de96c76b/crates/music/src/netease/mod.rs.
+// GPL-V3 https://github.com/sonorahq/sonora/blob/e3d4adfe04cd95d9a8b470bd98abc5b2de96c76b/COPYING.
+
 package netease
 
 import (
