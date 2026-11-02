@@ -38,7 +38,6 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	ctx, cancel := context.WithCancel(cmd.Context())
 	defer cancel()
 
-	// Main loop
 	ticker := time.NewTicker(config.UpdateInterval)
 	defer ticker.Stop()
 
@@ -63,6 +62,15 @@ func Execute(cmd *cobra.Command, _ []string) error {
 	go mpris.OnSignal(conn, signals)
 
 	var lastWaybar *waybar.Waybar
+	var info *player.Metadata
+	var lastUpdate time.Time
+
+	var doUpdate bool
+	var counter uint64
+
+	var lastServerPos time.Duration
+	var lastServerFetch time.Time
+	var estimatedPos time.Duration
 
 	for {
 		select {
@@ -70,30 +78,40 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			return ctx.Err()
 		case <-signals:
 			slog.Debug("Received player update signal")
+			doUpdate = true
 		case <-ticker.C:
+			counter++
+			doUpdate = time.Since(lastUpdate) > 2*time.Second
 		}
 
-		mprisPlayer, err := player.Select(conn)
-		if err != nil {
-			slog.Error("Player not found!", "error", err)
+		if doUpdate { //nolint
+			lastUpdate = time.Now()
+			mprisPlayer, err := player.Select(conn)
+			if err != nil {
+				slog.Error("Player not found!", "error", err)
 
-			w := waybar.Zero
-			if !w.Is(lastWaybar) {
-				w.Encode()
-				lastWaybar = w
+				w := waybar.Zero
+				if !w.Is(lastWaybar) {
+					w.Encode()
+					lastWaybar = w
+				}
+
+				continue
 			}
 
-			continue
+			info, err = player.Parse(mprisPlayer)
+			if err != nil {
+				slog.Error("Failed to parse dbus mpris metadata", "error", err)
+				w := waybar.Zero
+				if !w.Is(lastWaybar) {
+					w.Encode()
+					lastWaybar = w
+				}
+				continue
+			}
 		}
 
-		info, err := player.Parse(mprisPlayer)
-		if err != nil {
-			slog.Error("Failed to parse dbus mpris metadata", "error", err)
-			w := waybar.Zero
-			if !w.Is(lastWaybar) {
-				w.Encode()
-				lastWaybar = w
-			}
+		if info == nil {
 			continue
 		}
 
@@ -142,7 +160,6 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			cancel()
 		}
 
-		// replace load metadata with current
 		lyrics.Metadata = info
 
 		if err != nil || len(lyrics.Lines) == 0 {
@@ -160,6 +177,29 @@ func Execute(cmd *cobra.Command, _ []string) error {
 			slog.Error("Failed to update position", "error", err)
 			continue
 		}
+
+		now := time.Now()
+		serverPos := info.Position
+
+		if info.Status == mpris.PlaybackPlaying {
+			if serverPos != lastServerPos {
+				lastServerPos = serverPos
+				lastServerFetch = now
+				estimatedPos = serverPos
+			} else if !lastServerFetch.IsZero() {
+				elapsed := now.Sub(lastServerFetch)
+				estimatedPos = serverPos + elapsed
+			} else {
+				lastServerFetch = now
+				estimatedPos = serverPos
+			}
+		} else {
+			lastServerPos = serverPos
+			lastServerFetch = now
+			estimatedPos = serverPos
+		}
+
+		info.Position = estimatedPos
 
 		var idx int
 		for i, line := range lyrics.Lines {

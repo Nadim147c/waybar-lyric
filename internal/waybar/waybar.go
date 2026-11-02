@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
@@ -49,7 +48,7 @@ func ForLyrics(lyrics models.Lyrics, idx int) *Waybar {
 	start := max(idx-2, 0)
 	end := min(idx+config.TooltipLines-2, len(lines))
 
-	lyricsContext := slices.Clone(lines[start:end])
+	lyricsContext := lines[start:end]
 
 	var tooltip strings.Builder
 

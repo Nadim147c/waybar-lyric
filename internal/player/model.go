@@ -2,9 +2,7 @@ package player
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Nadim147c/go-mpris"
@@ -106,15 +104,5 @@ func (p *Metadata) UpdatePosition(player *mpris.Player) error {
 		return err
 	}
 	p.Position = pos
-
-	// HACK: YoutubeMusic dbus position is rounded to seconds which isn't ideal
-	// for realtime lyrics. Add 1.1sec delay make lyrics always appear before
-	// the song.
-	if player.GetName() == mpris.BaseInterface+".YoutubeMusic" ||
-		(p.URL.IsNil() && strings.Contains(p.URL.Host, "music.youtube.com")) {
-		slog.Debug("Adding 1.1 second to adjust mpris delay")
-		p.Position += 1100 * time.Millisecond
-	}
-
 	return nil
 }
