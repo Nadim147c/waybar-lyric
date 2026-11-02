@@ -51,7 +51,6 @@ in
         '';
 
       passGoPackages = makeGoPositionalArgsFixer true;
-      passGoFiles = makeGoPositionalArgsFixer false;
     in
     {
       treefmt = {
@@ -70,7 +69,7 @@ in
             includes = [ "*.go" ];
             options = [ "fix" ];
             stdin-options = [ ];
-            command = "${passGoFiles "${pkgs.go}/bin/go"}";
+            command = "${passGoPackages "${pkgs.go}/bin/go"}";
           };
           govet = {
             includes = [ "*.go" ];
