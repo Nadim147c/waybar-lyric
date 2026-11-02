@@ -20,6 +20,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/embedded"
 	lrcFile "github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrc_file"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/lrclib"
+	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/netease"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/simpmusic"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider/youlyplus"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
@@ -47,6 +48,7 @@ var providers = []*provider.LyricProvider{
 	betterlyrics.Provider,
 	simpmusic.Provider,
 	lrclib.Provider,
+	netease.Provider,
 }
 
 var reArtists = regexp.MustCompile(`(, | and )`)
