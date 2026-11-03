@@ -16,22 +16,9 @@ const (
 	PrefixSize  = len(mpris.BaseInterface) + 1
 )
 
-func computeID(p *mpris.Player, m *Metadata) string {
-	var buf bytes.Buffer
-
-	playerName := p.GetName()
-	buf.WriteString(stripPlayerName(playerName))
-	buf.WriteByte('-')
-
-	urlStr := removeUnwantedURLParameters(m.URL)
-	hash := hashParts(playerName, m.RawArtist, m.RawTitle, urlStr)
-	buf.Write(hash)
-
-	buf.Grow(len(m.Title))
-
+func writeSafe(buf *bytes.Buffer, s string) {
 	lastMinus := true
-	buf.WriteByte('-')
-	for _, r := range m.Title {
+	for _, r := range s {
 		if unicode.IsLetter(r) || unicode.IsDigit(r) {
 			buf.WriteRune(r)
 			lastMinus = false
@@ -44,6 +31,26 @@ func computeID(p *mpris.Player, m *Metadata) string {
 	if lastMinus {
 		buf.UnreadByte() //nolint
 	}
+}
+
+func computeID(p *mpris.Player, m *Metadata) string {
+	var buf bytes.Buffer
+
+	playerName, err := p.GetIdentity()
+	if err != nil || playerName == "" {
+		playerName = stripPlayerName(p.GetName())
+	}
+	writeSafe(&buf, playerName)
+
+	buf.WriteByte('-')
+
+	urlStr := removeUnwantedURLParameters(m.URL)
+	hash := hashParts(playerName, m.RawArtist, m.RawTitle, urlStr)
+	buf.Write(hash)
+
+	buf.WriteByte('-')
+
+	writeSafe(&buf, m.Title)
 
 	buf.Truncate(min(MaxIDLength, buf.Len()))
 	return buf.String()
