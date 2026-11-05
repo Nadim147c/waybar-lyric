@@ -132,6 +132,26 @@ func (sh *sheet) parse() (models.Lines, error) {
 	return nil, models.ErrLyricsNotSynced
 }
 
+var lineReplacer = strings.NewReplacer(
+	"（", "(",
+	"）", ")",
+	"，", ",",
+	"．", ".",
+	"。", ".",
+	"！", "!",
+	"？", "?",
+)
+
+// fixText replaces fullwidth punctuation characters with their standard ASCII
+// equivalents. It returns the original string unmodified if no target
+// characters are found.
+func fixText(s string) string {
+	if !strings.ContainsAny(s, "（），．。") {
+		return s
+	}
+	return lineReplacer.Replace(s)
+}
+
 // lyrics returns the synced lines of the sheet. Instrumentals and sheets
 // without usable synced lyrics are reported as not found.
 func (sh *sheet) lyrics(s song) (models.Lines, error) {
@@ -151,6 +171,13 @@ func (sh *sheet) lyrics(s song) (models.Lines, error) {
 	lines, ok := stripHeader(lines, s.Name, s.artistNames())
 	if !ok {
 		return nil, fmt.Errorf("netease lyrics hold nothing but a header: %w", models.ErrLyricsNotFound)
+	}
+
+	for i, line := range lines {
+		lines[i].Text = fixText(line.Text)
+		for j, word := range line.Words {
+			lines[i].Words[j].Text = fixText(word.Text)
+		}
 	}
 	return lines, nil
 }
