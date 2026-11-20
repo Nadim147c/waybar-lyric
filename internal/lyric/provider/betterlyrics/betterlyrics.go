@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/formats/ttml"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/models"
 	"github.com/Nadim147c/waybar-lyric/internal/lyric/provider"
@@ -67,6 +68,7 @@ func genericProvider(ctx context.Context, endpoint string, metadata *player.Meta
 	params.Set("artist", metadata.Artist)
 	params.Set("album", metadata.Album)
 	req.URL.RawQuery = params.Encode()
+	req.Header.Set("User-Agent", config.Version)
 
 	slog.Info("Fetching lyrics from betterlyrics api", "url", req.URL.String())
 
